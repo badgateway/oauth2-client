@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/evert/fetch-oauth2/issues"
   },
-  "homepage": "https://github.com/evert/fetch-oauth2#readme"
+  "homepage": "https://github.com/evert/fetch-oauth2#readme",
+  "devDependencies": {
+    "tslint": "^5.13.1",
+    "typescript": "^3.3.3333"
+  }
 }

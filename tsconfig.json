@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "target": "esnext",
+        "noImplicitAny": true,
+
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "outDir": "dist",
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "src/types/*"
+            ]
+        },
+        "lib": [
+          "DOM",
+          "ES5",
+          "ES2015",
+          "ES2016",
+          "ES2017",
+          "ESNext.bigint"
+        ],
+        "declaration": true
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
