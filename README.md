@@ -37,13 +37,9 @@ const response = await newFetch('https://api.example.org');
 
 The current features have been implemented:
 
-1. Nothing
-
-The following features are planned near-term:
-
 1. `client_credentials` grant-type support.
 2. `password` grant-type support.
-2. Automatically refreshing tokens
+3. Automatically refreshing tokens
 
 The following features are planned mid/long-term
 
