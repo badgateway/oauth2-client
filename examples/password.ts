@@ -11,12 +11,15 @@ global.Request = require("node-fetch").Request;
   const newFetch = fetchMwOAuth2({
     clientId: '...',
     clientSecret: '...',
-    grantType: 'client_credentials',
+    grantType: 'password',
     tokenEndpoint: 'https://auth-server.example.org/token',
     scope: ['foo', 'bar'],
+    userName: '...',
+    password: '...',
   });
 
-  const response = await newFetch('https://resource-server.example.org');
+  const response = await newFetch('https://resource-server.example.org/');
   console.log(response.status);
+  await wait();
 
 })();
