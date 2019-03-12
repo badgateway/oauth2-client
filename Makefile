@@ -6,7 +6,7 @@ build:
 
 .PHONY:test
 test:
-	nyc mocha
+	# No tests yet
 
 .PHONY:lint
 lint:
