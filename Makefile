@@ -6,14 +6,17 @@ build:
 
 .PHONY:test
 test:
-	nyc mocha
+	# No tests yet
 
 .PHONY:lint
 lint:
 	tslint -p .
 
 .PHONY:lint-fix
-lint-fix:
+lint-fix: fix
+
+.PHONY:fix
+fix:
 	tslint -p . --fix
 
 .PHONY:watch
