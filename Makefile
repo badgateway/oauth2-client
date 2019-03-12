@@ -13,7 +13,10 @@ lint:
 	tslint -p .
 
 .PHONY:lint-fix
-lint-fix:
+lint-fix: fix
+
+.PHONY:fix
+fix:
 	tslint -p . --fix
 
 .PHONY:watch

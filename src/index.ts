@@ -6,14 +6,14 @@ type FetchMwOAuth2Options = {
   grantType: 'client_credentials',
   tokenEndpoint: string,
   scopes?: string[],
-}
+};
 
-export = function(options: FetchMwOAuth2Options): typeof fetch {
+export = (options: FetchMwOAuth2Options): typeof fetch => {
 
-  let accessToken:string|null = null;
+  let accessToken: string|null = null;
   // const refreshToken = null;
 
-  return async (input: RequestInfo, init?: RequestInit):Promise<Response> => {
+  return async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
 
     // input might be a string or a Request object, we want to make sure this
     // is always a fully-formed Request object.
@@ -47,9 +47,8 @@ async function requestWithBearerToken(request: Request, accessToken: string) {
 
 }
 
-const getAccessToken = async function(options: FetchMwOAuth2Options): Promise<string> {
+const getAccessToken = async (options: FetchMwOAuth2Options): Promise<string> => {
 
-  console.log('Getting a new access token');
 
   if (options.grantType !== 'client_credentials') {
     throw new Error('Unknown grantType: ' + options.grantType);
@@ -78,4 +77,4 @@ const getAccessToken = async function(options: FetchMwOAuth2Options): Promise<st
 
   return jsonResult.access_token;
 
-}
+};
