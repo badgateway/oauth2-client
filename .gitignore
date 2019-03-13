@@ -4,6 +4,9 @@
 # typescript output
 /dist
 
+# webpack output
+/browser
+
 # vim
 .*.swp
 
