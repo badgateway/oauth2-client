@@ -9,9 +9,9 @@ global.Request = require("node-fetch").Request;
 (async () => {
 
   const oauth2 = new OAuth2({
-    grantType: 'client_credentials',
+    grantType: 'authorization_code',
     clientId: '...',
-    clientSecret: '...',
+    code: '...',
     tokenEndPoint: 'https://auth.example.org/token',
   });
 
