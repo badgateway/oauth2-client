@@ -1,6 +1,6 @@
 {
   "name": "fetch-mw-oauth2",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Fetch middleware to add OAuth2 support",
   "main": "dist/index.js",
   "scripts": {
