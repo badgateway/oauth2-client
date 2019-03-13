@@ -8,6 +8,8 @@ Changelog
 * Support for `authorization_code` grant type.
 * Exposing some more information to uses.
 * Add a new `onTokenUpdate` hook for custom storage.
+* It's now possible to construct a client with an existing (old) Access and/or
+  refresh token.
 
 
 0.2.1 (2019-03-13)
