@@ -1,4 +1,4 @@
-import fetchMwOAuth2 from 'fetch-mw-oauth2';
+import OAuth2 from 'fetch-mw-oauth2';
 
 // If on Node.js
 // @ts-ignore
@@ -8,18 +8,16 @@ global.Request = require("node-fetch").Request;
 
 (async () => {
 
-  const newFetch = fetchMwOAuth2({
+  const oauth2 = new OAuth2({
+    grantType: 'password',
     clientId: '...',
     clientSecret: '...',
-    grantType: 'password',
-    tokenEndpoint: 'https://auth-server.example.org/token',
-    scope: ['foo', 'bar'],
     userName: '...',
     password: '...',
+    tokenEndPoint: 'https://auth.example.org/token',
   });
 
-  const response = await newFetch('https://resource-server.example.org/');
+  const response = await oauth2.fetch('https://resource-server.example.org/');
   console.log(response.status);
-  await wait();
 
 })();
