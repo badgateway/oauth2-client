@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.3.1 (2019-03-13)
+------------------
+
+* Now correctly exporting all the right symbols.
+
+
 0.3.0 (2019-03-13)
 ------------------
 
