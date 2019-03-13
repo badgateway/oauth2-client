@@ -83,6 +83,11 @@ export default class OAuth2 {
         grant_type: 'refresh_token',
         refresh_token: previousToken.refreshToken
       };
+      if (!this.options.clientSecret) {
+        // If there is no secret, it means we need to send the clientId along
+        // in the body.
+        body.clientId = this.options.clientId;
+      }
 
     } else {
 

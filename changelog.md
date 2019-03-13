@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3.2 (2019-??-??)
+------------------
+
+* When refreshing a token, and there's no `client_secret`, the `client_id`
+  must be sent in the body.
+
+
 0.3.1 (2019-03-13)
 ------------------
 
