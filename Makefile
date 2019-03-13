@@ -1,5 +1,6 @@
 PATH:=./node_modules/.bin:$(PATH)
 SOURCE_FILES:=$(shell find src/ -type f -name '*.ts')
+EXAMPLE_FILES:=$(shell find examples/ -type f -name '*.js')
 
 .PHONY:build
 build: fetch-mw-oauth2.zip dist/build browser/fetch-mw-oauth2.min.js
@@ -38,5 +39,6 @@ browser/fetch-mw-oauth2.min.js: dist/build
 		--display-modules \
 		--sort-modules-by size
 
-fetch-mw-oauth2.zip: browser/fetch-mw-oauth2.min.js
-	cd browser; zip -r ../fetch-mw-oauth2.zip *.js *.map
+fetch-mw-oauth2.zip: browser/fetch-mw-oauth2.min.js $(EXAMPLE_FILES) README.md LICENSE
+	-rm fetch-mw-oauth2.zip
+	zip -r fetch-mw-oauth2.zip browser/ examples/ LICENSE README.md
