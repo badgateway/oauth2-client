@@ -7,6 +7,9 @@
 # webpack output
 /browser
 
+# zip
+/*.zip
+
 # vim
 .*.swp
 
