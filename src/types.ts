@@ -79,7 +79,7 @@ export type AccessTokenRequest = {
   grant_type: 'refresh_token',
   refresh_token: string,
   scope?: string,
-  clientId?: string,
+  client_id?: string,
 } | {
   grant_type: 'authorization_code',
   code: string,

@@ -21,10 +21,10 @@
   },
   "homepage": "https://github.com/evert/fetch-oauth2#readme",
   "devDependencies": {
-    "@types/node": "^11.11.1",
+    "@types/node": "^11.11.3",
     "awesome-typescript-loader": "^5.2.1",
     "node-fetch": "^2.3.0",
-    "tslint": "^5.13.1",
+    "tslint": "^5.14.0",
     "typescript": "^3.3.3333",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"

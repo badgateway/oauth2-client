@@ -86,7 +86,7 @@ export default class OAuth2 {
       if (!this.options.clientSecret) {
         // If there is no secret, it means we need to send the clientId along
         // in the body.
-        body.clientId = this.options.clientId;
+        body.client_id = this.options.clientId;
       }
 
     } else {
