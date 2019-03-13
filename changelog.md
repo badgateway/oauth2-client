@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.0 (????-??-??)
+0.3.0 (2019-03-13)
 ------------------
 
 * Library is refactored and now uses a class.
