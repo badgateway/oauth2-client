@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.2 (2019-??-??)
+0.3.2 (2019-03-13)
 ------------------
 
 * When refreshing a token, and there's no `client_secret`, the `client_id`
