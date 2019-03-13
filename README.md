@@ -13,24 +13,82 @@ npm i fetch-mw-oauth2
 
 The `fetch-mw-oauth2` package effectively works as follows:
 
-1. You pass it set up instructions
-2. It returns a new `fetch()`-like function.
+1. You pass it OAuth2 instructions
+2. It returns an object with a new `fetch()` function.
 
 This new `fetch()` function can now be used in place of the regular fetch,
 but it takes responsibility of oauth2 authentication.
 
-```javascript
-const fetchMwOauth2 = require('fetch-mw-oauth2');
+### Setup with access and/or refresh token
 
-const newFetch = fetchMwOAuth2({
+If you already have an access and/or refresh token obtained through other
+means, you can set up the object as such:
+
+```javascript
+const OAuth2 = require('fetch-mw-oauth2');
+
+const oauth2 = new OAuth2({
   clientId: '...',
-  clientSecret: '...',
-  grantType: 'client_credentials',
-  authorizationUri: 'https://github.com/login/oauth/authorize',
-  scopes: ['foo', 'bar'],
+  clientSecret: '...', // Optional in some cases
+  accessToken: '...',
+  refreshToken: '...',
+  tokenEndPoint: 'https://auth.example.org/token',
 });
 
-const response = await newFetch('https://api.example.org');
+const response = await oauth2.fetch('https://my-api.example.org/articles', {
+  method: 'POST'.
+  body: 'Hello world',
+});
+```
+
+The fetch function simply calls the javascript `fetch()` function but adds
+an `Authorization: Bearer ...` header.
+
+### Setup via authorization_code grant
+
+```javascript
+const OAuth2 = require('fetch-mw-oauth2');
+
+const oauth2 = new OAuth2({
+  grantType: 'authorization_code',
+  clientId: '...',
+  code: '...',
+  tokenEndPoint: 'https://auth.example.org/token',
+});
+```
+
+The library does not take responsibility for redirecting a user to an
+authorization endpoint and redirecting back. That's up to you. After that's
+done though, you should have a `code` variable that you can use to setup
+the OAuth2 object.
+
+
+### Setup via 'password' grant
+
+```javascript
+const OAuth2 = require('fetch-mw-oauth2');
+
+const oauth2 = new OAuth2({
+  grantType: 'password',
+  clientId: '...',
+  clientSecret: '...',
+  userName: '...',
+  password: '...',
+  tokenEndPoint: 'https://auth.example.org/token',
+});
+```
+
+### Setup via 'client_credentials' grant
+
+```javascript
+const OAuth2 = require('fetch-mw-oauth2');
+
+const oauth2 = new OAuth2({
+  grantType: 'client_credentials',
+  clientId: '...',
+  clientSecret: '...',
+  tokenEndPoint: 'https://auth.example.org/token',
+});
 ```
 
 ## Project status
@@ -39,17 +97,12 @@ The current features have been implemented:
 
 1. `client_credentials` grant-type support.
 2. `password` grant-type support.
-3. Automatically refreshing tokens
+3. `authorization_code` grant-type support
+4. Automatically refreshing tokens
 
 The following features are planned mid/long-term
 
 1. Supply an OAuth2 discovery document instead of authorization and token uris.
-2. Supply a known access token and refresh token instead of going through the
-   flow of obtaining these.
-3. `authorization_code` grant-type support
-4. `implicit` grant-type support
-5. Custom token storage (allowing people to store tokens in for example
-   LocalStorage).
-
+2. `implicit` grant-type support
 
 [1]: https://www.npmjs.com/package/node-fetch
