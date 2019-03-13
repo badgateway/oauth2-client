@@ -11,9 +11,11 @@ export default class OAuth2 {
 
     this.options = options;
     this.token = {
-      accessToken: '',
-      expiresAt: 0,
-      refreshToken: null
+      accessToken: options.accessToken || '',
+      // If there was an accessToken we want to mark it as _not_ expired.
+      // If there wasn't an access token we pretend it immediately expired.
+      expiresAt: options.accessToken ? null : 0,
+      refreshToken: options.refreshToken || null
     };
 
   }
@@ -83,6 +85,7 @@ export default class OAuth2 {
       };
 
     } else {
+
       switch (this.options.grantType) {
 
         case 'client_credentials':
@@ -112,7 +115,7 @@ export default class OAuth2 {
           };
           break;
         default :
-          throw new Error('Unknown grantType: ' + this.options!.grantType);
+          throw new Error('Unknown grantType: ' + this.options.grantType);
       }
 
     }
@@ -121,7 +124,8 @@ export default class OAuth2 {
       'Content-Type'  : 'application/x-www-form-urlencoded',
     };
 
-    if (this.options.grantType !== 'authorization_code') {
+    // @ts-ignore typescript doesn't like this but its the easiest way to do this.
+    if (this.options.clientSecret !== undefined) {
       const basicAuthStr = base64Encode(this.options.clientId + ':' + this.options.clientSecret);
       headers.Authorization = 'Basic ' + basicAuthStr;
     }
@@ -138,7 +142,7 @@ export default class OAuth2 {
 
       // If we failed with a refresh_token grant_type, we're going to make one
       // more attempt doing a full re-auth
-      if (body.grant_type === 'refresh_token') {
+      if (body.grant_type === 'refresh_token' && this.options.grantType) {
         // Wiping out all old token info
         this.token = {
           accessToken: '',

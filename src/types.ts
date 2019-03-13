@@ -13,36 +13,59 @@ export type Token = {
  * the OAuth2 class.
  */
 type BaseOptions = {
+  grantType: string | undefined,
   clientId: string,
-  onTokenUpdate?: (token: Token) => void
-};
+  clientSecret?: string, 
+  accessToken?: string,
+  refreshToken?: string,
+  tokenEndpoint: string,
+  onTokenUpdate?: (token: Token) => void,
+}
 
+/**
+ * grant_type=password
+ */
 type PasswordGrantOptions = {
   clientSecret: string,
   grantType: 'password',
-  tokenEndpoint: string,
   scope?: string[],
   userName: string,
   password: string,
 };
 
+/**
+ * grant_type=client_credentials
+ */
 type ClientCredentialsGrantOptions = {
   clientSecret: string,
   grantType: 'client_credentials',
-  tokenEndpoint: string,
   scope?: string[],
 };
 
+/**
+ * grant_type=authorization_code
+ */
 type AuthorizationCodeGrantOptions = {
   grantType: 'authorization_code',
   redirectUri: string,
-  tokenEndpoint: string,
   code: string,
-};
+}
+
+/**
+ * In case you obtained an access token and/or refresh token through different
+ * means, you can not specify a grant_type and simply only specifiy an access
+ * and refresh token.
+ */
+type RefreshOnlyGrantOptions = {
+  grantType: undefined,
+  accessToken: string,
+  refreshToken: string,
+  tokenEndpoint: string,
+}
 
 export type OAuth2Options =
-  BaseOptions &
-  (PasswordGrantOptions | ClientCredentialsGrantOptions | AuthorizationCodeGrantOptions);
+  BaseOptions & 
+  (PasswordGrantOptions | ClientCredentialsGrantOptions | AuthorizationCodeGrantOptions | RefreshOnlyGrantOptions);
 
 export type AccessTokenRequest = {
   grant_type: 'client_credentials',
