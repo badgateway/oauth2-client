@@ -4,7 +4,8 @@ Changelog
 0.2.1 (????-??-??)
 ------------------
 
-* Shipping `dist/` instead of `src/`
+* Shipping `dist/` instead of `src/`.
+* Making a browser build lean by not relying on `querystring` or `Buffer`.
 
 
 0.2.0 (2019-03-12)

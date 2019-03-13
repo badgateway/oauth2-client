@@ -7,4 +7,3 @@ export {
   OAuth2Options
 } from './types';
 
-

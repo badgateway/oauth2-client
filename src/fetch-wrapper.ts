@@ -1,6 +1,6 @@
+import { encode as base64Encode } from './base64';
 import { AccessTokenRequest, OAuth2Options } from './types';
 import { objToQueryString } from './util';
-import { encode as base64Encode } from './base64';
 
 type Token = {
   accessToken: string,
@@ -85,8 +85,6 @@ const getToken = async (options: OAuth2Options, previousToken: Token): Promise<T
   }
 
   const basicAuthStr = base64Encode(options.clientId + ':' + options.clientSecret);
-
-  console.log(body);
 
   const authResult = await fetch(options.tokenEndpoint, {
     method: 'POST',
