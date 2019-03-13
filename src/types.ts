@@ -15,12 +15,12 @@ export type Token = {
 type BaseOptions = {
   grantType: string | undefined,
   clientId: string,
-  clientSecret?: string, 
+  clientSecret?: string,
   accessToken?: string,
   refreshToken?: string,
   tokenEndpoint: string,
   onTokenUpdate?: (token: Token) => void,
-}
+};
 
 /**
  * grant_type=password
@@ -49,7 +49,7 @@ type AuthorizationCodeGrantOptions = {
   grantType: 'authorization_code',
   redirectUri: string,
   code: string,
-}
+};
 
 /**
  * In case you obtained an access token and/or refresh token through different
@@ -61,10 +61,10 @@ type RefreshOnlyGrantOptions = {
   accessToken: string,
   refreshToken: string,
   tokenEndpoint: string,
-}
+};
 
 export type OAuth2Options =
-  BaseOptions & 
+  BaseOptions &
   (PasswordGrantOptions | ClientCredentialsGrantOptions | AuthorizationCodeGrantOptions | RefreshOnlyGrantOptions);
 
 export type AccessTokenRequest = {
