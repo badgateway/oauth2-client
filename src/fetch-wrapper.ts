@@ -35,7 +35,7 @@ export default class OAuth2 {
 
     let accessToken = await this.getAccessToken();
 
-    let response = await requestWithBearerToken(request, accessToken);
+    let response = await requestWithBearerToken(request.clone(), accessToken);
 
     if (!response.ok && response.status === 401) {
 
@@ -45,7 +45,7 @@ export default class OAuth2 {
       response = await requestWithBearerToken(request, accessToken);
 
     }
-    return fetch(request);
+    return response;
 
   }
 
