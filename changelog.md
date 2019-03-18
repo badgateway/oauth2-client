@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3.3 (2019-03-18)
+------------------
+
+* When refreshing a token, browsers don't allow re-use of the same `Request`
+  object. Now we're cloning it before use.
+
+
 0.3.2 (2019-03-13)
 ------------------
 
