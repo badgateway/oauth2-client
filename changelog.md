@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.3.4 (????-??-??)
+------------------
+
+* This package now throws OAuth2Error classes for server-side errors.
+
+
 0.3.3 (2019-03-18)
 ------------------
 

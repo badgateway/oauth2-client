@@ -8,3 +8,6 @@ export {
   OAuth2Options
 } from './types';
 
+export {
+  default as OAuth2Error
+}from './error';
