@@ -1,6 +1,7 @@
 import { encode as base64Encode } from './base64';
 import { AccessTokenRequest, OAuth2Options, Token } from './types';
 import { objToQueryString } from './util';
+import OAuthError from './error';
 
 export default class OAuth2 {
 
@@ -162,7 +163,7 @@ export default class OAuth2 {
       if (jsonResult.error_description) {
         errorMessage += ' ' + jsonResult.error_description;
       }
-      throw new Error(errorMessage);
+      throw new OAuthError(errorMessage, jsonResult.error, authResult.status);
     }
 
     this.token = {
