@@ -1,7 +1,7 @@
 import { encode as base64Encode } from './base64';
+import OAuthError from './error';
 import { AccessTokenRequest, OAuth2Options, Token } from './types';
 import { objToQueryString } from './util';
-import OAuthError from './error';
 
 export default class OAuth2 {
 

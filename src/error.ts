@@ -14,7 +14,7 @@ export default class OAuthError extends Error {
 
   oauth2Code: number;
   httpCode: number;
-  
+
   constructor(message: string, oauth2Code: number, httpCode: number) {
 
     super(message);
