@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.3.5 (2019-09-05)
+------------------
+
+* Include typescript sourcefiles in NPM package, for IDE's.
+
+
 0.3.4 (2019-03-19)
 ------------------
 
