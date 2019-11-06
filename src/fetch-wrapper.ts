@@ -51,6 +51,48 @@ export default class OAuth2 {
   }
 
   /**
+   * After authenticating, this functions returns a set of options that may be
+   * used when authenticating the next time.
+   *
+   * You might for example want to store this in LocalStorage, allowing your
+   * application to remember any refresh / access tokens for next time.
+   *
+   * The result of this function can be used as the constructor argument for
+   * this object.
+   */
+  async getOptions(): Promise<OAuth2Options> {
+
+    const token = await this.getToken();
+
+    return {
+      clientId: this.options.clientId,
+      grantType: undefined,
+      accessToken: token.accessToken,
+      refreshToken: token.refreshToken || undefined,
+      tokenEndpoint: this.options.tokenEndpoint,
+    }
+
+  }
+
+  /**
+   * Returns current token information.
+   *
+   * There result object will have:
+   *   * accessToken
+   *   * expiresAt - when the token expires, or null.
+   *   * refreshToken - may be null
+   */
+  async getToken(): Promise<Token> {
+
+    /**
+     * We're running this function to make sure we get up-to-date information
+     */
+    await this.getAccessToken();
+    return this.token;
+
+  }
+
+  /**
    * Returns an access token.
    *
    * If the current access token is not known, it will attempt to fetch it.

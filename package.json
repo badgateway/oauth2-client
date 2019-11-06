@@ -30,6 +30,7 @@
     "webpack-cli": "^3.3.7"
   },
   "dependencies": {},
+  "browser": "browser/fetch-mw-oauth2.min.js",
   "files": [
     "dist/",
     "src/",
