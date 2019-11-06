@@ -70,7 +70,7 @@ export default class OAuth2 {
       accessToken: token.accessToken,
       refreshToken: token.refreshToken || undefined,
       tokenEndpoint: this.options.tokenEndpoint,
-    }
+    };
 
   }
 
