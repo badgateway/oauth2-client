@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.4.0 (2019-11-06)
+------------------
+
+* Added a `getOptions()` method, which allows a user to get all current
+  tokens and store them in LocalStorage. These options can be used as-is in
+  the constructor.
+
 0.3.5 (2019-09-05)
 ------------------
 
