@@ -24,6 +24,10 @@ fix:
 watch:
 	tsc --watch
 
+.PHONY:clean
+clean:
+	rm -rf browser dist
+
 
 dist/build: $(SOURCE_FILES)
 	tsc
