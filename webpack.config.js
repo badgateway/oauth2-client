@@ -4,7 +4,8 @@ module.exports = [
     output: {
       path: __dirname + '/browser',
       filename: 'fetch-mw-oauth2.min.js',
-      library: 'fetchMwOAuth2'
+      library: 'fetchMwOAuth2',
+      libraryTarget: 'umd'
     },
 
     resolve: {
@@ -24,6 +25,5 @@ module.exports = [
     node: {
       Buffer: false
     }
-
-  },
+  }
 ];

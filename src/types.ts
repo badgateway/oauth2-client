@@ -55,12 +55,12 @@ type AuthorizationCodeGrantOptions = {
  * In case you obtained an access token and/or refresh token through different
  * means, you can not specify a grant_type and simply only specifiy an access
  * and refresh token.
+ *
+ * If a refresh or tokenEndpoint are not supplied, the token will never get refreshed.
  */
 type RefreshOnlyGrantOptions = {
   grantType: undefined,
   accessToken: string,
-  refreshToken: string,
-  tokenEndpoint: string,
 };
 
 export type OAuth2Options =
