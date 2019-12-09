@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.4.2 (2019-12-09)
+------------------
+
+* Files were not correctly built in the last release.
+
+
 0.4.1 (2019-12-09)
 ------------------
 
