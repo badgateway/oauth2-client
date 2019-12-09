@@ -205,7 +205,7 @@ export default class OAuth2 {
       if (jsonResult.error_description) {
         errorMessage += ' ' + jsonResult.error_description;
       }
-      throw new OAuthError(errorMessage, jsonResult.error, authResult.status);
+      throw new OAuthError(errorMessage, jsonResult.error, 401);
     }
 
     this.token = {
