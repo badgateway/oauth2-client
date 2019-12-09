@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.4.1 (2019-12-09)
+------------------
+
+* Error code 401 will be submitted when authentication fails. Before, we would
+  just forward the error code from the OAuth2 server, but this doesn't make a
+  lot of sense for a `fetch()` user, as the error might be misinterpreted as
+  an error unrelated to auth.
+
+
 0.4.0 (2019-11-06)
 ------------------
 
