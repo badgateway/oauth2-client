@@ -51,6 +51,34 @@ export default class OAuth2 {
   }
 
   /**
+   * This function allows the fetch-mw to be called as more traditional
+   * middleware.
+   *
+   * The function takes a Request object, and a next() function that
+   * represents the next 'fetch' function in the chain.
+   */
+  async fetchMw(request: Request, next: (request: Request) => Promise<Response>): Promise<Response> {
+
+    let accessToken = await this.getAccessToken();
+
+    let authenticatedRequest = request.clone();
+    authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
+    let response = await next(authenticatedRequest);
+
+    if (!response.ok && response.status === 401) {
+
+      accessToken = await this.refreshToken();
+
+      authenticatedRequest = request.clone();
+      authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
+      response = await next(authenticatedRequest);
+
+    }
+    return response;
+
+  }
+
+  /**
    * After authenticating, this functions returns a set of options that may be
    * used when authenticating the next time.
    *
