@@ -91,6 +91,31 @@ const oauth2 = new OAuth2({
 });
 ```
 
+## fetchMw function
+
+It might be preferable to use this library as a more traditional 'middleware'.
+
+The OAuth2 object also exposes a `fetchMw` function that takes 2 arguments:
+
+1. `request`
+2. `next`
+
+The next argument is a function that also takes a request and returns a
+response.
+
+Usually you will want to use this with some kind of fetch middleware container,
+as such:
+
+```typescript
+myFetchMiddleware(oauth2.fetchMw);
+```
+
+But it's also possible to use it directly. For example:
+
+```typescript
+oauth2.fetchMw(myRequest, innerRequest => fetch(innerRequest));
+```
+
 ## Project status
 
 The current features have been implemented:
