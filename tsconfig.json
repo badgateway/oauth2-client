@@ -2,16 +2,11 @@
     "compilerOptions": {
         "module": "commonjs",
         "esModuleInterop": true,
-        "target": "esnext",
-        "noImplicitAny": true,
+        "target": "es2019",
 
-        "strictFunctionTypes": true,
-        "strictNullChecks": true,
-        "noImplicitThis": true,
-        "alwaysStrict": true,
-        "noUnusedLocals": true,
-        "noImplicitReturns": true,
+        "strict": true,
         "noFallthroughCasesInSwitch": true,
+        "experimentalDecorators": true,
 
         "moduleResolution": "node",
         "sourceMap": true,

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.5.0 (2020-04-19)
+------------------
+
+* Added a `fetchMw()` function that takes a `next` argument so this package
+  can behave as a more regular middleware.
+
+
 0.4.2 (2019-12-09)
 ------------------
 
