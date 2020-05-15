@@ -55,6 +55,7 @@ const oauth2 = new OAuth2({
   code: '...',
   redirect_uri: 'https://my-app.example.org/cb',
   tokenEndpoint: 'https://auth.example.org/token',
+  codeVerifier: '...' // Optional if PKCE wasn't used in authorization request
 });
 ```
 

@@ -14,6 +14,7 @@ global.Request = require("node-fetch").Request;
     code: '...',
     redirect_uri: 'https://resource-app.example.org/cb',
     tokenEndpoint: 'https://auth.example.org/token',
+    codeVerifier: '...' // Optional if PKCE wasn't used in authorization request
   });
 
   const response = await oauth2.fetch('https://resource-server.example.org/');
