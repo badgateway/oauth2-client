@@ -12,7 +12,8 @@ global.Request = require("node-fetch").Request;
     grantType: 'authorization_code',
     clientId: '...',
     code: '...',
-    tokenEndPoint: 'https://auth.example.org/token',
+    redirect_uri: 'https://resource-app.example.org/cb',
+    tokenEndpoint: 'https://auth.example.org/token',
   });
 
   const response = await oauth2.fetch('https://resource-server.example.org/');
