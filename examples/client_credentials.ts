@@ -12,7 +12,7 @@ global.Request = require("node-fetch").Request;
     grantType: 'client_credentials',
     clientId: '...',
     clientSecret: '...',
-    tokenEndPoint: 'https://auth.example.org/token',
+    tokenEndpoint: 'https://auth.example.org/token',
   });
 
   const response = await oauth2.fetch('https://resource-server.example.org/');

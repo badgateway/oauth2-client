@@ -25,18 +25,18 @@ If you already have an access and/or refresh token obtained through other
 means, you can set up the object as such:
 
 ```javascript
-const OAuth2 = require('fetch-mw-oauth2');
+const { OAuth2 } = require('fetch-mw-oauth2');
 
 const oauth2 = new OAuth2({
   clientId: '...',
   clientSecret: '...', // Optional in some cases
   accessToken: '...',
   refreshToken: '...',
-  tokenEndPoint: 'https://auth.example.org/token',
+  tokenEndpoint: 'https://auth.example.org/token',
 });
 
 const response = await oauth2.fetch('https://my-api.example.org/articles', {
-  method: 'POST'.
+  method: 'POST',
   body: 'Hello world',
 });
 ```
@@ -47,13 +47,15 @@ an `Authorization: Bearer ...` header.
 ### Setup via authorization_code grant
 
 ```javascript
-const OAuth2 = require('fetch-mw-oauth2');
+const { OAuth2 } = require('fetch-mw-oauth2');
 
 const oauth2 = new OAuth2({
   grantType: 'authorization_code',
   clientId: '...',
   code: '...',
-  tokenEndPoint: 'https://auth.example.org/token',
+  redirect_uri: 'https://my-app.example.org/cb',
+  tokenEndpoint: 'https://auth.example.org/token',
+  codeVerifier: '...' // If PKCE was used in authorization request
 });
 ```
 
@@ -66,7 +68,7 @@ the OAuth2 object.
 ### Setup via 'password' grant
 
 ```javascript
-const OAuth2 = require('fetch-mw-oauth2');
+const { OAuth2 } = require('fetch-mw-oauth2');
 
 const oauth2 = new OAuth2({
   grantType: 'password',
@@ -74,20 +76,20 @@ const oauth2 = new OAuth2({
   clientSecret: '...',
   userName: '...',
   password: '...',
-  tokenEndPoint: 'https://auth.example.org/token',
+  tokenEndpoint: 'https://auth.example.org/token',
 });
 ```
 
 ### Setup via 'client_credentials' grant
 
 ```javascript
-const OAuth2 = require('fetch-mw-oauth2');
+const { OAuth2 } = require('fetch-mw-oauth2');
 
 const oauth2 = new OAuth2({
   grantType: 'client_credentials',
   clientId: '...',
   clientSecret: '...',
-  tokenEndPoint: 'https://auth.example.org/token',
+  tokenEndpoint: 'https://auth.example.org/token',
 });
 ```
 

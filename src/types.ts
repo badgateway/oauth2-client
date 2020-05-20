@@ -49,11 +49,12 @@ type AuthorizationCodeGrantOptions = {
   grantType: 'authorization_code',
   redirectUri: string,
   code: string,
+  codeVerifier?: string,
 };
 
 /**
  * In case you obtained an access token and/or refresh token through different
- * means, you can not specify a grant_type and simply only specifiy an access
+ * means, you can not specify a grant_type and simply only specify an access
  * and refresh token.
  *
  * If a refresh or tokenEndpoint are not supplied, the token will never get refreshed.
@@ -85,5 +86,6 @@ export type AccessTokenRequest = {
   code: string,
   redirect_uri: string,
   client_id: string,
+  code_verifier?: string,
 };
 

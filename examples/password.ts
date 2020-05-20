@@ -14,7 +14,7 @@ global.Request = require("node-fetch").Request;
     clientSecret: '...',
     userName: '...',
     password: '...',
-    tokenEndPoint: 'https://auth.example.org/token',
+    tokenEndpoint: 'https://auth.example.org/token',
   });
 
   const response = await oauth2.fetch('https://resource-server.example.org/');
