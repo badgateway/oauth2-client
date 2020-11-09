@@ -45,6 +45,10 @@ export default class OAuth2 {
       // We will try one more time
       response = await requestWithBearerToken(request, accessToken);
 
+      if (!response.ok && response.status === 401 && this.options.onAuthError) {
+        this.options.onAuthError(new Error('Authentication failed with 401 error'));
+      }
+
     }
     return response;
 
