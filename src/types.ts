@@ -7,39 +7,118 @@ export type Token = {
   refreshToken: string | null,
 };
 
-
-/**
- * The following types build the constructor options argument for
- * the OAuth2 class.
- */
-type BaseOptions = {
-  grantType: string | undefined,
-  clientId: string,
-  clientSecret?: string,
-  accessToken?: string,
-  refreshToken?: string,
-  tokenEndpoint: string,
-  onTokenUpdate?: (token: Token) => void,
-};
-
 /**
  * grant_type=password
  */
 type PasswordGrantOptions = {
-  clientSecret: string,
   grantType: 'password',
+
+  /**
+   * OAuth2 client id
+   */
+  clientId: string,
+
+  /**
+   * OAuth2 Client Secret
+   */
+  clientSecret: string,
+
+  /**
+   * OAuth2 token endpoint
+   */
+  tokenEndpoint: string,
+
+  /**
+   * List of OAuth2 scopes
+   */
   scope?: string[],
+
+  /**
+   * Username to log in as
+   */
   userName: string,
+
+  /**
+   * Password
+   */
   password: string,
+
+  /**
+   * If there's a previously valid access token, use this.
+   * 
+   * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
+   */
+  accessToken?: string,
+
+  /**
+   * Previously obtained refresh token (if any)
+   */
+  refreshToken?: string,
+
+  /**
+   * Callback to trigger when a new access/refresh token pair was obtained.
+   */
+  onTokenUpdate?: (token: Token) => void,
+
+  /**
+   * If authentication fails without a chance of recovery, this gets triggered.
+   *
+   * This is used for example when your resource server returns a 401, but only after
+   * other attempts have been made to reauthenticate (such as a token refresh).
+   */
+  onAuthError?: (error: Error) => void,
 };
 
 /**
  * grant_type=client_credentials
  */
 type ClientCredentialsGrantOptions = {
-  clientSecret: string,
   grantType: 'client_credentials',
+
+  /**
+   * OAuth2 client id
+   */
+  clientId: string,
+
+  /**
+   * OAuth2 Client Secret
+   */
+  clientSecret: string,
+
+  /**
+   * OAuth2 token endpoint
+   */
+  tokenEndpoint: string,
+
+  /**
+   * List of OAuth2 scopes
+   */
   scope?: string[],
+
+  /**
+   * If there's a previously valid access token, use this.
+   * 
+   * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
+   */
+  accessToken?: string,
+
+  /**
+   * Previously obtained refresh token (if any)
+   */
+  refreshToken?: string,
+
+  /**
+   * Callback to trigger when a new access/refresh token pair was obtained.
+   */
+  onTokenUpdate?: (token: Token) => void,
+
+  /**
+   * If authentication fails without a chance of recovery, this gets triggered.
+   *
+   * This is used for example when your resource server returns a 401, but only after
+   * other attempts have been made to reauthenticate (such as a token refresh).
+   */
+  onAuthError?: (error: Error) => void,
 };
 
 /**
@@ -47,8 +126,54 @@ type ClientCredentialsGrantOptions = {
  */
 type AuthorizationCodeGrantOptions = {
   grantType: 'authorization_code',
+
+  /**
+   * OAuth2 client id
+   */
+  clientId: string,
+
+  /**
+   * OAuth2 token endpoint
+   */
+  tokenEndpoint: string,
+
+  /**
+   * The redirect_uri that was passed originally to the 'authorization' endpoint.
+   *
+   * This must be identical to the original string, as conforming OAuth2 servers
+   * will validate this.
+   */
   redirectUri: string,
+
+  /**
+   * Code that was obtained from the authorization endpoint
+   */
   code: string,
+
+  /**
+   * If there's a previously valid access token, use this.
+   * 
+   * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
+   */
+  accessToken?: string,
+
+  /**
+   * Previously obtained refresh token (if any)
+   */
+  refreshToken?: string,
+
+  /**
+   * Callback to trigger when a new access/refresh token pair was obtained.
+   */
+  onTokenUpdate?: (token: Token) => void,
+
+  /**
+   * If authentication fails without a chance of recovery, this gets triggered.
+   *
+   * This is used for example when your resource server returns a 401, but only after
+   * other attempts have been made to reauthenticate (such as a token refresh).
+   */
+  onAuthError?: (error: Error) => void,
 };
 
 /**
@@ -60,12 +185,40 @@ type AuthorizationCodeGrantOptions = {
  */
 type RefreshOnlyGrantOptions = {
   grantType: undefined,
+
+  /**
+   * OAuth2 client id
+   */
+  clientId: string,
+  tokenEndpoint: string,
+
+  /**
+   * Previously obtained access token
+   */
   accessToken: string,
+
+  /**
+   * Previously obtained refresh token (if any)
+   */
+  refreshToken?: string,
+
+  /**
+   * Callback to trigger when a new access/refresh token pair was obtained.
+   */
+  onTokenUpdate?: (token: Token) => void,
+
+  /**
+   * If authentication fails without a chance of recovery, this gets triggered.
+   *
+   * This is used for example when your resource server returns a 401, but only after
+   * other attempts have been made to reauthenticate (such as a token refresh).
+   */
+  onAuthError?: (error: Error) => void,
 };
 
 export type OAuth2Options =
-  BaseOptions &
-  (PasswordGrantOptions | ClientCredentialsGrantOptions | AuthorizationCodeGrantOptions | RefreshOnlyGrantOptions);
+  PasswordGrantOptions | ClientCredentialsGrantOptions | AuthorizationCodeGrantOptions | RefreshOnlyGrantOptions;
+
 
 export type AccessTokenRequest = {
   grant_type: 'client_credentials',
