@@ -45,7 +45,7 @@ type PasswordGrantOptions = {
 
   /**
    * If there's a previously valid access token, use this.
-   * 
+   *
    * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
    */
   accessToken?: string,
@@ -97,7 +97,7 @@ type ClientCredentialsGrantOptions = {
 
   /**
    * If there's a previously valid access token, use this.
-   * 
+   *
    * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
    */
   accessToken?: string,
@@ -152,7 +152,7 @@ type AuthorizationCodeGrantOptions = {
 
   /**
    * If there's a previously valid access token, use this.
-   * 
+   *
    * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
    */
   accessToken?: string,
