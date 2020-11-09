@@ -21,9 +21,6 @@ module.exports = [
           loader: 'awesome-typescript-loader'
         }
       ]
-    },
-    node: {
-      Buffer: false
     }
   }
 ];
