@@ -1,6 +1,18 @@
 Changelog
 =========
 
+0.6.0 (2020-11-09)
+------------------
+
+* Added a onAuthError event, allowing users to intercept this event and
+  re-authenticate.
+* Simplify types a bit. More duplication in the library, but this should
+  result in easier to read errors.
+* Typescript 4
+* Switch from tslint to eslint.
+* Webpack 5
+
+
 0.5.0 (2020-04-19)
 ------------------
 
