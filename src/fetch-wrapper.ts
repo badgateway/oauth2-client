@@ -188,6 +188,7 @@ export default class OAuth2 {
             code: this.options.code,
             redirect_uri: this.options.redirectUri,
             client_id: this.options.clientId,
+            code_verifier: this.options.codeVerifier,
           };
           break;
         default :
