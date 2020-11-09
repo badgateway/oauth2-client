@@ -154,7 +154,7 @@ export default class OAuth2 {
         grant_type: 'refresh_token',
         refresh_token: previousToken.refreshToken
       };
-      if (!this.options.clientSecret) {
+      if ((this.options as any).clientSecret !== undefined) {
         // If there is no secret, it means we need to send the clientId along
         // in the body.
         body.client_id = this.options.clientId;
@@ -201,9 +201,8 @@ export default class OAuth2 {
       'Content-Type'  : 'application/x-www-form-urlencoded',
     };
 
-    // @ts-ignore typescript doesn't like this but its the easiest way to do this.
-    if (this.options.clientSecret !== undefined) {
-      const basicAuthStr = base64Encode(this.options.clientId + ':' + this.options.clientSecret);
+    if ((this.options as any).clientSecret !== undefined) {
+      const basicAuthStr = base64Encode(this.options.clientId + ':' + (this.options as any).clientSecret);
       headers.Authorization = 'Basic ' + basicAuthStr;
     }
 
