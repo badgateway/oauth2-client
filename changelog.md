@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.6.1 (2020-11-19)
+------------------
+
+* #34: Refresh operation failed for the `authorization_code` flow.
+
+
 0.6.0 (2020-11-09)
 ------------------
 
