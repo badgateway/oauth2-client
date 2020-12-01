@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.7.3 (2020-12-01)
+------------------
+
+* Re-publishing package. Previous version had an old build artifact.
+
+
 0.7.2 (2020-12-01)
 ------------------
 
