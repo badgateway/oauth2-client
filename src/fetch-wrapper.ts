@@ -8,9 +8,28 @@ export default class OAuth2 {
   options: OAuth2Options;
   token: Token;
 
-  constructor(options: OAuth2Options, token?: Token) {
+  constructor(options: OAuth2Options & Partial<Token>, token?: Token) {
 
+    if (!options.grantType && !token) {
+      throw new Error('If no grantType is specified, a token must be provided');
+    }
     this.options = options;
+
+    // Backwards compatibility
+    if (options.accessToken) {
+      console.warn(
+        '[fetch-mw-oauth2] Specifying accessToken via the options argument ' +
+        'in the constructor of OAuth2 is deprecated. Please supply the ' +
+        'options in the second argument. Backwards compatability will be ' +
+        'removed in a future version of this library');
+      token = {
+        accessToken: options.accessToken,
+        refreshToken: options.refreshToken || null,
+        expiresAt: null,
+      };
+    }
+
+
     this.token = token || {
       accessToken: '',
       expiresAt: null,
@@ -157,7 +176,12 @@ export default class OAuth2 {
           };
           break;
         default :
-          throw new Error('Unknown grantType: ' + this.options.grantType);
+          if (typeof (this.options as any).grantType === 'string') {
+            throw new Error('Unknown grantType: ' + (this.options as any).grantType);
+          } else {
+            throw new Error('Cannot obtain an access token if no "grantType" is specified');
+          }
+          break;
       }
 
     }

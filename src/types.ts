@@ -153,18 +153,13 @@ type AuthorizationCodeGrantOptions = {
  * If a refresh or tokenEndpoint are not supplied, the token will never get refreshed.
  */
 type RefreshOnlyGrantOptions = {
-  grantType: undefined,
+  grantType: never,
 
   /**
    * OAuth2 client id
    */
   clientId: string,
   tokenEndpoint: string,
-
-  /**
-   * Previously obtained access token
-   */
-  accessToken: string,
 
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
@@ -204,4 +199,3 @@ export type AccessTokenRequest = {
   client_id: string,
   code_verifier?: string,
 };
-
