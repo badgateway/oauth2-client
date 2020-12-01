@@ -1,6 +1,20 @@
 Changelog
 =========
 
+0.7.0 (2020-11-30)
+------------------
+
+* Ensure that only 1 refresh operation will happen in parallel. If there are
+  multiple things triggering the refresh, all will wait for the first one
+  to finish.
+* Automatically schedule a refresh operation 1 minute before the access token
+  expires, if the expiry time is known.
+* BC Break: If a token is known when setting up OAuth2, this now needs to be
+  passed as the second argument. The old behavior still works but will emit
+  a warning, and will be removed in a future release.
+* 'OAuth2Token' type is now exported.
+
+
 0.6.1 (2020-11-19)
 ------------------
 
