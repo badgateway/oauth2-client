@@ -17,6 +17,11 @@ export default class OAuth2 {
    */
   private activeRefresh: Promise<Token> | null;
 
+  /**
+   * Timer trigger for the next automated refresh
+   */
+  private refreshTimer: number | null;
+
   constructor(options: Options & Partial<Token>, token?: Token) {
 
     if (!options.grantType && !token && !options.accessToken) {
@@ -47,6 +52,9 @@ export default class OAuth2 {
     };
 
     this.activeRefresh = null;
+    this.refreshTimer = null;
+
+    this.scheduleRefresh();
 
   }
 
@@ -151,11 +159,44 @@ export default class OAuth2 {
 
     try {
       const token = await this.activeRefresh;
+      this.token = token;
+      this.scheduleRefresh();
       return token;
     } finally {
       // Make sure we clear the current refresh operation.
       this.activeRefresh = null;
     }
+
+  }
+
+  private scheduleRefresh() {
+
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+
+    if (!this.token.expiresAt || !this.token.refreshToken) {
+      // If we don't know when the token expires, or don't have a refresh_token, don't bother.
+      return;
+    }
+
+    const expiresIn = this.token.expiresAt - Date.now();
+
+    // We only schedule this event if it happens more than 2 minutes in the future.
+    if (expiresIn < 120*1000) {
+      return;
+    }
+
+    // Schedule 1 minute before expiry
+    this.refreshTimer = setTimeout(async () => {
+      try {
+        await this.refreshToken();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[fetch-mw-oauth2] error while doing a background OAuth2 auto-refresh', err);
+      }
+    });
 
   }
 
