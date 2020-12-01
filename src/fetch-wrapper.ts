@@ -10,7 +10,7 @@ export default class OAuth2 {
 
   constructor(options: OAuth2Options & Partial<Token>, token?: Token) {
 
-    if (!options.grantType && !token) {
+    if (!options.grantType && !token && !options.accessToken) {
       throw new Error('If no grantType is specified, a token must be provided');
     }
     this.options = options;
@@ -176,8 +176,8 @@ export default class OAuth2 {
           };
           break;
         default :
-          if (typeof (this.options as any).grantType === 'string') {
-            throw new Error('Unknown grantType: ' + (this.options as any).grantType);
+          if (typeof this.options.grantType === 'string') {
+            throw new Error('Unknown grantType: ' + this.options.grantType);
           } else {
             throw new Error('Cannot obtain an access token if no "grantType" is specified');
           }

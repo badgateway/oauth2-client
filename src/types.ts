@@ -153,7 +153,7 @@ type AuthorizationCodeGrantOptions = {
  * If a refresh or tokenEndpoint are not supplied, the token will never get refreshed.
  */
 type RefreshOnlyGrantOptions = {
-  grantType: never,
+  grantType: undefined,
 
   /**
    * OAuth2 client id
