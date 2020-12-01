@@ -1,14 +1,23 @@
-import { encode as base64Encode } from './base64';
-import OAuthError from './error';
-import { AccessTokenRequest, OAuth2Options, Token } from './types';
-import { objToQueryString } from './util';
+import {
+  OAuth2Options as Options,
+  OAuth2Token as Token
+} from './types';
+import { refreshToken } from './util';
 
 export default class OAuth2 {
 
-  options: OAuth2Options;
+  options: Options;
   token: Token;
 
-  constructor(options: OAuth2Options & Partial<Token>, token?: Token) {
+  /**
+   * Keeping track of an active refreshToken operation.
+   *
+   * This will allow us to ensure only 1 such operation happens at any
+   * given time.
+   */
+  private activeRefresh: Promise<Token> | null;
+
+  constructor(options: Options & Partial<Token>, token?: Token) {
 
     if (!options.grantType && !token && !options.accessToken) {
       throw new Error('If no grantType is specified, a token must be provided');
@@ -36,6 +45,8 @@ export default class OAuth2 {
       expiresAt: null,
       refreshToken: null
     };
+
+    this.activeRefresh = null;
 
   }
 
@@ -68,7 +79,7 @@ export default class OAuth2 {
    */
   async fetchMw(request: Request, next: (request: Request) => Promise<Response>): Promise<Response> {
 
-    let accessToken = await this.getAccessToken();
+    const accessToken = await this.getAccessToken();
 
     let authenticatedRequest = request.clone();
     authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
@@ -76,10 +87,10 @@ export default class OAuth2 {
 
     if (!response.ok && response.status === 401) {
 
-      accessToken = await this.refreshToken();
+      await this.refreshToken();
 
       authenticatedRequest = request.clone();
-      authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
+      authenticatedRequest.headers.set('Authorization', 'Bearer '  + this.token.accessToken);
       response = await next(authenticatedRequest);
 
     }
@@ -120,122 +131,31 @@ export default class OAuth2 {
 
     }
 
-    return this.refreshToken();
+    await this.refreshToken();
+    return this.token.accessToken;
 
   }
 
   /**
    * Forces an access token refresh
    */
-  async refreshToken(): Promise<string> {
+  async refreshToken(): Promise<Token> {
 
-    // The request body for the OAuth2 token endpoint
-    let body: AccessTokenRequest;
-
-    const previousToken = this.token;
-
-    if (previousToken.refreshToken) {
-      body = {
-        grant_type: 'refresh_token',
-        refresh_token: previousToken.refreshToken
-      };
-      if ((this.options as any).clientSecret === undefined) {
-        // If there is no secret, it means we need to send the clientId along
-        // in the body.
-        body.client_id = this.options.clientId;
-      }
-
-    } else {
-
-      switch (this.options.grantType) {
-
-        case 'client_credentials':
-          body = {
-            grant_type: 'client_credentials',
-          };
-          if (this.options.scope) {
-            body.scope = this.options.scope.join(' ');
-          }
-          break;
-        case 'password':
-          body = {
-            grant_type: 'password',
-            username: this.options.userName,
-            password: this.options.password,
-          };
-          if (this.options.scope) {
-            body.scope = this.options.scope.join(' ');
-          }
-          break;
-        case 'authorization_code' :
-          body = {
-            grant_type: 'authorization_code',
-            code: this.options.code,
-            redirect_uri: this.options.redirectUri,
-            client_id: this.options.clientId,
-            code_verifier: this.options.codeVerifier,
-          };
-          break;
-        default :
-          if (typeof this.options.grantType === 'string') {
-            throw new Error('Unknown grantType: ' + this.options.grantType);
-          } else {
-            throw new Error('Cannot obtain an access token if no "grantType" is specified');
-          }
-          break;
-      }
-
+    if (this.activeRefresh) {
+      // If we are currently already doing this operation,
+      // make sure we don't do it twice in parallel.
+      return this.activeRefresh;
     }
 
-    const headers: {[s: string]: string} = {
-      'Content-Type'  : 'application/x-www-form-urlencoded',
-    };
+    this.activeRefresh = refreshToken(this.options, this.token);
 
-    if ((this.options as any).clientSecret !== undefined) {
-      const basicAuthStr = base64Encode(this.options.clientId + ':' + (this.options as any).clientSecret);
-      headers.Authorization = 'Basic ' + basicAuthStr;
+    try {
+      const token = await this.activeRefresh;
+      return token;
+    } finally {
+      // Make sure we clear the current refresh operation.
+      this.activeRefresh = null;
     }
-
-    const authResult = await fetch(this.options.tokenEndpoint, {
-      method: 'POST',
-      headers,
-      body: objToQueryString(body),
-    });
-
-    const jsonResult = await authResult.json();
-
-    if (!authResult.ok) {
-
-      // If we failed with a refresh_token grant_type, we're going to make one
-      // more attempt doing a full re-auth
-      if (body.grant_type === 'refresh_token' && this.options.grantType) {
-        // Wiping out all old token info
-        this.token = {
-          accessToken: '',
-          expiresAt: 0,
-          refreshToken: null,
-        };
-        return this.getAccessToken();
-
-      }
-
-      let errorMessage = 'OAuth2 error ' + jsonResult.error + '.';
-      if (jsonResult.error_description) {
-        errorMessage += ' ' + jsonResult.error_description;
-      }
-      throw new OAuthError(errorMessage, jsonResult.error, 401);
-    }
-
-    this.token = {
-      accessToken: jsonResult.access_token,
-      expiresAt: jsonResult.expires_in ? Date.now() + (jsonResult.expires_in * 1000) : null,
-      refreshToken: jsonResult.refresh_token ? jsonResult.refresh_token : null,
-    };
-    if (this.options.onTokenUpdate) {
-      this.options.onTokenUpdate(this.token);
-    }
-
-    return this.token.accessToken;
 
   }
 
