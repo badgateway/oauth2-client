@@ -30,9 +30,10 @@ const { OAuth2 } = require('fetch-mw-oauth2');
 const oauth2 = new OAuth2({
   clientId: '...',
   clientSecret: '...', // Optional in some cases
+  tokenEndpoint: 'https://auth.example.org/token',
+}, {
   accessToken: '...',
   refreshToken: '...',
-  tokenEndpoint: 'https://auth.example.org/token',
 });
 
 const response = await oauth2.fetch('https://my-api.example.org/articles', {
