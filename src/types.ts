@@ -44,18 +44,6 @@ type PasswordGrantOptions = {
   password: string,
 
   /**
-   * If there's a previously valid access token, use this.
-   *
-   * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
-   */
-  accessToken?: string,
-
-  /**
-   * Previously obtained refresh token (if any)
-   */
-  refreshToken?: string,
-
-  /**
    * Callback to trigger when a new access/refresh token pair was obtained.
    */
   onTokenUpdate?: (token: Token) => void,
@@ -94,18 +82,6 @@ type ClientCredentialsGrantOptions = {
    * List of OAuth2 scopes
    */
   scope?: string[],
-
-  /**
-   * If there's a previously valid access token, use this.
-   *
-   * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
-   */
-  accessToken?: string,
-
-  /**
-   * Previously obtained refresh token (if any)
-   */
-  refreshToken?: string,
 
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
@@ -151,18 +127,6 @@ type AuthorizationCodeGrantOptions = {
   code: string,
 
   /**
-   * If there's a previously valid access token, use this.
-   *
-   * If specified, it won't use the standard OAuth2 flow unless the token is invalid.
-   */
-  accessToken?: string,
-
-  /**
-   * Previously obtained refresh token (if any)
-   */
-  refreshToken?: string,
-
-  /**
    * Callback to trigger when a new access/refresh token pair was obtained.
    */
   onTokenUpdate?: (token: Token) => void,
@@ -196,16 +160,6 @@ type RefreshOnlyGrantOptions = {
    */
   clientId: string,
   tokenEndpoint: string,
-
-  /**
-   * Previously obtained access token
-   */
-  accessToken: string,
-
-  /**
-   * Previously obtained refresh token (if any)
-   */
-  refreshToken?: string,
 
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
@@ -245,4 +199,3 @@ export type AccessTokenRequest = {
   client_id: string,
   code_verifier?: string,
 };
-

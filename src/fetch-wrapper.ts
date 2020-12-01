@@ -8,15 +8,33 @@ export default class OAuth2 {
   options: OAuth2Options;
   token: Token;
 
-  constructor(options: OAuth2Options) {
+  constructor(options: OAuth2Options & Partial<Token>, token?: Token) {
 
+    if (!options.grantType && !token && !options.accessToken) {
+      throw new Error('If no grantType is specified, a token must be provided');
+    }
     this.options = options;
-    this.token = {
-      accessToken: options.accessToken || '',
-      // If there was an accessToken we want to mark it as _not_ expired.
-      // If there wasn't an access token we pretend it immediately expired.
-      expiresAt: options.accessToken ? null : 0,
-      refreshToken: options.refreshToken || null
+
+    // Backwards compatibility
+    if (options.accessToken) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[fetch-mw-oauth2] Specifying accessToken via the options argument ' +
+        'in the constructor of OAuth2 is deprecated. Please supply the ' +
+        'options in the second argument. Backwards compatability will be ' +
+        'removed in a future version of this library');
+      token = {
+        accessToken: options.accessToken,
+        refreshToken: options.refreshToken || null,
+        expiresAt: null,
+      };
+    }
+
+
+    this.token = token || {
+      accessToken: '',
+      expiresAt: null,
+      refreshToken: null
     };
 
   }
@@ -34,23 +52,10 @@ export default class OAuth2 {
     // is always a fully-formed Request object.
     const request = new Request(input, init);
 
-    let accessToken = await this.getAccessToken();
-
-    let response = await requestWithBearerToken(request.clone(), accessToken);
-
-    if (!response.ok && response.status === 401) {
-
-      accessToken = await this.refreshToken();
-
-      // We will try one more time
-      response = await requestWithBearerToken(request, accessToken);
-
-      if (!response.ok && response.status === 401 && this.options.onAuthError) {
-        this.options.onAuthError(new Error('Authentication failed with 401 error'));
-      }
-
-    }
-    return response;
+    return this.fetchMw(
+      request,
+      req => fetch(req)
+    );
 
   }
 
@@ -79,30 +84,6 @@ export default class OAuth2 {
 
     }
     return response;
-
-  }
-
-  /**
-   * After authenticating, this functions returns a set of options that may be
-   * used when authenticating the next time.
-   *
-   * You might for example want to store this in LocalStorage, allowing your
-   * application to remember any refresh / access tokens for next time.
-   *
-   * The result of this function can be used as the constructor argument for
-   * this object.
-   */
-  async getOptions(): Promise<OAuth2Options> {
-
-    const token = await this.getToken();
-
-    return {
-      clientId: this.options.clientId,
-      grantType: undefined,
-      accessToken: token.accessToken,
-      refreshToken: token.refreshToken || undefined,
-      tokenEndpoint: this.options.tokenEndpoint,
-    };
 
   }
 
@@ -196,7 +177,12 @@ export default class OAuth2 {
           };
           break;
         default :
-          throw new Error('Unknown grantType: ' + this.options.grantType);
+          if (typeof this.options.grantType === 'string') {
+            throw new Error('Unknown grantType: ' + this.options.grantType);
+          } else {
+            throw new Error('Cannot obtain an access token if no "grantType" is specified');
+          }
+          break;
       }
 
     }
@@ -252,12 +238,5 @@ export default class OAuth2 {
     return this.token.accessToken;
 
   }
-
-}
-
-async function requestWithBearerToken(request: Request, accessToken: string) {
-
-  request.headers.set('Authorization', 'Bearer '  + accessToken);
-  return await fetch(request);
 
 }
