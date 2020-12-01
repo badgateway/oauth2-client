@@ -20,7 +20,7 @@ export default class OAuth2 {
   /**
    * Timer trigger for the next automated refresh
    */
-  private refreshTimer: number | null;
+  private refreshTimer: ReturnType<typeof setTimeout> | null;
 
   constructor(options: Options & Partial<Token>, token?: Token) {
 
@@ -196,7 +196,7 @@ export default class OAuth2 {
         // eslint-disable-next-line no-console
         console.error('[fetch-mw-oauth2] error while doing a background OAuth2 auto-refresh', err);
       }
-    });
+    }, expiresIn - 60*1000);
 
   }
 
