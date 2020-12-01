@@ -1,14 +1,18 @@
 import { encode as base64Encode } from './base64';
 import OAuthError from './error';
-import { AccessTokenRequest, OAuth2Options, Token } from './types';
+import {
+  AccessTokenRequest,
+  OAuth2Options as Options,
+  OAuth2Token as Token
+} from './types';
 import { objToQueryString } from './util';
 
 export default class OAuth2 {
 
-  options: OAuth2Options;
+  options: Options;
   token: Token;
 
-  constructor(options: OAuth2Options & Partial<Token>, token?: Token) {
+  constructor(options: Options & Partial<Token>, token?: Token) {
 
     if (!options.grantType && !token && !options.accessToken) {
       throw new Error('If no grantType is specified, a token must be provided');

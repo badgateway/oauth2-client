@@ -5,7 +5,8 @@ export {
 } from './fetch-wrapper';
 
 export {
-  OAuth2Options
+  OAuth2Options,
+  OAuth2Token
 } from './types';
 
 export {

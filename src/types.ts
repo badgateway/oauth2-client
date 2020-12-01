@@ -1,7 +1,7 @@
 /**
  * Token information
  */
-export type Token = {
+export type OAuth2Token = {
   accessToken: string,
   expiresAt: number | null,
   refreshToken: string | null,
@@ -46,7 +46,7 @@ type PasswordGrantOptions = {
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
    */
-  onTokenUpdate?: (token: Token) => void,
+  onTokenUpdate?: (token: OAuth2Token) => void,
 
   /**
    * If authentication fails without a chance of recovery, this gets triggered.
@@ -86,7 +86,7 @@ type ClientCredentialsGrantOptions = {
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
    */
-  onTokenUpdate?: (token: Token) => void,
+  onTokenUpdate?: (token: OAuth2Token) => void,
 
   /**
    * If authentication fails without a chance of recovery, this gets triggered.
@@ -129,7 +129,7 @@ type AuthorizationCodeGrantOptions = {
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
    */
-  onTokenUpdate?: (token: Token) => void,
+  onTokenUpdate?: (token: OAuth2Token) => void,
 
   /**
    * If authentication fails without a chance of recovery, this gets triggered.
@@ -164,7 +164,7 @@ type RefreshOnlyGrantOptions = {
   /**
    * Callback to trigger when a new access/refresh token pair was obtained.
    */
-  onTokenUpdate?: (token: Token) => void,
+  onTokenUpdate?: (token: OAuth2Token) => void,
 
   /**
    * If authentication fails without a chance of recovery, this gets triggered.
