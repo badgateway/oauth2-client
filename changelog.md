@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.7.2 (2020-12-01)
+------------------
+
+* Fixed bug that completely broke the token flow.
+
+
 0.7.1 (2020-11-30)
 ------------------
 

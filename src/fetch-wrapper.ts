@@ -7,7 +7,7 @@ import { refreshToken } from './util';
 export default class OAuth2 {
 
   options: Options;
-  token: Token;
+  token: Token | null;
 
   /**
    * Keeping track of an active refreshToken operation.
@@ -22,7 +22,7 @@ export default class OAuth2 {
    */
   private refreshTimer: ReturnType<typeof setTimeout> | null;
 
-  constructor(options: Options & Partial<Token>, token?: Token) {
+  constructor(options: Options & Partial<Token>, token: Token|null = null) {
 
     if (!options.grantType && !token && !options.accessToken) {
       throw new Error('If no grantType is specified, a token must be provided');
@@ -44,13 +44,7 @@ export default class OAuth2 {
       };
     }
 
-
-    this.token = token || {
-      accessToken: '',
-      expiresAt: null,
-      refreshToken: null
-    };
-
+    this.token = token;
     this.activeRefresh = null;
     this.refreshTimer = null;
 
@@ -95,10 +89,10 @@ export default class OAuth2 {
 
     if (!response.ok && response.status === 401) {
 
-      await this.refreshToken();
+      const newToken = await this.refreshToken();
 
       authenticatedRequest = request.clone();
-      authenticatedRequest.headers.set('Authorization', 'Bearer '  + this.token.accessToken);
+      authenticatedRequest.headers.set('Authorization', 'Bearer '  + newToken.accessToken);
       response = await next(authenticatedRequest);
 
     }
@@ -116,11 +110,14 @@ export default class OAuth2 {
    */
   async getToken(): Promise<Token> {
 
-    /**
-     * We're running this function to make sure we get up-to-date information
-     */
-    await this.getAccessToken();
-    return this.token;
+    if (this.token && (this.token.expiresAt === null || this.token.expiresAt > Date.now())) {
+
+      // The current token is still valid
+      return this.token;
+
+    }
+
+    return this.refreshToken();
 
   }
 
@@ -132,15 +129,8 @@ export default class OAuth2 {
    */
   async getAccessToken(): Promise<string> {
 
-    if (this.token.expiresAt === null || this.token.expiresAt > Date.now()) {
-
-      // The current token is still valid
-      return this.token.accessToken;
-
-    }
-
-    await this.refreshToken();
-    return this.token.accessToken;
+    const token = await this.getToken();
+    return token.accessToken;
 
   }
 
@@ -176,7 +166,7 @@ export default class OAuth2 {
       this.refreshTimer = null;
     }
 
-    if (!this.token.expiresAt || !this.token.refreshToken) {
+    if (!this.token || !this.token.expiresAt || !this.token.refreshToken) {
       // If we don't know when the token expires, or don't have a refresh_token, don't bother.
       return;
     }
