@@ -17,6 +17,7 @@ export default class OAuth2 {
 
     // Backwards compatibility
     if (options.accessToken) {
+      // eslint-disable-next-line no-console
       console.warn(
         '[fetch-mw-oauth2] Specifying accessToken via the options argument ' +
         'in the constructor of OAuth2 is deprecated. Please supply the ' +
