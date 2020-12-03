@@ -1,6 +1,6 @@
 {
   "name": "fetch-mw-oauth2",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Fetch middleware to add OAuth2 support",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/badgateway/fetch-oauth2.git"
+    "url": "git+ssh://git@github.com/badgateway/fetch-mw-oauth2.git"
   },
   "keywords": [
     "fetch",
@@ -18,9 +18,9 @@
   "author": "Evert Pot (https://evertpot.com)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/badgateway/fetch-oauth2/issues"
+    "url": "https://github.com/badgateway/fetch-mw-oauth2/issues"
   },
-  "homepage": "https://github.com/badgateway/fetch-oauth2#readme",
+  "homepage": "https://github.com/badgateway/fetch-mw-oauth2#readme",
   "devDependencies": {
     "@types/node": "^12.19.8",
     "@typescript-eslint/eslint-plugin": "^4.9.0",

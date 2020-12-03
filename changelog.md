@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.7.4 (2020-12-03)
+------------------
+
+* Fixing a few broken links in package.json. Does not alter any behavior.
+
+
 0.7.3 (2020-12-01)
 ------------------
 
