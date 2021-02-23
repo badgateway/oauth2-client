@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.7.7 (2021-02-22)
+------------------
+
+* Last version did not correctly build it's files.
+
+
 0.7.6 (2021-02-22)
 ------------------
 
