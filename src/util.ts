@@ -92,7 +92,9 @@ export async function refreshToken(options: OAuth2Options, token: OAuth2Token | 
     'Content-Type'  : 'application/x-www-form-urlencoded',
   };
 
+  let usesBasicAuth = false;
   if ((options as any).clientSecret !== undefined) {
+    usesBasicAuth = true;
     const basicAuthStr = base64Encode(options.clientId + ':' + (options as any).clientSecret);
     headers.Authorization = 'Basic ' + basicAuthStr;
   }
@@ -113,11 +115,24 @@ export async function refreshToken(options: OAuth2Options, token: OAuth2Token | 
       return refreshToken(options, null);
     }
 
-    let errorMessage = 'OAuth2 error ' + jsonResult.error + '.';
-    if (jsonResult.error_description) {
-      errorMessage += ' ' + jsonResult.error_description;
+    const httpError = authResult.status;
+    let errorMessage;
+
+    let oauth2Code;
+    if (jsonResult.error) {
+      errorMessage = 'OAuth2 error ' + jsonResult.error + '.';
+      if (jsonResult.error_description) {
+        errorMessage += ' ' + jsonResult.error_description;
+      }
+      oauth2Code = jsonResult.error;
+    } else {
+      errorMessage = 'HTTP Error ' + authResult.status + ' ' + authResult.statusText;
+      if (authResult.status === 401 && usesBasicAuth) {
+        errorMessage += '. It\'s likely that the clientId and/or clientSecret was incorrect';
+      }
+      oauth2Code = null;
     }
-    throw new OAuthError(errorMessage, jsonResult.error, 401);
+    throw new OAuthError(errorMessage, oauth2Code, httpError);
   }
 
 

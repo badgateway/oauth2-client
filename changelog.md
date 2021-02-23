@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.7.6 (2021-02-22)
+------------------
+
+* Better error handling when the response we got was not a standard OAuth2
+  error response body + adding information for when the Basic credentials
+  were wrong.
+* This fixes the bug when fetch-mw-oauth2 says there's an 'undefined' error.
+
+
 0.7.5 (2020-12-03)
 ------------------
 
