@@ -152,7 +152,7 @@ export default class OAuth2 {
       this.token = token;
       this.scheduleRefresh();
       return token;
-    } catch (err) {
+    } catch (err: any) {
       if (this.options.onAuthError) {
         this.options.onAuthError(err);
       }
