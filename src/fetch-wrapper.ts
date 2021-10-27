@@ -152,11 +152,6 @@ export default class OAuth2 {
       this.token = token;
       this.scheduleRefresh();
       return token;
-    } catch (err) {
-      if (this.options.onAuthError) {
-        this.options.onAuthError(err);
-      }
-      throw err;
     } finally {
       // Make sure we clear the current refresh operation.
       this.activeRefresh = null;
