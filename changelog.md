@@ -1,6 +1,16 @@
 Changelog
 =========
 
+1.0.0 (2021-10-??)
+------------------
+
+* Dropped support for Node 10.
+* Fixed #45: Call `onAuthError` when a refresh fails.
+* Replaced `awesome-typescript-loader` with `ts-loader` for Webpack builds.
+  the former appears unmaintained.
+* Switched from Travis CI to Github Actions.
+
+
 0.7.7 (2021-02-22)
 ------------------
 
