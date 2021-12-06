@@ -127,6 +127,7 @@ The current features have been implemented:
 2. `password` grant-type support.
 3. `authorization_code` grant-type support
 4. Automatically refreshing tokens
+5. Invoking hooks for successful token update (`options.onTokenUpdate`) and authentication failure (`options.onAuthError`)
 
 The following features are planned mid/long-term
 
