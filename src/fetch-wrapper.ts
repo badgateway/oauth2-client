@@ -1,53 +1,63 @@
-import {
-  OAuth2Options as Options,
-  OAuth2Token as Token
-} from './types';
-import { refreshToken } from './util';
+import { OAuth2Token } from './token';
+import { OAuth2Client } from './client';
 
-export default class OAuth2 {
-
-  options: Options;
-  token: Token | null;
+type OAuth2FetchOptions = {
 
   /**
-   * Keeping track of an active refreshToken operation.
+   * Reference to OAuth2 client.
+   */
+  client: OAuth2Client;
+
+  /**
+   * You are responsible for implementing this function.
+   * it's purpose is to supply the 'intitial' oauth2 token.
    *
-   * This will allow us to ensure only 1 such operation happens at any
-   * given time.
+   * This function may be async. Return `null` to fail the process.
    */
-  private activeRefresh: Promise<Token> | null;
+  getNewToken(): OAuth2Token | null | Promise<OAuth2Token | null>;
 
   /**
-   * Timer trigger for the next automated refresh
+   * If set, will be called if authenticatin fatally failed.
    */
-  private refreshTimer: ReturnType<typeof setTimeout> | null;
+  onError?: (err: Error) => void;
 
-  constructor(options: Options & Partial<Token>, token: Token|null = null) {
+  /**
+   * This function is called whenever the active token changes. Using this is
+   * optional, but it may be used to (for example) put the token in off-line
+   * storage for later usage.
+   */
+  storeToken?: (token: OAuth2Token) => void;
 
-    if (!options.grantType && !token && !options.accessToken) {
-      throw new Error('If no grantType is specified, a token must be provided');
-    }
+  /**
+   * Also an optional feature. Implement this if you want the wrapper to try a
+   * stored token before attempting a full reauthentication.
+   *
+   * This function may be async. Return null if there was no token.
+   */
+  getStoredToken?: () => OAuth2Token | null | Promise<OAuth2Token | null>;
+
+}
+
+
+
+export class OAuth2Fetch {
+
+
+  private options: OAuth2FetchOptions;
+
+  /**
+   * Current active token (if any)
+   */
+  private token: OAuth2Token | null = null;
+
+  constructor(options: OAuth2FetchOptions) {
+
     this.options = options;
-
-    // Backwards compatibility
-    if (options.accessToken) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[fetch-mw-oauth2] Specifying accessToken via the options argument ' +
-        'in the constructor of OAuth2 is deprecated. Please supply the ' +
-        'options in the second argument. Backwards compatability will be ' +
-        'removed in a future version of this library');
-      token = {
-        accessToken: options.accessToken,
-        refreshToken: options.refreshToken || null,
-        expiresAt: null,
-      };
+    if (options.getStoredToken) {
+      (async () => {
+        this.token = await options.getStoredToken!();
+      })();
     }
-
-    this.token = token;
-    this.activeRefresh = null;
-    this.refreshTimer = null;
-
     this.scheduleRefresh();
 
   }
@@ -83,6 +93,7 @@ export default class OAuth2 {
 
     const accessToken = await this.getAccessToken();
 
+    // Make a clone. We need to clone if we need to retry the request later.
     let authenticatedRequest = request.clone();
     authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
     let response = await next(authenticatedRequest);
@@ -107,8 +118,10 @@ export default class OAuth2 {
    *   * accessToken
    *   * expiresAt - when the token expires, or null.
    *   * refreshToken - may be null
+   *
+   * This function will attempt to automatically refresh if stale.
    */
-  async getToken(): Promise<Token> {
+  async getToken(): Promise<OAuth2Token> {
 
     if (this.token && (this.token.expiresAt === null || this.token.expiresAt > Date.now())) {
 
@@ -135,9 +148,18 @@ export default class OAuth2 {
   }
 
   /**
+   * Keeping track of an active refreshToken operation.
+   *
+   * This will allow us to ensure only 1 such operation happens at any
+   * given time.
+   */
+  private activeRefresh: Promise<OAuth2Token> | null = null;
+
+
+  /**
    * Forces an access token refresh
    */
-  async refreshToken(): Promise<Token> {
+  async refreshToken(): Promise<OAuth2Token> {
 
     if (this.activeRefresh) {
       // If we are currently already doing this operation,
@@ -145,7 +167,32 @@ export default class OAuth2 {
       return this.activeRefresh;
     }
 
-    this.activeRefresh = refreshToken(this.options, this.token);
+    const oldToken = this.token;
+    this.activeRefresh = (async() => {
+
+      let newToken: OAuth2Token|null = null;
+
+      try {
+        if (oldToken?.refreshToken) {
+          // We had a refresh token, lets see if we can use it!
+          newToken = await this.options.client.refreshToken(oldToken);
+        }
+      } catch (err) {
+        console.warn('[oauth2] refresh token not accepted, we\'ll try reauthenticating');
+      }
+
+      if (!newToken) {
+        newToken = await this.options.getNewToken();
+      }
+
+      if (!newToken) {
+        const err = new Error('Unableto obtain OAuth2 tokens, a full reauth may be needed');
+        this.options.onError?.(err);
+        throw err;
+      }
+      return newToken;
+
+    })();
 
     try {
       const token = await this.activeRefresh;
@@ -153,8 +200,8 @@ export default class OAuth2 {
       this.scheduleRefresh();
       return token;
     } catch (err: any) {
-      if (this.options.onAuthError) {
-        this.options.onAuthError(err);
+      if (this.options.onError) {
+        this.options.onError(err);
       }
       throw err;
     } finally {
@@ -163,6 +210,11 @@ export default class OAuth2 {
     }
 
   }
+
+  /**
+   * Timer trigger for the next automated refresh
+   */
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   private scheduleRefresh() {
 

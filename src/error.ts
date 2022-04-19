@@ -10,7 +10,7 @@
  * - unsupported_grant_type
  * - invalid_scope
  */
-export default class OAuthError extends Error {
+export class OAuth2Error extends Error {
 
   oauth2Code: number;
   httpCode: number;
