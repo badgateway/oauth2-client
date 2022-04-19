@@ -1,8 +1,14 @@
 Changelog
 =========
 
-2.0.0 (2022-04-19) (alpha tag)
-------------------------------
+2.0.1 (2022-04-19) (alpha)
+--------------------------
+
+* Fix introspection HTTP method name.
+
+
+2.0.0 (2022-04-19) (alpha)
+--------------------------
 
 The 2.0 version of this library is a complete rewrite. The original scope
 of this library was to provide a wrapper around `fetch()` to add a `Bearer`

@@ -267,7 +267,7 @@ export class OAuth2Client {
     }
 
     const resp = await fetch(uri, {
-      method:' POST',
+      method: 'POST',
       body: new URLSearchParams(body),
       headers,
     });
