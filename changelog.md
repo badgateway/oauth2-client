@@ -1,6 +1,31 @@
 Changelog
 =========
 
+2.0.0 (2022-04-19) (alpha tag)
+------------------------------
+
+The 2.0 version of this library is a complete rewrite. The original scope
+of this library was to provide a wrapper around `fetch()` to add a `Bearer`
+token and refresh this token under the hood, but it has now evolved into
+a full-featured modern OAuth2 library.
+
+The existing 'fetch wrapper' still exists, but it's not merely one of the
+features this package offers. The API has changes, and while I think it
+shouldn't be difficult to migrate, v2 offers no backwards compatibility
+so some rewrites will be required.
+
+New features include:
+
+* Complete support for the `authorization_code` flow, including generating
+  redirect urls and parsing query parameters after redirect.
+* Support for OAuth2 endpoint discovery, using the OAuth2 Authorization
+  Server Metadata document. If your server supports it, just give the
+  library a URL and it will figure out the rest. [RFC8414][2].
+* Support for OAuth2 token introspection ([RFC7662][3]).
+* Generally a better abstraction of the OAuth2 framework.
+
+
+
 1.0.0 (2021-10-28)
 ------------------
 
@@ -168,3 +193,8 @@ Changelog
 * Support for `client_credentials`, `password` and `refresh_token`.
 * Will automatically attempt to refresh tokens if it knows an access token is
   expired.
+
+
+[1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
+[2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
+[3]: https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
