@@ -197,6 +197,7 @@ export class OAuth2Fetch {
     try {
       const token = await this.activeRefresh;
       this.token = token;
+      this.options.storeToken?.(token);
       this.scheduleRefresh();
       return token;
     } catch (err: any) {
