@@ -10,12 +10,12 @@
  * - unsupported_grant_type
  * - invalid_scope
  */
-export default class OAuthError extends Error {
+export class OAuth2Error extends Error {
 
-  oauth2Code: number;
+  oauth2Code: string;
   httpCode: number;
 
-  constructor(message: string, oauth2Code: number, httpCode: number) {
+  constructor(message: string, oauth2Code: string, httpCode: number) {
 
     super(message);
 
