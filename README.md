@@ -10,6 +10,8 @@ This library supports the following features:
 * a `fetch()` wrapper that automatically passe OAuth2 tokens and refreshes
   them.
 * OAuth2 endpoint discovery via the Server metadata document ([RFC8414][2]).
+* OAuth2 Token Introspection ([RFC7662][3]).
+
 
 ## Installation
 
@@ -19,7 +21,7 @@ npm i fetch-mw-oauth2
 
 ## Usage
 
-To get started, set up the Client class:
+To get started, set up the Client class.
 
 
 ```typescript
@@ -268,6 +270,40 @@ But it's also possible to use it directly. For example:
 oauth2.fetchMw(myRequest, innerRequest => fetch(innerRequest));
 ```
 
+### Introspection
+
+Introspection ([RFC7662][3]) lets you find more information about a token,
+such as whether it's valid, which user it belongs to, which oauth2 client
+was used to generate it, etc.
+
+To be able to use it, your authorization server must have support for the
+introspection endpoint. It's location will be automatically detected using
+the Metadata discovery document.
+
+```typescript
+import { OAuth2Client } from 'fetch-mw-oauth2';
+
+const client = new Client({
+  server: 'https://auth-server.example/',
+
+  clientId: '...',
+
+  /**
+   * Some servers require OAuth2 clientId/clientSecret to be passed.
+   * If they require it, specify it. If not it's fine to omit.
+   */
+  clientSecret: '...',
+
+});
+
+// Get a token
+const token = client.clientCredentials();
+
+// Introspect!
+console.log(client.introspect(token));
+```
+
+
 ## Project status
 
 The current features have been implemented:
@@ -285,3 +321,4 @@ The following features are planned mid/long-term
 
 [1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
 [2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
+[3]: https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"

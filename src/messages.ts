@@ -46,6 +46,12 @@ export type TokenResponse = {
   scope?: string;
 }
 
+type OAuth2ResponseType = 'code' | 'token';
+type OAuth2GrantType = 'authorization_code' | 'implicit' | 'password' | 'client_credentials' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:jwt-bearer' | 'urn:ietf:params:oauth:grant-type:saml2-bearer';
+type OAuth2AuthMethod = 'none' | 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'tls_client_auth' | 'self_signed_tls_client_auth';
+type OAuth2CodeChallengeMethod = 'S256' | 'plain';
+
+export type OAuth2TokenTypeHint = 'access_token' | 'refresh_token';
 
 /**
  * Response from /.well-known/oauth-authorization-server
@@ -175,7 +181,73 @@ export type ServerMetadataResponse = {
 
 }
 
-type OAuth2ResponseType = 'code' | 'token';
-type OAuth2GrantType = 'authorization_code' | 'implicit' | 'password' | 'client_credentials' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:jwt-bearer' | 'urn:ietf:params:oauth:grant-type:saml2-bearer';
-type OAuth2AuthMethod = 'none' | 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'tls_client_auth' | 'self_signed_tls_client_auth';
-type OAuth2CodeChallengeMethod = 'S256' | 'plain';
+export type IntrospectionRequest = {
+  token: string;
+  token_type_hint?: OAuth2TokenTypeHint;
+};
+
+
+export type IntrospectionResponse = {
+
+  /**
+   * Whether or not the token is still active.
+   */
+  active: boolean;
+
+  /**
+   * Space-separted list of scopes.
+   */
+  scope?: string;
+
+  /**
+   * client_id that requested the token.
+   */
+  client_id?: string;
+
+  /**
+   * Human-readable string of the resource-owner that requested the token.
+   */
+  username?: string;
+
+  /**
+   * Type of token
+   */
+  token_type?: string;
+
+  /**
+   * Unix timestamp of when this token expires.
+   */
+  exp?: number;
+
+  /**
+   * Unix timestamp of when the token was issued.
+   */
+  iat?: number;
+
+  /**
+   * Unix timestamp indicating when the token should not be used before.
+   */
+  nbf?: number;
+
+  /**
+   * Subject of the token. Usually a machine-readable identifier of the
+   * resource owner/user.
+   */
+  sub?: string;
+
+  /**
+   * String representing the audience of the token.
+   */
+  aud?: string;
+
+  /**
+   * Issuer of the token.
+   */
+  iss?: string;
+
+  /**
+   * String identifier of the token.
+   */
+  jti?: string;
+
+}

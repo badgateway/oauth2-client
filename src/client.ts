@@ -2,6 +2,8 @@ import { OAuth2Token } from './token';
 import {
   AuthorizationCodeRequest,
   ClientCredentialsRequest,
+  IntrospectionRequest,
+  IntrospectionResponse,
   PasswordRequest,
   RefreshRequest,
   ServerMetadataResponse,
@@ -101,7 +103,7 @@ export class OAuth2Client {
       body.client_id = this.settings.clientId;
     }
 
-    return this.tokenRequest(body);
+    return this.request('tokenEndpoint', body);
 
   }
 
@@ -118,7 +120,7 @@ export class OAuth2Client {
       throw new Error('A clientSecret must be provied to use client_credentials');
     }
 
-    return this.tokenRequest(body);
+    return this.request('tokenEndpoint', body);
 
   }
 
@@ -135,7 +137,7 @@ export class OAuth2Client {
     if (!this.settings.clientSecret) {
       throw new Error('A clientSecret must be provied to use client_credentials');
     }
-    return this.tokenRequest(body);
+    return this.request('tokenEndpoint', body);
 
   }
 
@@ -151,10 +153,27 @@ export class OAuth2Client {
       client_id: this.settings.clientId,
       code_verifier: params.codeVerifier,
     };
-    return this.tokenRequest(body);
+    return this.request('tokenEndpoint', body);
 
   }
 
+  /**
+   * Introspect a token
+   *
+   * This will give information about the validity, owner, which client
+   * created the token and more.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc7662
+   */
+  async introspect(token: OAuth2Token): Promise<IntrospectionResponse> {
+
+    const body: IntrospectionRequest = {
+      token: token.accessToken,
+      token_type_hint: 'access_token',
+    };
+    return this.request('introspectionEndpoint', body);
+
+  }
 
   /**
    * Returns a url for an OAuth2 endpoint.
@@ -239,9 +258,11 @@ export class OAuth2Client {
   /**
    * Does a HTTP request on the 'token' endpoint.
    */
-  private async tokenRequest(body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<OAuth2Token> {
+  private async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<OAuth2Token>;
+  private async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
+  private async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
 
-    const uri = await this.getEndpoint('tokenEndpoint');
+    const uri = await this.getEndpoint(endpoint);
 
     const headers: Record<string, string> = {};
 
