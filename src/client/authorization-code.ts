@@ -1,15 +1,15 @@
 import { OAuth2Client } from '../client';
 import { OAuth2Token } from '../token';
-import { AuthorizationCodeRequest } from '../messages';
+import { AuthorizationCodeRequest, AuthorizationQueryParams } from '../messages';
 import { OAuth2Error } from '../error';
 
 export class AuthorizationCodeClient {
 
   client: OAuth2Client;
   redirectUri: string;
-  state: string;
+  state: string|undefined;
 
-  constructor(client: OAuth2Client, redirectUri: string, state: string) {
+  constructor(client: OAuth2Client, redirectUri: string, state?: string) {
 
     this.client = client;
     this.redirectUri = redirectUri;
@@ -23,12 +23,16 @@ export class AuthorizationCodeClient {
    */
   async getAuthorizeUri(): Promise<string> {
 
-    const queryString = new URLSearchParams([
-      ['response_type', 'code'],
-      ['client_id', this.client.settings.clientId],
-      ['redirect_uri', this.redirectUri],
-      ['state', this.state],
-    ]);
+    const params: AuthorizationQueryParams = {
+      response_type: 'code',
+      client_id: this.client.settings.clientId,
+      redirect_uri: this.redirectUri,
+    };
+    if (this.state) {
+      params.state = this.state;
+    }
+
+    const queryString = new URLSearchParams(params);
 
     return (await this.client.getEndpoint('authorizationEndpoint')) + '?' + queryString.toString();
 

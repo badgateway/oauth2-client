@@ -112,25 +112,57 @@ const token = await client.password({
 
 ### authorization_code
 
-To use authorization_code, you typically first need to send a user to the
-authorization endpoint.
+The `authorization_code` flow is the flow for browser-based applications,
+and roughly consists of 3 major steps:
 
-After the user was redirected back, you will be able to obtain a `code`
-string.
+1. Redirect the user to an authorization endpoint, where they log in.
+2. Authorization endpoint redirects back to app with a 'code' query
+   parameter.
+3. The `code` is exchanged for a access and refresh token.
 
-This `code` can be exchanged for an oauth2 access token.
+This library provides support for all 3 steps, but there's no requirement
+to use its functionality as the system is mostly stateless.
 
 ```typescript
-const token = await client.authorizationCode({
-  code: '....',
+import { OAuth2Client } from 'client';
 
-  // MUST match the exact original redirect_uri as passed to the auhtorization endpoint
-  redirectUri: '...',
+const client = new OAuth2Client({
+  server: 'https://authserver.example/',
+  clientId: '...',
 
-  // If PCKE was used (highly recommended), pass the code_verifier here
-  codeVerifier: '...', 
+  // Note, if urls cannot be auto-detected, also specify these:
+  tokenEndpoint: '/token',
+  authorizationEndpoint: '/authorize',
+});
+
+const authorizationCode = client.authorizationCode({
+
+  // URL in the app that the user should get redirected to after authenticating
+  redirectUri: 'https://my-app.example/',
+
+  // Optional string that can be sent along to the auth server. This value will
+  // be sent along with the redirect back to the app verbatim.
+  state: 'some-string',
 });
 ```
+
+**Redirecting the user to the authorization server**
+
+```typescript
+// In a browser this might work as follows:
+document.location = await authorizationCode.getAuthorizeUri();
+```
+
+**Handling the redirect back to the app and obtain token**
+
+```typescript
+const codeResponse = await authorizationCode.validateResponse(
+  document.location
+);
+
+const oauth2Token = await authorizationCode.getToken(codeResponse);
+```
+
 
 ### Fetch Wrapper
 
@@ -244,7 +276,6 @@ const fetchWrapper = new OAuth2Fetch({
 ```
 
 
-
 ### fetchMw function
 
 It might be preferable to use this library as a more traditional 'middleware'.
@@ -302,22 +333,6 @@ const token = client.clientCredentials();
 // Introspect!
 console.log(client.introspect(token));
 ```
-
-
-## Project status
-
-The current features have been implemented:
-
-1. `client_credentials` grant-type support.
-2. `password` grant-type support.
-3. `authorization_code` grant-type support
-4. Automatically refreshing tokens
-5. Invoking hooks for successful token update (`options.onTokenUpdate`) and authentication failure (`options.onAuthError`)
-
-The following features are planned mid/long-term
-
-1. Supply an OAuth2 discovery document instead of authorization and token uris.
-2. `implicit` grant-type support
 
 [1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
 [2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"

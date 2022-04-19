@@ -36,6 +36,17 @@ export type AuthorizationCodeRequest = {
 }
 
 /**
+ * The query parameters that will be sent to the /authorization endpoint
+ * for the authorization_code request.
+ */
+export type AuthorizationQueryParams = {
+  response_type: 'code';
+  client_id: string;
+  redirect_uri: string;
+  state?: string;
+}
+
+/**
  * Response from the /token endpoint
  */
 export type TokenResponse = {
