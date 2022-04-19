@@ -1,5 +1,12 @@
 import { OAuth2Token } from './token';
-import { RefreshRequest, TokenResponse, ClientCredentialsRequest, PasswordRequest, AuthorizationCodeRequest } from './messages';
+import {
+  AuthorizationCodeRequest,
+  ClientCredentialsRequest,
+  PasswordRequest,
+  RefreshRequest,
+  ServerMetadataResponse,
+  TokenResponse,
+} from './messages';
 import { OAuth2Error } from './error';
 
 export interface ClientSettings {
@@ -43,6 +50,14 @@ export interface ClientSettings {
   tokenEndpoint?: string;
 
   /**
+   * Introspection endpoint.
+   *
+   * Required for, well, introspecting tokens.
+   * If not provided we'll try to discover it, or othwerwise default to /introspect
+   */
+  introspectionEndpoint?: string;
+
+  /**
    * OAuth 2.0 Authorization Server Metadata endpoint or OpenID
    * Connect Discovery 1.0 endpoint.
    *
@@ -56,7 +71,7 @@ export interface ClientSettings {
 }
 
 
-type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint';
+type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint' | 'introspectionEndpoint';
 
 export class OAuth2Client {
 
@@ -172,11 +187,15 @@ export class OAuth2Client {
         return resolve('/token', this.settings.server);
       case 'discoveryEndpoint':
         return resolve('/.well-known/oauth-authorization-server', this.settings.server);
+      case 'introspectionEndpoint' :
+        return resolve('/introspect', this.settings.server);
     }
 
   }
 
   private discoveryDone = false;
+  private serverMetadata: ServerMetadataResponse | null = null;
+
 
   /**
    * Fetches the OAuth2 discovery document
@@ -200,16 +219,19 @@ export class OAuth2Client {
       console.warn('[oauth2] OAuth2 discovery endpoint was not a JSON response. Response is ignored');
       return;
     }
-    const discoverDoc = await resp.json();
+    this.serverMetadata = await resp.json();
 
     const urlMap = [
       ['authorization_endpoint', 'authorizationEndpoint'],
       ['token_endpoint', 'tokenEndpoint'],
+      ['introspection_endpoint', 'introspectionEndpoint'],
     ] as const;
 
+    if (this.serverMetadata===null) return;
+
     for(const [property, setting] of urlMap) {
-      if (!discoverDoc[property]) continue;
-      this.settings[setting] = resolve(discoverDoc[property], discoverUrl);
+      if (!this.serverMetadata[property]) continue;
+      this.settings[setting] = resolve(this.serverMetadata[property]!, discoverUrl);
     }
 
   }
