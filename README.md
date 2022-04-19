@@ -1,14 +1,13 @@
 # fetch-mw-oauth2
 
-This package contains an OAuth2 client. It aims to be a a fully-featured OAuth2
+This package contains an OAuth2 client. It aims to be a fully-featured OAuth2
 utility library, for Node.js, Browsers and written in Typescript.
 
 This library supports the following features:
 
 * `authorization_code` grant with optional [PKCE][1] support.
 * `password` and `client_credentials` grant.
-* a `fetch()` wrapper that automatically passe OAuth2 tokens and refreshes
-  them.
+* a `fetch()` wrapper that automatically adds Bearer tokens and refreshes them.
 * OAuth2 endpoint discovery via the Server metadata document ([RFC8414][2]).
 * OAuth2 Token Introspection ([RFC7662][3]).
 
