@@ -10,6 +10,7 @@ import {
   TokenResponse,
 } from './messages';
 import { OAuth2Error } from './error';
+import { AuthorizationCodeClient } from './client/authorization-code';
 
 export interface ClientSettings {
 
@@ -141,19 +142,13 @@ export class OAuth2Client {
 
   }
 
-  /**
-   * Receives an OAuth2 token using 'authorization_code' grant
-   */
-  async authorizationCode(params: { code: string; redirectUri: string; codeVerifier?: string }) {
+  async authorizationCode(params: {redirectUri: string; state: string}) {
 
-    const body:AuthorizationCodeRequest = {
-      grant_type: 'authorization_code',
-      code: params.code,
-      redirect_uri: params.redirectUri,
-      client_id: this.settings.clientId,
-      code_verifier: params.codeVerifier,
-    };
-    return this.request('tokenEndpoint', body);
+    return new AuthorizationCodeClient(
+      this,
+      params.redirectUri,
+      params.state,
+    );
 
   }
 
@@ -258,9 +253,9 @@ export class OAuth2Client {
   /**
    * Does a HTTP request on the 'token' endpoint.
    */
-  private async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<OAuth2Token>;
-  private async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
-  private async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
+  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<OAuth2Token>;
+  async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
+  async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
 
     const uri = await this.getEndpoint(endpoint);
 
