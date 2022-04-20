@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.0.3 (2022-04-19) (alpha)
+--------------------------
+
+* Export `OAuth2AuthorizationCodeClient`
+* Client.authorizationCode() should not have been `async`.
+
+
 2.0.2 (2022-04-19) (alpha)
 --------------------------
 

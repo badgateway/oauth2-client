@@ -10,7 +10,7 @@ import {
   TokenResponse,
 } from './messages';
 import { OAuth2Error } from './error';
-import { AuthorizationCodeClient } from './client/authorization-code';
+import { OAuth2AuthorizationCodeClient } from './client/authorization-code';
 
 export interface ClientSettings {
 
@@ -142,9 +142,9 @@ export class OAuth2Client {
 
   }
 
-  async authorizationCode(params: {redirectUri: string; state: string}) {
+  authorizationCode(params: {redirectUri: string; state: string}): OAuth2AuthorizationCodeClient {
 
-    return new AuthorizationCodeClient(
+    return new OAuth2AuthorizationCodeClient(
       this,
       params.redirectUri,
       params.state,

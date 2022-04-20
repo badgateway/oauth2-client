@@ -3,7 +3,7 @@ import { OAuth2Token } from '../token';
 import { AuthorizationCodeRequest, AuthorizationQueryParams } from '../messages';
 import { OAuth2Error } from '../error';
 
-export class AuthorizationCodeClient {
+export class OAuth2AuthorizationCodeClient {
 
   client: OAuth2Client;
   redirectUri: string;
