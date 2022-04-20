@@ -1,6 +1,11 @@
 Changelog
 =========
 
+2.0.4 (2022-04-20) (alpha)
+--------------------------
+
+* remove `fetchMw` and add `mw()`. `mw()` now _returns_ a middleware function.
+
 2.0.3 (2022-04-19) (alpha)
 --------------------------
 

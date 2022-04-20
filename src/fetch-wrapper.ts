@@ -1,6 +1,8 @@
 import { OAuth2Token } from './token';
 import { OAuth2Client } from './client';
 
+type FetchMiddleware = (request: Request, next: (request: Request) => Promise<Response>) => Promise<Response>;
+
 type OAuth2FetchOptions = {
 
   /**
@@ -67,7 +69,7 @@ export class OAuth2Fetch {
    *
    * If the access token is not known, this function attempts to fetch it
    * first. If the access token is almost expiring, this function might attempt
-   * to refresh it.
+   1G* to refresh it.
    */
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
 
@@ -75,7 +77,7 @@ export class OAuth2Fetch {
     // is always a fully-formed Request object.
     const request = new Request(input, init);
 
-    return this.fetchMw(
+    return this.mw()(
       request,
       req => fetch(req)
     );
@@ -86,28 +88,30 @@ export class OAuth2Fetch {
    * This function allows the fetch-mw to be called as more traditional
    * middleware.
    *
-   * The function takes a Request object, and a next() function that
-   * represents the next 'fetch' function in the chain.
+   * This function returns a middleware function with the signature
+   *    (request, next): Response
    */
-  async fetchMw(request: Request, next: (request: Request) => Promise<Response>): Promise<Response> {
+  mw(): FetchMiddleware {
 
-    const accessToken = await this.getAccessToken();
+    return async (request, next) => {
+      const accessToken = await this.getAccessToken();
 
-    // Make a clone. We need to clone if we need to retry the request later.
-    let authenticatedRequest = request.clone();
-    authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
-    let response = await next(authenticatedRequest);
+      // Make a clone. We need to clone if we need to retry the request later.
+      let authenticatedRequest = request.clone();
+      authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
+      let response = await next(authenticatedRequest);
 
-    if (!response.ok && response.status === 401) {
+      if (!response.ok && response.status === 401) {
 
-      const newToken = await this.refreshToken();
+        const newToken = await this.refreshToken();
 
-      authenticatedRequest = request.clone();
-      authenticatedRequest.headers.set('Authorization', 'Bearer '  + newToken.accessToken);
-      response = await next(authenticatedRequest);
+        authenticatedRequest = request.clone();
+        authenticatedRequest.headers.set('Authorization', 'Bearer '  + newToken.accessToken);
+        response = await next(authenticatedRequest);
 
-    }
-    return response;
+      }
+      return response;
+    };
 
   }
 

@@ -275,29 +275,52 @@ const fetchWrapper = new OAuth2Fetch({
 ```
 
 
-### fetchMw function
+### Fetch Middleware function
 
 It might be preferable to use this library as a more traditional 'middleware'.
 
-The OAuth2Fetch object also exposes a `fetchMw` function that takes 2 arguments:
-
-1. `request`
-2. `next`
-
-The next argument is a function that also takes a request and returns a
-response.
-
-Usually you will want to use this with some kind of fetch middleware container,
-as such:
+The OAuth2Fetch object also exposes a `mw` function that returns a middleware
+for fetch.
 
 ```typescript
-myFetchMiddleware(oauth2.fetchMw);
+const mw = oauth2.mw();
+const response = mw(
+  myRequest,
+  req => fetch(req)
+);
 ```
 
-But it's also possible to use it directly. For example:
+This syntax looks a bit wild if you're not used to building middlewares, but
+this effectively allows you to 'decorate' existing request libraries with
+functionality from this oauth2 library.
+
+A real example using the [Ketting](https://github.com/badgateway/ketting)
+library:
 
 ```typescript
-oauth2.fetchMw(myRequest, innerRequest => fetch(innerRequest));
+import { Client } from 'ketting';
+import { OAuth2Client, OAuth2Fetch } from 'fetch-mw-oauth2';
+
+/**
+ * Create the oauth2 client
+ */
+const oauth2Client = new OAuth2Client({
+  server: 'https://my-auth.example',
+  clientId: 'foo',
+});
+
+/**
+ * Create the 'fetch helper'
+ */
+const oauth2Fetch = new OAuth2Fetch({
+  client: oauth2Client,
+});
+
+/**
+ * Add the middleware to Ketting
+ */
+const ketting = new Client('http://api-root');
+ketting.use(oauth2Fetch.mw());
 ```
 
 ### Introspection
