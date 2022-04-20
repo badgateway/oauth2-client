@@ -104,7 +104,7 @@ export class OAuth2Client {
       body.client_id = this.settings.clientId;
     }
 
-    return this.request('tokenEndpoint', body);
+    return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
 
@@ -121,7 +121,7 @@ export class OAuth2Client {
       throw new Error('A clientSecret must be provied to use client_credentials');
     }
 
-    return this.request('tokenEndpoint', body);
+    return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
 
@@ -138,7 +138,7 @@ export class OAuth2Client {
     if (!this.settings.clientSecret) {
       throw new Error('A clientSecret must be provied to use client_credentials');
     }
-    return this.request('tokenEndpoint', body);
+    return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
 
@@ -253,7 +253,7 @@ export class OAuth2Client {
   /**
    * Does a HTTP request on the 'token' endpoint.
    */
-  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<OAuth2Token>;
+  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
   async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
 
@@ -273,12 +273,7 @@ export class OAuth2Client {
     });
 
     if (resp.ok) {
-      const result: TokenResponse = await resp.json();
-      return {
-        accessToken: result.access_token,
-        expiresAt: result.expires_in ? Date.now() + (result.expires_in * 1000) : null,
-        refreshToken: result.refresh_token ?? null,
-      };
+      return await resp.json();
     }
 
     let jsonError;
@@ -314,3 +309,12 @@ function resolve(uri: string, base?:string): string {
 
 }
 
+export function tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
+
+  return resp.then( body => ({
+    accessToken: body.access_token,
+    expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
+    refreshToken: body.refresh_token ?? null,
+  }));
+
+}

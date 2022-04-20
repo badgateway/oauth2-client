@@ -1,4 +1,4 @@
-import { OAuth2Client } from '../client';
+import { OAuth2Client, tokenResponseToOAuth2Token } from '../client';
 import { OAuth2Token } from '../token';
 import { AuthorizationCodeRequest, AuthorizationQueryParams } from '../messages';
 import { OAuth2Error } from '../error';
@@ -83,7 +83,7 @@ export class AuthorizationCodeClient {
       client_id: this.client.settings.clientId,
       code_verifier: params.codeVerifier,
     };
-    return this.client.request('tokenEndpoint', body);
+    return tokenResponseToOAuth2Token(this.client.request('tokenEndpoint', body));
 
   }
 
