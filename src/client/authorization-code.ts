@@ -8,12 +8,14 @@ export class OAuth2AuthorizationCodeClient {
   client: OAuth2Client;
   redirectUri: string;
   state: string|undefined;
+  codeVerifier: string|undefined;
 
-  constructor(client: OAuth2Client, redirectUri: string, state?: string) {
+  constructor(client: OAuth2Client, redirectUri: string, state?: string, codeVerifier?: string) {
 
     this.client = client;
     this.redirectUri = redirectUri;
     this.state = state;
+    this.codeVerifier = codeVerifier;
 
   }
 
@@ -21,20 +23,30 @@ export class OAuth2AuthorizationCodeClient {
    * Returns the URi that the user should open in a browser to initiate the
    * authorization_code flow.
    */
-  async getAuthorizeUri(): Promise<string> {
+  async getAuthorizeUri(params: { codeVerifier: string; redirectUri: string; state: string}): Promise<string> {
 
-    const params: AuthorizationQueryParams = {
+    const [
+      codeChallenge,
+      authorizationEndpoint
+    ] = await Promise.all([
+      getCodeChallenge(params.codeVerifier),
+      this.client.getEndpoint('authorizationEndpoint')
+    ]);
+
+    const query: AuthorizationQueryParams = {
       response_type: 'code',
       client_id: this.client.settings.clientId,
       redirect_uri: this.redirectUri,
+      code_challenge_method: codeChallenge[0],
+      code_challenge: codeChallenge[1],
     };
     if (this.state) {
-      params.state = this.state;
+      query.state = this.state;
     }
 
-    const queryString = new URLSearchParams(params);
+    const queryString = new URLSearchParams(query);
 
-    return (await this.client.getEndpoint('authorizationEndpoint')) + '?' + queryString.toString();
+    return authorizationEndpoint + '?' + queryString.toString();
 
   }
 
@@ -81,7 +93,7 @@ export class OAuth2AuthorizationCodeClient {
       code: params.code,
       redirect_uri: this.redirectUri,
       client_id: this.client.settings.clientId,
-      code_verifier: params.codeVerifier,
+      code_verifier: this.codeVerifier,
     };
     return tokenResponseToOAuth2Token(this.client.request('tokenEndpoint', body));
 
@@ -89,3 +101,35 @@ export class OAuth2AuthorizationCodeClient {
 
 
 }
+
+export function getCodeVerifier(): string {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return base64Url(arr);
+}
+
+async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
+
+  return ['S256', base64Url(await crypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
+
+}
+
+function stringToBuffer(input: string): ArrayBuffer {
+
+  const buf = new Uint8Array(input.length);
+  for(let i=0; i<input.length;i++) {
+    buf[i] = input.charCodeAt(i) & 0xFF;
+  }
+  return buf;
+
+}
+
+function base64Url(buf: ArrayBuffer) {
+  return (
+    btoa(String.fromCharCode(...new Uint8Array(buf)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
+  );
+}
+
