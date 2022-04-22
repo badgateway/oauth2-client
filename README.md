@@ -162,6 +162,51 @@ const codeResponse = await authorizationCode.validateResponse(
 const oauth2Token = await authorizationCode.getToken(codeResponse);
 ```
 
+### PKCE support
+
+Modern OAuth2 server should support PKCE, which improves security.
+This library supports PKCE. Luckily you don't need to know in advance whether
+your authorization server supports it. If they do, you get the additional
+benefit. If not, nothing should break.
+
+To use PKCE, you need to make one extra step when calling `authorizationCode`:
+
+```typescript
+import { OAuth2Client, getCodeVerifier } from 'client';
+
+const client = new OAuth2Client({
+  server: 'https://authserver.example/',
+  clientId: '...',
+
+  // Note, if urls cannot be auto-detected, also specify these:
+  tokenEndpoint: '/token',
+  authorizationEndpoint: '/authorize',
+});
+
+/**
+ * IMPORTANT! This returns a random value every time it's called
+ *
+ * Because the authorization_code is a multi-step process that likely results
+ * in the user leaving your website and coming back later, you must store the
+ * result of this somewhere.
+ *
+ * The codeVerifier gets used in the first step 'getAuthorizeUrl()` and the
+ * last step 'getToken()`.
+ */
+const codeVerifier = getCodeVerifier();
+const authorizationCode = client.authorizationCode({
+
+  // URL in the app that the user should get redirected to after authenticating
+  redirectUri: 'https://my-app.example/',
+
+  // Optional string that can be sent along to the auth server. This value will
+  // be sent along with the redirect back to the app verbatim.
+  state: 'some-string',
+
+  // Pass the code verifier
+  codeVerifier,
+});
+```
 
 ### Fetch Wrapper
 

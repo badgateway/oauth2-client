@@ -32,7 +32,7 @@ export type AuthorizationCodeRequest = {
   code: string;
   redirect_uri: string;
   client_id: string;
-  code_verifier?: string;
+  code_verifier: string|undefined;
 }
 
 /**
@@ -44,6 +44,8 @@ export type AuthorizationQueryParams = {
   client_id: string;
   redirect_uri: string;
   state?: string;
+  code_challenge_method: 'plain' | 'S256';
+  code_challenge: string;
 }
 
 /**

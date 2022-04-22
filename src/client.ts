@@ -268,7 +268,7 @@ export class OAuth2Client {
 
     const resp = await fetch(uri, {
       method: 'POST',
-      body: new URLSearchParams(body),
+      body: generateQueryString(body),
       headers,
     });
 
@@ -316,5 +316,20 @@ export function tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promis
     expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
     refreshToken: body.refresh_token ?? null,
   }));
+
+}
+
+/**
+ * Generates a query string.
+ *
+ * This function filters out any undefined values.
+ */
+function generateQueryString(params: Record<string, undefined|number|string>): string {
+
+  return new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter( ([k, v]) => v!==undefined)
+    ) as Record<string, string>
+  ).toString();
 
 }
