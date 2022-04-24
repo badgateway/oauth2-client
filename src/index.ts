@@ -3,3 +3,5 @@ export { OAuth2AuthorizationCodeClient, getCodeVerifier } from './client/authori
 export { OAuth2Fetch } from './fetch-wrapper';
 export { OAuth2Token } from './token';
 export { OAuth2Error } from './error';
+
+export { IntrospectionResponse } from './messages';
