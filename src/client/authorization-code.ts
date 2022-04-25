@@ -1,4 +1,4 @@
-import { OAuth2Client, tokenResponseToOAuth2Token } from '../client';
+import { OAuth2Client, tokenResponseToOAuth2Token, generateQueryString } from '../client';
 import { OAuth2Token } from '../token';
 import { AuthorizationCodeRequest, AuthorizationQueryParams } from '../messages';
 import { OAuth2Error } from '../error';
@@ -23,13 +23,13 @@ export class OAuth2AuthorizationCodeClient {
    * Returns the URi that the user should open in a browser to initiate the
    * authorization_code flow.
    */
-  async getAuthorizeUri(params: { codeVerifier: string; redirectUri: string; state: string}): Promise<string> {
+  async getAuthorizeUri(): Promise<string> {
 
     const [
       codeChallenge,
       authorizationEndpoint
     ] = await Promise.all([
-      getCodeChallenge(params.codeVerifier),
+      this.codeVerifier ? getCodeChallenge(this.codeVerifier) : undefined,
       this.client.getEndpoint('authorizationEndpoint')
     ]);
 
@@ -37,16 +37,14 @@ export class OAuth2AuthorizationCodeClient {
       response_type: 'code',
       client_id: this.client.settings.clientId,
       redirect_uri: this.redirectUri,
-      code_challenge_method: codeChallenge[0],
-      code_challenge: codeChallenge[1],
+      code_challenge_method: codeChallenge?.[0],
+      code_challenge: codeChallenge?.[1],
     };
     if (this.state) {
       query.state = this.state;
     }
 
-    const queryString = new URLSearchParams(query);
-
-    return authorizationEndpoint + '?' + queryString.toString();
+    return authorizationEndpoint + '?' + generateQueryString(query);
 
   }
 
@@ -86,7 +84,7 @@ export class OAuth2AuthorizationCodeClient {
   /**
    * Receives an OAuth2 token using 'authorization_code' grant
    */
-  async getToken(params: { code: string; codeVerifier?: string }): Promise<OAuth2Token> {
+  async getToken(params: { code: string }): Promise<OAuth2Token> {
 
     const body:AuthorizationCodeRequest = {
       grant_type: 'authorization_code',
@@ -102,7 +100,7 @@ export class OAuth2AuthorizationCodeClient {
 
 }
 
-export function getCodeVerifier(): string {
+export function generateCodeVerifier(): string {
   const arr = new Uint8Array(32);
   crypto.getRandomValues(arr);
   return base64Url(arr);

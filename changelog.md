@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.0.6 (2022-04-26) (alpha)
+--------------------------
+
+* Removed redundant parameters.
+* `authorization_code` should now also work correctly without PKCE.
+* Removed some redundant arguments.
+
+
 2.0.5 (2022-04-25) (alpha)
 --------------------------
 

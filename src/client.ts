@@ -324,7 +324,7 @@ export function tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promis
  *
  * This function filters out any undefined values.
  */
-function generateQueryString(params: Record<string, undefined|number|string>): string {
+export function generateQueryString(params: Record<string, undefined|number|string>): string {
 
   return new URLSearchParams(
     Object.fromEntries(
