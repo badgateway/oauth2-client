@@ -119,11 +119,11 @@ and roughly consists of 3 major steps:
    parameter.
 3. The `code` is exchanged for a access and refresh token.
 
-This library provides support for all 3 steps, but there's no requirement
+This library provides support for these steps, but there's no requirement
 to use its functionality as the system is mostly stateless.
 
 ```typescript
-import { OAuth2Client } from 'client';
+import { OAuth2Client, generateCodeVerifier } from 'client';
 
 const client = new OAuth2Client({
   server: 'https://authserver.example/',
@@ -132,69 +132,26 @@ const client = new OAuth2Client({
   // Note, if urls cannot be auto-detected, also specify these:
   tokenEndpoint: '/token',
   authorizationEndpoint: '/authorize',
-});
-
-const authorizationCode = client.authorizationCode({
-
-  // URL in the app that the user should get redirected to after authenticating
-  redirectUri: 'https://my-app.example/',
-
-  // Optional string that can be sent along to the auth server. This value will
-  // be sent along with the redirect back to the app verbatim.
-  state: 'some-string',
 });
 ```
 
 **Redirecting the user to the authorization server**
 
 ```typescript
-// In a browser this might work as follows:
-document.location = await authorizationCode.getAuthorizeUri();
-```
-
-**Handling the redirect back to the app and obtain token**
-
-```typescript
-const codeResponse = await authorizationCode.validateResponse(
-  document.location
-);
-
-const oauth2Token = await authorizationCode.getToken(codeResponse);
-```
-
-### PKCE support
-
-Modern OAuth2 server should support PKCE, which improves security.
-This library supports PKCE. Luckily you don't need to know in advance whether
-your authorization server supports it. If they do, you get the additional
-benefit. If not, nothing should break.
-
-To use PKCE, you need to make one extra step when calling `authorizationCode`:
-
-```typescript
-import { OAuth2Client, getCodeVerifier } from 'client';
-
-const client = new OAuth2Client({
-  server: 'https://authserver.example/',
-  clientId: '...',
-
-  // Note, if urls cannot be auto-detected, also specify these:
-  tokenEndpoint: '/token',
-  authorizationEndpoint: '/authorize',
-});
 
 /**
- * IMPORTANT! This returns a random value every time it's called
+ * This generates a security code that must be passed to the various steps.
+ * This is used for 'PKCE' which is an advanced security feature.
  *
- * Because the authorization_code is a multi-step process that likely results
- * in the user leaving your website and coming back later, you must store the
- * result of this somewhere.
+ * It doesn't break servers that don't support it, but it makes servers that
+ * so support it more secure.
  *
- * The codeVerifier gets used in the first step 'getAuthorizeUrl()` and the
- * last step 'getToken()`.
+ * It's optional to pass this, but recommended.
  */
-const codeVerifier = getCodeVerifier();
-const authorizationCode = client.authorizationCode({
+const codeVerifier = generateCodeVerifier():
+
+// In a browser this might work as follows:
+document.location = await authorizationCode.authorizationCode.getAuthorizeUri({
 
   // URL in the app that the user should get redirected to after authenticating
   redirectUri: 'https://my-app.example/',
@@ -203,10 +160,39 @@ const authorizationCode = client.authorizationCode({
   // be sent along with the redirect back to the app verbatim.
   state: 'some-string',
 
-  // Pass the code verifier
   codeVerifier,
+
 });
 ```
+
+**Handling the redirect back to the app and obtain token**
+
+```typescript
+const oauth2Token = await client.authorizationCode.getTokenFromCodeRedirect(
+  document.location,
+  {
+    /**
+     * The redirect URI is not actually used for any redirects, but MUST be the
+     * same as what you passed earlier to "authorizationCode"
+     */
+    redirectUri: 'https://my-app.example/',
+
+    /**
+     * This is optional, but if it's passed then it also MUST be the same as
+     * what you passed in the first step.
+     *
+     * If set, it will verify that the server sent the exact same state back.
+     */
+    state: 'some-string',
+
+    codeVerifier,
+
+  }
+);
+
+const oauth2Token = await authorizationCode.getToken(codeResponse);
+```
+
 
 ### Fetch Wrapper
 
@@ -242,7 +228,7 @@ const fetchWrapper = new OAuth2Fetch({
   getNewToken: async () => {
 
     // Example
-    return client.clientCredentials();     
+    return client.clientCredentials();
 
     // Another example
     return client.authorizationCode({

@@ -142,12 +142,14 @@ export class OAuth2Client {
 
   }
 
-  authorizationCode(params: {redirectUri: string; state: string}): OAuth2AuthorizationCodeClient {
+  /**
+   * Returns the helper object for the `authorization_code` grant.
+   *
+   */
+  get authorizationCode(): OAuth2AuthorizationCodeClient {
 
     return new OAuth2AuthorizationCodeClient(
       this,
-      params.redirectUri,
-      params.state,
     );
 
   }
