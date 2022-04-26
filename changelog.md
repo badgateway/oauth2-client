@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.0.9 (2022-04-26) (alpha)
+--------------------------
+
+* Set `Content-Type` to `application/x-www-form-urlencoded`.
+
+
 2.0.8 (2022-04-26) (alpha)
 --------------------------
 

@@ -261,7 +261,9 @@ export class OAuth2Client {
 
     const uri = await this.getEndpoint(endpoint);
 
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
 
     if (body.grant_type !== 'authorization_code' && this.settings.clientSecret) {
       const basicAuthStr = btoa(this.settings.clientId + ':' + this.settings.clientSecret);
