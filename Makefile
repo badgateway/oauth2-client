@@ -10,11 +10,11 @@ test:
 
 .PHONY:lint
 lint:
-	./node_modules/.bin/eslint --quiet 'src/**/*.ts'
+	./node_modules/.bin/eslint --quiet 'src/**/*.ts' 'test/**/*.ts'
 
 .PHONY:fix
 fix:
-	./node_modules/.bin/eslint --quiet 'src/**/*.ts' --fix
+	./node_modules/.bin/eslint --quiet 'src/**/*.ts' 'test/**/*.ts' --fix
 
 .PHONY:watch
 watch:
