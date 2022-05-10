@@ -134,7 +134,7 @@ export async function generateCodeVerifier(): Promise<string> {
           res(buf);
         });
       }));
-      return base64Url(bytes);
+      return base64Url(new Uint8Array(bytes));
 
     }
 
