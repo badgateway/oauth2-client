@@ -10,6 +10,7 @@ module.exports = [
 
     resolve: {
       extensions: ['.web.ts', '.web.js', '.ts', '.js', '.json'],
+      fallback: { 'crypto': false }
     },
 
     devtool: 'source-map',

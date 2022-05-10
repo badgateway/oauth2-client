@@ -5,6 +5,7 @@ utility library, for Node.js, Browsers and written in Typescript.
 
 This library supports the following features:
 
+* 9KB minified.
 * `authorization_code` grant with optional [PKCE][1] support.
 * `password` and `client_credentials` grant.
 * a `fetch()` wrapper that automatically adds Bearer tokens and refreshes them.
