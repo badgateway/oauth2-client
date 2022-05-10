@@ -1,11 +1,12 @@
 {
   "name": "fetch-mw-oauth2",
-  "version": "2.0.7",
+  "version": "2.0.9",
   "description": "Fetch middleware to add OAuth2 support",
   "main": "dist/index.js",
   "scripts": {
-    "test": "make test lint",
-    "prepublishOnly": "make build"
+    "test": "make test",
+    "prepublishOnly": "make build",
+    "lint": "make lint"
   },
   "repository": {
     "type": "git",
@@ -22,12 +23,19 @@
   },
   "homepage": "https://github.com/badgateway/fetch-mw-oauth2#readme",
   "devDependencies": {
+    "@curveball/bodyparser": "^0.4.14",
+    "@curveball/core": "^0.19.0",
+    "@types/chai": "^4.3.1",
+    "@types/mocha": "^9.1.1",
     "@types/node": "^17.0.25",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
+    "chai": "^4.3.6",
     "eslint": "^8.1.0",
-    "node-fetch": "^3.0.0",
+    "mocha": "^10.0.0",
+    "node-fetch": "^2.6.7",
     "ts-loader": "^9.2.6",
+    "ts-node": "^10.7.0",
     "typescript": "^4.4.4",
     "webpack": "^5.60.0",
     "webpack-cli": "^4.9.1"
@@ -39,5 +47,17 @@
     "browser/",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "mocha": {
+    "require": [
+      "ts-node/register",
+      "./test/polyfills.js"
+    ],
+    "recursive": true,
+    "extension": [
+      "ts",
+      "js",
+      "tsx"
+    ]
+  }
 }

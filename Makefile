@@ -6,15 +6,15 @@ build: fetch-mw-oauth2.zip dist/build browser/fetch-mw-oauth2.min.js
 
 .PHONY:test
 test:
-	# No tests yet
+	npx mocha
 
 .PHONY:lint
 lint:
-	./node_modules/.bin/eslint --quiet 'src/**/*.ts'
+	./node_modules/.bin/eslint --quiet 'src/**/*.ts' 'test/**/*.ts'
 
 .PHONY:fix
 fix:
-	./node_modules/.bin/eslint --quiet 'src/**/*.ts' --fix
+	./node_modules/.bin/eslint --quiet 'src/**/*.ts' 'test/**/*.ts' --fix
 
 .PHONY:watch
 watch:

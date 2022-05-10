@@ -1,6 +1,20 @@
 Changelog
 =========
 
+2.0.9 (2022-04-26) (alpha)
+--------------------------
+
+* Set `Content-Type` to `application/x-www-form-urlencoded`.
+
+
+2.0.8 (2022-04-26) (alpha)
+--------------------------
+
+* Changing the `authorization_code` signature again. It's a bit hard to come
+  up with a create signature for this, especially because there's multiple
+  steps in the process, and some information has to survive these steps.
+
+
 2.0.7 (2022-04-26) (alpha)
 --------------------------
 
