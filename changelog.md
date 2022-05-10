@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.0.10 (2022-05-10) (alpha)
+---------------------------
+
+* Tested on Node 14, 16.
+* Added polyfills for these node versions (see README).
+* `generateCodeVerifier` is now async to support Node 14.
+
+
 2.0.9 (2022-04-26) (alpha)
 --------------------------
 
