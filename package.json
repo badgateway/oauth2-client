@@ -49,7 +49,10 @@
     "README.md"
   ],
   "mocha": {
-    "require": "ts-node/register",
+    "require": [
+      "ts-node/register",
+      "./test/polyfills"
+    ],
     "recursive": true,
     "extension": [
       "ts",
