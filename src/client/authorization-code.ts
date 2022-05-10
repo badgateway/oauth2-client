@@ -108,8 +108,17 @@ export class OAuth2AuthorizationCodeClient {
 
 }
 
+let crypto: typeof global.crypto;
+if (typeof window !== 'undefined') {
+  crypto = window.crypto;
+} else {
+  crypto = require('crypto').webcrypto;
+}
+
 export function generateCodeVerifier(): string {
   const arr = new Uint8Array(32);
+
+  // This should in theory work in browsers and node.
   crypto.getRandomValues(arr);
   return base64Url(arr);
 }
