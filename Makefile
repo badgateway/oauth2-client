@@ -6,7 +6,7 @@ build: fetch-mw-oauth2.zip dist/build browser/fetch-mw-oauth2.min.js
 
 .PHONY:test
 test:
-	# No tests yet
+	npx mocha
 
 .PHONY:lint
 lint:
