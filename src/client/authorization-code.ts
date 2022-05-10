@@ -128,13 +128,12 @@ export async function generateCodeVerifier(): Promise<string> {
     } else {
 
       // Old node
-      const bytes = await (new Promise<Buffer>((res, rej) => {
+      return new Promise<string>((res, rej) => {
         crypto.randomBytes(32, (err:Error, buf: Buffer) => {
           if (err) rej(err);
-          res(buf);
+          res(buf.toString('base64url'));
         });
-      }));
-      return base64Url(new Uint8Array(bytes));
+      });
 
     }
 
