@@ -148,7 +148,7 @@ const client = new OAuth2Client({
  *
  * It's optional to pass this, but recommended.
  */
-const codeVerifier = generateCodeVerifier():
+const codeVerifier = await generateCodeVerifier():
 
 // In a browser this might work as follows:
 document.location = await authorizationCode.authorizationCode.getAuthorizeUri({

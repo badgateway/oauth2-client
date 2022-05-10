@@ -108,19 +108,38 @@ export class OAuth2AuthorizationCodeClient {
 
 }
 
-let crypto: typeof global.crypto;
-if (typeof window !== 'undefined') {
-  crypto = window.crypto;
-} else {
-  crypto = require('crypto').webcrypto;
-}
+export async function generateCodeVerifier(): Promise<string> {
 
-export function generateCodeVerifier(): string {
-  const arr = new Uint8Array(32);
+  if (typeof window !== 'undefined' && window.crypto) {
+    // Built-in webcrypto
+    const arr = new Uint8Array(32);
+    crypto.getRandomValues(arr);
+    return base64Url(arr);
+  } else {
 
-  // This should in theory work in browsers and node.
-  crypto.getRandomValues(arr);
-  return base64Url(arr);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const crypto = require('crypto');
+    if (crypto.webcrypto) {
+      // Webcrypto in a Node 16 or 18 module
+      const arr = new Uint8Array(32);
+      crypto.getRandomValues(arr);
+      return base64Url(arr);
+
+    } else {
+
+      // Old node
+      const bytes = await (new Promise<Buffer>((res, rej) => {
+        crypto.randomBytes(32, (err:Error, buf: Buffer) => {
+          if (err) rej(err);
+          res(buf);
+        });
+      }));
+      return base64Url(bytes);
+
+    }
+
+  }
+
 }
 
 async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
