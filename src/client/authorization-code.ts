@@ -122,7 +122,7 @@ export async function generateCodeVerifier(): Promise<string> {
     if (crypto.webcrypto) {
       // Webcrypto in a Node 16 or 18 module
       const arr = new Uint8Array(32);
-      crypto.getRandomValues(arr);
+      crypto.webcrypto.getRandomValues(arr);
       return base64Url(arr);
 
     } else {
