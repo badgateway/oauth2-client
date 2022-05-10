@@ -51,7 +51,7 @@
   "mocha": {
     "require": [
       "ts-node/register",
-      "./test/polyfills"
+      "./test/polyfills.js"
     ],
     "recursive": true,
     "extension": [
