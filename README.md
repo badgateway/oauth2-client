@@ -29,7 +29,7 @@ To get started, set up the Client class.
 ```typescript
 import { OAuth2Client } from 'fetch-mw-oauth2';
 
-const client = new Client({
+const client = new OAuth2Client({
 
   // The base URI of your OAuth2 server
   server: 'https://my-auth-server/',
