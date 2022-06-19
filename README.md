@@ -1,9 +1,10 @@
-# fetch-mw-oauth2
+# OAuth2 client for Node and browsers
 
 This package contains an OAuth2 client. It aims to be a fully-featured OAuth2
 utility library, for Node.js, Browsers and written in Typescript.
 
-This library supports the following features:
+
+## Highlights
 
 * 9KB minified (3KB gzipped).
 * No dependencies.
@@ -17,7 +18,7 @@ This library supports the following features:
 ## Installation
 
 ```sh
-npm i fetch-mw-oauth2
+npm i @badgateway/oauth2-client
 ```
 
 
