@@ -4,6 +4,8 @@ Changelog
 2.0.12 (2022-06-19)
 -------------------
 
+* First stable v2 release!
+* Renamed this package from `fetch-mw-oauth2` to `@badgateway/oauth2-client`.
 * #59: Scope support for `authorization_code` flow.
 
 
