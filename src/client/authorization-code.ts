@@ -3,6 +3,45 @@ import { OAuth2Token } from '../token';
 import { AuthorizationCodeRequest, AuthorizationQueryParams } from '../messages';
 import { OAuth2Error } from '../error';
 
+type GetAuthorizeUrlParams = {
+  /**
+   * Where to redirect the user back to after authentication.
+   */
+  redirectUri: string;
+
+  /**
+   * The 'state' is a string that can be sent to the authentication server,
+   * and back to the redirectUri.
+   */
+  state?: string;
+
+  /**
+   * Code verifier for PKCE support. If you used this in the redirect
+   * to the authorization endpoint, you also need to use this again
+   * when getting the access_token on the token endpoint.
+   */
+  codeVerifier?: string;
+
+  /**
+   * List of scopes.
+   */
+  scope?: string[];
+}
+
+type ValidateResponseResult = {
+
+  /**
+   * The authorization code. This code should be used to obtain an access token.
+   */
+  code: string;
+
+  /**
+   * List of scopes that the client requested.
+   */
+  scope?: string[];
+
+}
+
 export class OAuth2AuthorizationCodeClient {
 
   client: OAuth2Client;
@@ -17,7 +56,7 @@ export class OAuth2AuthorizationCodeClient {
    * Returns the URi that the user should open in a browser to initiate the
    * authorization_code flow.
    */
-  async getAuthorizeUri(params: {redirectUri: string; state?: string; codeVerifier?: string}): Promise<string> {
+  async getAuthorizeUri(params: GetAuthorizeUrlParams): Promise<string> {
 
     const [
       codeChallenge,
@@ -63,7 +102,7 @@ export class OAuth2AuthorizationCodeClient {
    * This function takes the url and validate the response. If the user
    * redirected back with an error, an error will be thrown.
    */
-  async validateResponse(url: string|URL, params: {state?: string}): Promise<{code: string}> {
+  async validateResponse(url: string|URL, params: {state?: string}): Promise<ValidateResponseResult> {
 
     const queryParams = new URL(url).searchParams;
 
@@ -83,7 +122,8 @@ export class OAuth2AuthorizationCodeClient {
     }
 
     return {
-      code: queryParams.get('code')!
+      code: queryParams.get('code')!,
+      scope: queryParams.has('scope') ? queryParams.get('scope')!.split(' ') : undefined,
     };
 
   }
