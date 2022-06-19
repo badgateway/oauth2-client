@@ -3,8 +3,8 @@ module.exports = [
     entry: './src/index',
     output: {
       path: __dirname + '/browser',
-      filename: 'fetch-mw-oauth2.min.js',
-      library: 'fetchMwOAuth2',
+      filename: 'oauth2-client.min.js',
+      library: 'OAuth2Client',
       libraryTarget: 'umd'
     },
 
