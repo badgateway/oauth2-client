@@ -165,6 +165,8 @@ document.location = await authorizationCode.authorizationCode.getAuthorizeUri({
 
   codeVerifier,
 
+  scope: ['scope1', 'scope2'],
+
 });
 ```
 
