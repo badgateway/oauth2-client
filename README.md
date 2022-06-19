@@ -1,5 +1,9 @@
 # fetch-mw-oauth2
 
+_Note that v2 of this package has been renamed to `@badgateway/oauth2-client`. This
+package has the same features (and more). v1 will receive some maintenance for the
+forseeable future, but uprading is strongly recommended._
+
 This library adds support to OAuth2 to fetch by wrapping the fetch function.
 It works both for `fetch()` in a browser, as well as [node-fetch][1].
 
