@@ -28,7 +28,7 @@ To get started, set up the Client class.
 
 
 ```typescript
-import { OAuth2Client } from 'fetch-mw-oauth2';
+import { OAuth2Client } from '@badgateway/oauth2-client';
 
 const client = new OAuth2Client({
 
@@ -216,7 +216,7 @@ and will automatically refresh tokens when needed.
 Usage:
 
 ```typescript
-import { OAuth2Client, OAuth2Fetch } from 'fetch-mw-oauth2';
+import { OAuth2Client, OAuth2Fetch } from '@badgateway/oauth2-client';
 
 const client = new OAuth2Client({
   server: 'https://my-auth-server',
@@ -336,7 +336,7 @@ library:
 
 ```typescript
 import { Client } from 'ketting';
-import { OAuth2Client, OAuth2Fetch } from 'fetch-mw-oauth2';
+import { OAuth2Client, OAuth2Fetch } from '@badgateway/oauth2-client';
 
 /**
  * Create the oauth2 client
@@ -371,7 +371,7 @@ introspection endpoint. It's location will be automatically detected using
 the Metadata discovery document.
 
 ```typescript
-import { OAuth2Client } from 'fetch-mw-oauth2';
+import { OAuth2Client } from '@badgateway/oauth2-client';
 
 const client = new Client({
   server: 'https://auth-server.example/',
