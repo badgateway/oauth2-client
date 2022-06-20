@@ -437,3 +437,4 @@ if (global.btoa === undefined) {
 [1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
 [2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
 [3]: https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
+[4]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API "Web Crypto API"
