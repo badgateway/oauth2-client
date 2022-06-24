@@ -2,7 +2,7 @@ SOURCE_FILES:=$(shell find src/ -type f -name '*.ts')
 EXAMPLE_FILES:=$(shell find examples/ -type f -name '*.js')
 
 .PHONY:build
-build: fetch-mw-oauth2.zip dist/build browser/fetch-mw-oauth2.min.js
+build: oauth2-client.zip dist/build browser/oauth2-client.min.js
 
 .PHONY:test
 test:
@@ -35,4 +35,4 @@ browserbuild: dist/build
 	mkdir -p browser
 	./node_modules/.bin/webpack
 
-browser/fetch-mw-oauth2.min.js: browserbuild
+browser/oauth2-client.min.js: browserbuild
