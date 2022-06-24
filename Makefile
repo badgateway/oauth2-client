@@ -2,7 +2,7 @@ SOURCE_FILES:=$(shell find src/ -type f -name '*.ts')
 EXAMPLE_FILES:=$(shell find examples/ -type f -name '*.js')
 
 .PHONY:build
-build: oauth2-client.zip dist/build browser/oauth2-client.min.js
+build: dist/build browser/oauth2-client.min.js
 
 .PHONY:test
 test:
