@@ -231,7 +231,7 @@ export class OAuth2Client {
     }
     const resp = await fetch(discoverUrl, { headers: { Accept: 'application/json' }});
     if (!resp.ok) return;
-    if (!resp.headers.has('Content-Type') || resp.headers.get('Content-Type')!.startsWith('application/json')) {
+    if (!resp.headers.get('Content-Type')?.startsWith('application/json')) {
       console.warn('[oauth2] OAuth2 discovery endpoint was not a JSON response. Response is ignored');
       return;
     }
