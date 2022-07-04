@@ -9,8 +9,8 @@ describe('client-credentials', () => {
     const server = testServer();
 
     const client = new OAuth2Client({
-      server: 'http://localhost:44444',
-      tokenEndpoint: '/token/client-credentials',
+      server: server.url,
+      tokenEndpoint: '/token',
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
     });
@@ -22,8 +22,12 @@ describe('client-credentials', () => {
     expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
     expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
 
-    server.close();
+    const request = server.lastRequest();
+    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
 
+    expect(request.body).to.eql({
+      grant_type: 'client_credentials',
+    });
   });
 
 });

@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.0.15 (2022-??-??)
+-------------------
+
+* #70: Allow send Client Secret with `authorization_code`
+
+
 2.0.14 (2022-06-23)
 -------------------
 

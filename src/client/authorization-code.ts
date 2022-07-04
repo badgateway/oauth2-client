@@ -67,8 +67,8 @@ export class OAuth2AuthorizationCodeClient {
     ]);
 
     const query: AuthorizationQueryParams = {
-      response_type: 'code',
       client_id: this.client.settings.clientId,
+      response_type: 'code',
       redirect_uri: params.redirectUri,
       code_challenge_method: codeChallenge?.[0],
       code_challenge: codeChallenge?.[1],
@@ -138,7 +138,6 @@ export class OAuth2AuthorizationCodeClient {
       grant_type: 'authorization_code',
       code: params.code,
       redirect_uri: params.redirectUri,
-      client_id: this.client.settings.clientId,
       code_verifier: params.codeVerifier,
     };
     return tokenResponseToOAuth2Token(this.client.request('tokenEndpoint', body));
@@ -150,7 +149,7 @@ export class OAuth2AuthorizationCodeClient {
 
 export async function generateCodeVerifier(): Promise<string> {
 
-  if (typeof window !== 'undefined' && window.crypto) {
+  if ((typeof window !== 'undefined' && window.crypto) || (typeof self !== 'undefined' && self.crypto)) {
     // Built-in webcrypto
     const arr = new Uint8Array(32);
     crypto.getRandomValues(arr);

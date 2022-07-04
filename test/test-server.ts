@@ -1,7 +1,21 @@
 import { Application, Middleware, Request } from '@curveball/core';
 import bodyParser from '@curveball/bodyparser';
+import * as http from 'http';
+
+type TestServer = {
+  server: http.Server;
+  app: Application;
+  lastRequest: () => Request;
+  port: number;
+  url: string;
+  close: () => Promise<void>;
+}
+
+let serverCache: null|TestServer = null;
 
 export function testServer() {
+
+  if (serverCache) return serverCache;
 
   let lastRequest: any = null;
 
@@ -12,23 +26,34 @@ export function testServer() {
     lastRequest = ctx.request;
     return next();
   });
-  app.use(clientCredentials);
-  const server = app.listen(44444);
+  app.use(issueToken);
+  const port = 40000 + Math.round(Math.random()*9999);
+  const server = app.listen(port);
 
-  return {
+  serverCache = {
     server,
     app,
     lastRequest: (): Request => lastRequest,
-    close: () => server.close()
+    port,
+    url: 'http://localhost:' + port,
+    close: async() => {
+
+      return new Promise<void>(res => {
+        server.close(() => res());
+      });
+
+    }
+
   };
+  return serverCache;
 
 }
 
 
 
-const clientCredentials: Middleware = (ctx, next) => {
+const issueToken: Middleware = (ctx, next) => {
 
-  if (ctx.path !== '/token/client-credentials') {
+  if (ctx.path !== '/token') {
     return next();
   }
 

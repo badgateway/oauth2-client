@@ -31,7 +31,6 @@ export type AuthorizationCodeRequest = {
   grant_type: 'authorization_code';
   code: string;
   redirect_uri: string;
-  client_id: string;
   code_verifier: string|undefined;
 }
 
