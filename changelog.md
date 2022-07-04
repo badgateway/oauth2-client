@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.0.15 (2022-??-??)
+-------------------
+
+* #70: Sending the client secret is now supported with the `authorization_code`
+  flow.
+
+
 2.0.14 (2022-06-23)
 -------------------
 
