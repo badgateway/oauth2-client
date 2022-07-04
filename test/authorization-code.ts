@@ -24,8 +24,6 @@ describe('authorization-code', () => {
     expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
     expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
 
-    server.close();
-
     const request = server.lastRequest();
     expect(request.headers.get('Authorization')).to.equal(null);
 
@@ -58,8 +56,6 @@ describe('authorization-code', () => {
     expect(result.refreshToken).to.equal('refresh_token_000');
     expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
     expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
-
-    server.close();
 
     const request = server.lastRequest();
     expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
