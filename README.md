@@ -156,10 +156,10 @@ const client = new OAuth2Client({
  *
  * It's optional to pass this, but recommended.
  */
-const codeVerifier = await generateCodeVerifier():
+const codeVerifier = await generateCodeVerifier();
 
 // In a browser this might work as follows:
-document.location = await authorizationCode.authorizationCode.getAuthorizeUri({
+document.location = await client.authorizationCode.getAuthorizeUri({
 
   // URL in the app that the user should get redirected to after authenticating
   redirectUri: 'https://my-app.example/',
