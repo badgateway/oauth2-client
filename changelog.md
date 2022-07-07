@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.0.15 (2022-??-??)
+2.0.15 (2022-07-07)
 -------------------
 
 * #70: Sending the client secret is now supported with the `authorization_code`
