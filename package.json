@@ -1,6 +1,6 @@
 {
   "name": "@badgateway/oauth2-client",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "OAuth2 client for browsers and Node.js. Tiny footprint, PKCE support",
   "main": "dist/index.js",
   "scripts": {
