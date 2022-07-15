@@ -5,10 +5,15 @@ Note that v2 of this package has been renamed to `@badgateway/oauth2-client`. Th
 package has the same features (and more). v1 will receive some maintenance for the
 forseeable future, but uprading is strongly recommended.
 
+1.0.2 (2022-07-15)
+------------------
+
+* maintenance release.
+
 1.0.1 (2021-10-19)
 ------------------
 
-* Maintenance release.
+* maintenance release.
 
 1.0.0 (2021-10-28)
 ------------------
