@@ -174,7 +174,16 @@ export async function generateCodeVerifier(): Promise<string> {
 export async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
 
   const webCrypto = getWebCrypto();
-  return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
+  if (webCrypto?.subtle) {
+    return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
+  } else {
+    // Node 14.x fallback
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const nodeCrypto = require('crypto');
+    const hash = nodeCrypto.createHash('sha256');
+    hash.update(codeVerifier);
+    return ['S256', base64Url(hash.digest())];
+  }
 
 }
 
