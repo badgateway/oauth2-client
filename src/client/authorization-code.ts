@@ -180,9 +180,30 @@ export async function generateCodeVerifier(): Promise<string> {
 
 }
 
-async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
+export async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
 
-  return ['S256', base64Url(await crypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
+  const webCrypto = getWebCrypto();
+  return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
+
+}
+
+function getWebCrypto() {
+
+  // Browsers
+  if ((typeof window !== 'undefined' && window.crypto)) {
+    return window.crypto;
+  }
+  // Web workers possibly
+  if ((typeof self !== 'undefined' && self.crypto)) {
+    return self.crypto;
+  }
+  // Node
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const crypto = require('crypto');
+  if (crypto.webcrypto) {
+    return crypto.webcrypto;
+  }
+  return null;
 
 }
 

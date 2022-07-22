@@ -49,8 +49,8 @@ describe('authorization-code', () => {
         client_id: 'test-client-id',
         response_type: 'code',
         redirect_uri: redirectUri,
-        code_challenge: codeChallenge,
         code_challenge_method: 'S256',
+        code_challenge: codeChallenge,
       });
 
       expect(
