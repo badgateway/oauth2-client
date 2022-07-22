@@ -182,7 +182,7 @@ export async function getCodeChallenge(codeVerifier: string): Promise<['plain' |
     const nodeCrypto = require('crypto');
     const hash = nodeCrypto.createHash('sha256');
     hash.update(stringToBuffer(codeVerifier));
-    return ['S256', base64Url(hash.digest())];
+    return ['S256', hash.digest('base64url')];
   }
 
 }
