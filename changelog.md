@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.0.16 (2022-07-22)
+-------------------
+
+* It was not possible to generate the URL to the authorization endpoint with
+  PKCE using Node, due to depending on a global `crypto` object. This is fixed
+  with fallbacks all the way back to Node 14.
+
 2.0.15 (2022-07-07)
 -------------------
 
