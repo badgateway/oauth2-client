@@ -181,7 +181,7 @@ export async function getCodeChallenge(codeVerifier: string): Promise<['plain' |
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const nodeCrypto = require('crypto');
     const hash = nodeCrypto.createHash('sha256');
-    hash.update(codeVerifier);
+    hash.update(stringToBuffer(codeVerifier));
     return ['S256', base64Url(hash.digest())];
   }
 
