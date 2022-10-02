@@ -43,6 +43,7 @@ export type AuthorizationQueryParams = {
   client_id: string;
   redirect_uri: string;
   state?: string;
+  scope?: string;
   code_challenge_method?: 'plain' | 'S256';
   code_challenge?: string;
 }

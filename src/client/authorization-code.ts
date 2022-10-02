@@ -76,6 +76,9 @@ export class OAuth2AuthorizationCodeClient {
     if (params.state) {
       query.state = params.state;
     }
+    if (params.scope) {
+      query.scope = params.scope.join(' ');
+    }
 
     return authorizationEndpoint + '?' + generateQueryString(query);
 
