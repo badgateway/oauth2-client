@@ -24,12 +24,14 @@ describe('authorization-code', () => {
       const params = new URLSearchParams({
         client_id: 'test-client-id',
         response_type: 'code',
-        redirect_uri: redirectUri
+        redirect_uri: redirectUri,
+        scope: 'a b',
       });
 
       expect(
         await client.authorizationCode.getAuthorizeUri({
           redirectUri,
+          scope: ['a', 'b'],
         })
       ).to.equal(server.url + '/authorize?' + params.toString());
 
