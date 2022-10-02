@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.0.17 (2022-10-02)
+------------------
+
+* Correctly pass 'scope' to `authorization_code` redirects.
+
+
 2.0.16 (2022-07-22)
 -------------------
 
