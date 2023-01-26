@@ -52,8 +52,8 @@ describe('client-credentials', () => {
     const request = server.lastRequest();
 
     expect(request.body).to.eql({
-      client_id: "test-client-id",
-      client_secret: "test-client-secret",
+      client_id: 'test-client-id',
+      client_secret: 'test-client-secret',
       grant_type: 'client_credentials'
     });
   });

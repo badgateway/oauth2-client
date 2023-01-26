@@ -33,7 +33,7 @@ export interface ClientSettings {
   /**
    * OAuth2 clientSecret
    *
-   * This is required when using the 'client_secret_basic' authenticationMethod 
+   * This is required when using the 'client_secret_basic' authenticationMethod
    * for the client_credentials and password flows, but not authorization_code
    * or implicit.
    */
@@ -73,11 +73,11 @@ export interface ClientSettings {
   discoveryEndpoint?: string;
 
   /**
-   * Client authentication method that is used to authenticate 
+   * Client authentication method that is used to authenticate
    * when using the token endpoint.
-   * 
+   *
    * Can be one of 'client_secret_basic' | 'client_secret_post'.
-   * 
+   *
    * The default value is 'client_secret_basic' if not provided.
    */
   authenticationMethod?: string;
@@ -94,7 +94,7 @@ export class OAuth2Client {
 
     this.settings = clientSettings;
     if (!this.settings.authenticationMethod) {
-      this.settings.authenticationMethod = 'client_secret_basic'
+      this.settings.authenticationMethod = 'client_secret_basic';
     }
   }
 
