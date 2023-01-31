@@ -38,6 +38,14 @@ type OAuth2FetchOptions = {
    */
   getStoredToken?: () => OAuth2Token | null | Promise<OAuth2Token | null>;
 
+  /**
+   * Whether to automatically schedule token refresh.
+   *
+   * Certain execution environments, e.g. React Native, do not handle scheduled
+   * tasks with setTimeout() in a graceful or predictable fashion. The default
+   * behavior is to schedule refresh. Set this to false to disable scheduling.
+   */
+  scheduleRefresh?: boolean;
 }
 
 
@@ -54,6 +62,9 @@ export class OAuth2Fetch {
 
   constructor(options: OAuth2FetchOptions) {
 
+    if (options?.scheduleRefresh === undefined) {
+      options.scheduleRefresh = true;
+    }
     this.options = options;
     if (options.getStoredToken) {
       (async () => {
@@ -222,7 +233,9 @@ export class OAuth2Fetch {
   private refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   private scheduleRefresh() {
-
+    if (!this.options.scheduleRefresh) {
+      return;
+    }
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
