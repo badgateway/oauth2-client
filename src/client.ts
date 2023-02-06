@@ -118,7 +118,7 @@ export class OAuth2Client {
       scope: params?.scope?.join(' '),
     };
     if (!this.settings.clientSecret) {
-      throw new Error('A clientSecret must be provied to use client_credentials');
+      throw new Error('A clientSecret must be provided to use client_credentials');
     }
 
     return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
@@ -136,7 +136,7 @@ export class OAuth2Client {
       scope: params.scope?.join(' '),
     };
     if (!this.settings.clientSecret) {
-      throw new Error('A clientSecret must be provied to use client_credentials');
+      throw new Error('A clientSecret must be provided to use client_credentials');
     }
     return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
