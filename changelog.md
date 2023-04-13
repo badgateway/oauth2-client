@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.0.18 (2023-04-13)
+-------------------
+
+* Didn't run `make build` before the last release, which causes some files in
+  the `dist/` directory to be out of date.
+
+
 2.0.17 (2022-10-02)
 -------------------
 
