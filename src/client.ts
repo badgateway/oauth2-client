@@ -147,9 +147,6 @@ export class OAuth2Client {
       ...params,
       scope: params.scope?.join(' '),
     };
-    if (this.settings.authenticationMethod != 'client_secret_post' && !this.settings.clientSecret) {
-      throw new Error('A clientSecret must be provided to use client_secret_basic password');
-    }
     return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }

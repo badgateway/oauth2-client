@@ -228,7 +228,7 @@ export class OAuth2Fetch {
       this.refreshTimer = null;
     }
 
-    if (!this.token || !this.token.expiresAt || !this.token.refreshToken) {
+    if (!this.token?.expiresAt || !this.token.refreshToken) {
       // If we don't know when the token expires, or don't have a refresh_token, don't bother.
       return;
     }
