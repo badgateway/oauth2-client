@@ -15,6 +15,7 @@ export type RefreshRequest = {
 export type ClientCredentialsRequest = {
   grant_type: 'client_credentials';
   scope?: string;
+  [key: string]: string | undefined;
 }
 
 /**
