@@ -231,7 +231,7 @@ const fetchWrapper = new OAuth2Fetch({
 
   /**
    * You are responsible for implementing this function.
-   * it's purpose is to supply the 'intitial' oauth2 token.
+   * it's purpose is to supply the 'initial' oauth2 token.
    */
   getNewToken: async () => {
 
@@ -300,7 +300,7 @@ const fetchWrapper = new OAuth2Fetch({
 
   /**
    * Also an optional feature. Implement this if you want the wrapper to try a
-   * stored token before attempting a full reauthentication.
+   * stored token before attempting a full re-authentication.
    *
    * This function may be async. Return null if there was no token.
    */

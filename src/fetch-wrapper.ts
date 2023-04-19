@@ -12,14 +12,14 @@ type OAuth2FetchOptions = {
 
   /**
    * You are responsible for implementing this function.
-   * it's purpose is to supply the 'intitial' oauth2 token.
+   * it's purpose is to supply the 'initial' oauth2 token.
    *
    * This function may be async. Return `null` to fail the process.
    */
   getNewToken(): OAuth2Token | null | Promise<OAuth2Token | null>;
 
   /**
-   * If set, will be called if authenticatin fatally failed.
+   * If set, will be called if authentication fatally failed.
    */
   onError?: (err: Error) => void;
 
@@ -32,7 +32,7 @@ type OAuth2FetchOptions = {
 
   /**
    * Also an optional feature. Implement this if you want the wrapper to try a
-   * stored token before attempting a full reauthentication.
+   * stored token before attempting a full re-authentication.
    *
    * This function may be async. Return null if there was no token.
    */
@@ -69,7 +69,7 @@ export class OAuth2Fetch {
    *
    * If the access token is not known, this function attempts to fetch it
    * first. If the access token is almost expiring, this function might attempt
-   1G* to refresh it.
+   * to refresh it.
    */
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
 

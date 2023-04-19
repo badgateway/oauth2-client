@@ -109,7 +109,7 @@ export type ServerMetadataResponse = {
   /**
    * List of supported response types for the authorization endpoint.
    *
-   * If 'code' appears here it implies authoriziation_code support,
+   * If 'code' appears here it implies authorization_code support,
    * 'token' implies support for implicit auth.
    */
   response_types_supported: OAuth2ResponseType[];
@@ -158,12 +158,12 @@ export type ServerMetadataResponse = {
   op_tos_uri?: string;
 
   /**
-   * Url to servers revokation endpoint.
+   * Url to servers revocation endpoint.
    */
   revocation_endpoint?: string;
 
   /**
-   * Auth method that may be used on the revokation endpoint.
+   * Auth method that may be used on the revocation endpoint.
    */
   revocation_endpoint_auth_methods_supported?: OAuth2AuthMethod[];
 
@@ -189,7 +189,7 @@ export type ServerMetadataResponse = {
   introspection_endpoint_auth_signing_alg_values_supported?: string[];
 
   /**
-   * List of support PCKE code shallenge methods.
+   * List of support PCKE code challenge methods.
    */
   code_challenge_methods_supported?: OAuth2CodeChallengeMethod[];
 
@@ -209,7 +209,7 @@ export type IntrospectionResponse = {
   active: boolean;
 
   /**
-   * Space-separted list of scopes.
+   * Space-separated list of scopes.
    */
   scope?: string;
 
