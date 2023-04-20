@@ -339,7 +339,6 @@ include:
 * Will automatically attempt to refresh tokens if it knows an access token is
   expired.
 
-[1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange
-by OAuth Public Clients" [2]: https://datatracker.ietf.org/doc/html/rfc8414
-"OAuth 2.0 Authorization Server Metadata" [3]:
-https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
+[1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
+[2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
+[3]: https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
