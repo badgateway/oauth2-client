@@ -288,7 +288,7 @@ export class OAuth2Client {
       authMethod = this.settings.clientSecret ? 'client_secret_basic' : 'client_secret_post';
     }
 
-    switch(this.settings.authenticationMethod) {
+    switch(authMethod) {
       case 'client_secret_basic' :
         headers.Authorization = 'Basic ' +
           btoa(this.settings.clientId + ':' + this.settings.clientSecret);
