@@ -14,6 +14,8 @@ Changelog
   discovery document is used. (@parkerduckworth)
 * The fetchWrapper now has an option to disable auto-refreshing tokens.
   (@bradjones1)
+* Bug fix: If a 'state' parameter was not used in `authorization_code`, it
+  should not be required in the redirect.
 * Tested with Node 20.
 
 
