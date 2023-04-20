@@ -3,9 +3,9 @@
 This package contains an OAuth2 client. It aims to be a fully-featured OAuth2
 utility library, for Node.js, Browsers and written in Typescript.
 
-This OAuth2 client is only **3KB** gzipped, it has **0** dependencies and
-relies on modern APIs like `fetch()` and [Web Crypto][4] which are built in
-Node 18 (but it works with Polyfills on Node 14 and 16).
+This OAuth2 client is only **3.6KB** gzipped, it has **0** dependencies and
+relies on modern APIs like `fetch()` and [Web Crypto][4] which are built-in
+since Node 18 (but it works with Polyfills on Node 14 and 16).
 
 
 ## Highlights

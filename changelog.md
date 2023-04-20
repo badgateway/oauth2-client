@@ -1,14 +1,22 @@
 Changelog
 =========
 
-2.1.0 (????-??-??)
+2.1.0 (2023-04-20)
 ------------------
 
 * Allow users to provide non-standard properties to `client_credentials` token
   requests via an `extraParams` property. This is necessary to support vendors
   like Auth0 and Kinde which both require an `audience` parameter. (@South-Paw)
+* Sending `client_id` and `client_secret` in POST request body is now
+  optionally supported. By default the credentials will still be sent in the
+  `Authorization` header, but users can opt-in to using the body. The
+  authentication method will also be discovered if an OAuth2 or OpenID
+  discovery document is used. (@parkerduckworth)
+* The fetchWrapper now has an option to disable auto-refreshing tokens.
+  (@bradjones1)
 * Bug fix: If a 'state' parameter was not used in `authorization_code`, it
   should not be required in the redirect.
+* Tested with Node 20.
 
 
 2.0.18 (2023-04-13)
@@ -154,7 +162,6 @@ but it's not merely one of the features this package offers. The API has
 changes, and while I think it shouldn't be difficult to migrate, v2 offers no
 backwards compatibility so some rewrites will be required. New features
 include:
-
 * Complete support for the `authorization_code` flow, including generating
   redirect urls and parsing query parameters after redirect.
 * Support for OAuth2 endpoint discovery, using the OAuth2 Authorization Server
