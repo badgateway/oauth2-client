@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.1.0 (????-??-??)
+2.1.0 (2023-04-20)
 ------------------
 
 * Allow users to provide non-standard properties to `client_credentials` token
@@ -160,7 +160,6 @@ but it's not merely one of the features this package offers. The API has
 changes, and while I think it shouldn't be difficult to migrate, v2 offers no
 backwards compatibility so some rewrites will be required. New features
 include:
-
 * Complete support for the `authorization_code` flow, including generating
   redirect urls and parsing query parameters after redirect.
 * Support for OAuth2 endpoint discovery, using the OAuth2 Authorization Server
@@ -340,6 +339,7 @@ include:
 * Will automatically attempt to refresh tokens if it knows an access token is
   expired.
 
-[1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
-[2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
-[3]: https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
+[1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange
+by OAuth Public Clients" [2]: https://datatracker.ietf.org/doc/html/rfc8414
+"OAuth 2.0 Authorization Server Metadata" [3]:
+https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
