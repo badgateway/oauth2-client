@@ -18,7 +18,7 @@ export interface ClientSettings {
    * The hostname of the OAuth2 server.
    * If provided, we'll attempt to discover all the other related endpoints.
    *
-   * If this is not desired, just specifiy the other endpoints manually.
+   * If this is not desired, just specify the other endpoints manually.
    *
    * This url will also be used as the base URL for all other urls. This lets
    * you specify all the other urls as relative.
@@ -56,7 +56,7 @@ export interface ClientSettings {
    * Introspection endpoint.
    *
    * Required for, well, introspecting tokens.
-   * If not provided we'll try to discover it, or othwerwise default to /introspect
+   * If not provided we'll try to discover it, or otherwise default to /introspect
    */
   introspectionEndpoint?: string;
 
@@ -111,12 +111,20 @@ export class OAuth2Client {
   /**
    * Retrieves an OAuth2 token using the client_credentials grant.
    */
-  async clientCredentials(params?: {scope?: string[]}): Promise<OAuth2Token> {
+  async clientCredentials(params?: { scope?: string[]; extraParams?: Record<string, string> }): Promise<OAuth2Token> {
 
-    const body:ClientCredentialsRequest = {
+    const disallowed = ['client_id', 'client_secret', 'grant_type', 'scope'];
+
+    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
+      throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
+    }
+
+    const body: ClientCredentialsRequest = {
       grant_type: 'client_credentials',
       scope: params?.scope?.join(' '),
+      ...params?.extraParams
     };
+
     if (!this.settings.clientSecret) {
       throw new Error('A clientSecret must be provided to use client_credentials');
     }
@@ -144,7 +152,6 @@ export class OAuth2Client {
 
   /**
    * Returns the helper object for the `authorization_code` grant.
-   *
    */
   get authorizationCode(): OAuth2AuthorizationCodeClient {
 
