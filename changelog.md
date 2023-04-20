@@ -7,6 +7,8 @@ Changelog
 * Allow users to provide non-standard properties to `client_credentials` token
   requests via an `extraParams` property. This is necessary to support vendors
   like Auth0 and Kinde which both require an `audience` parameter. (@South-Paw)
+* Bug fix: If a 'state' parameter was not used in `authorization_code`, it
+  should not be required in the redirect.
 
 
 2.0.18 (2023-04-13)
