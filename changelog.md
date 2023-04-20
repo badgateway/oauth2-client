@@ -7,6 +7,14 @@ Changelog
 * Allow users to provide non-standard properties to `client_credentials` token
   requests via an `extraParams` property. This is necessary to support vendors
   like Auth0 and Kinde which both require an `audience` parameter. (@South-Paw)
+* Sending `client_id` and `client_secret` in POST request body is now
+  optionally supported. By default the credentials will still be sent in the
+  `Authorization` header, but users can opt-in to using the body. The
+  authentication method will also be discovered if an OAuth2 or OpenID
+  discovery document is used. (@parkerduckworth)
+* The fetchWrapper now has an option to disable auto-refreshing tokens.
+  (@bradjones1)
+* Tested with Node 20.
 
 
 2.0.18 (2023-04-13)
