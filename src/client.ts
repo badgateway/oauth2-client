@@ -93,9 +93,7 @@ export class OAuth2Client {
   constructor(clientSettings: ClientSettings) {
 
     this.settings = clientSettings;
-    if (!this.settings.authenticationMethod) {
-      this.settings.authenticationMethod = 'client_secret_basic';
-    }
+
   }
 
   /**
@@ -266,6 +264,10 @@ export class OAuth2Client {
       this.settings[setting] = resolve(this.serverMetadata[property]!, discoverUrl);
     }
 
+    if (this.serverMetadata.token_endpoint_auth_methods_supported && !this.settings.authenticationMethod) {
+      this.settings.authenticationMethod = this.serverMetadata.token_endpoint_auth_methods_supported[0];
+    }
+
   }
 
   /**
@@ -281,16 +283,24 @@ export class OAuth2Client {
       'Content-Type': 'application/x-www-form-urlencoded',
     };
 
-    if (this.settings.authenticationMethod === 'client_secret_post') {
-      body.client_id = this.settings.clientId;
-      if (body.grant_type === 'client_credentials') {
-        body.client_secret = this.settings.clientSecret;
-      }
-    } else if (this.settings.clientSecret) {
-      const basicAuthStr = btoa(this.settings.clientId + ':' + this.settings.clientSecret);
-      headers.Authorization = 'Basic ' + basicAuthStr;
-    } else if (body.grant_type === 'authorization_code') {
-      body.client_id = this.settings.clientId;
+    let authMethod = this.settings.authenticationMethod;
+    if (!authMethod) {
+      authMethod = this.settings.clientSecret ? 'client_secret_basic' : 'client_secret_post';
+    }
+
+    switch(this.settings.authenticationMethod) {
+      case 'client_secret_basic' :
+        headers.Authorization = 'Basic ' +
+          btoa(this.settings.clientId + ':' + this.settings.clientSecret);
+        break;
+      case 'client_secret_post' :
+        body.client_id = this.settings.clientId;
+        if (this.settings.clientSecret) {
+          body.client_secret = this.settings.clientSecret;
+        }
+        break;
+      default:
+        throw new Error('Authentication method not yet supported:' + authMethod + '. Open a feature request if you want this!');
     }
 
     const resp = await fetch(uri, {
