@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.1.0 (????-??-??)
+------------------
+
+* Allow users to provide non-standard properties to `client_credentials` token
+  requests via an `extraParams` property. This is necessary to support vendors
+  like Auth0 and Kinde which both require an `audience` parameter. (@South-Paw)
+
+
 2.0.18 (2023-04-13)
 -------------------
 
