@@ -123,12 +123,20 @@ export class OAuth2Client {
   /**
    * Retrieves an OAuth2 token using the client_credentials grant.
    */
-  async clientCredentials(params?: { scope?: string[] }): Promise<OAuth2Token> {
+  async clientCredentials(params?: { scope?: string[]; extraParams?: Record<string, string> }): Promise<OAuth2Token> {
+
+    const disallowed = ['client_id', 'client_secret', 'grant_type', 'scope'];
+
+    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
+      throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
+    }
 
     const body: ClientCredentialsRequest = {
       grant_type: 'client_credentials',
       scope: params?.scope?.join(' '),
+      ...params?.extraParams
     };
+
     if (!this.settings.clientSecret) {
       throw new Error('A clientSecret must be provided to use client_credentials');
     }
@@ -153,7 +161,6 @@ export class OAuth2Client {
 
   /**
    * Returns the helper object for the `authorization_code` grant.
-   *
    */
   get authorizationCode(): OAuth2AuthorizationCodeClient {
 
