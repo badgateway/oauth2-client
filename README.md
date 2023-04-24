@@ -10,7 +10,7 @@ since Node 18 (but it works with Polyfills on Node 14 and 16).
 
 ## Highlights
 
-* 9KB minified (3KB gzipped).
+* 10KB minified (3.6KB gzipped).
 * No dependencies.
 * `authorization_code` grant with optional [PKCE][1] support.
 * `password` and `client_credentials` grant.
