@@ -73,6 +73,14 @@ export interface ClientSettings {
   discoveryEndpoint?: string;
 
   /**
+   * Fetch implementation to use.
+   *
+   * Set this if you wish to explicitly set the fetch implementation, e.g. to
+   * implement middlewares or set custom headers.
+   */
+  fetch?: typeof fetch;
+
+  /**
    * Client authentication method that is used to authenticate
    * when using the token endpoint.
    *
@@ -92,6 +100,9 @@ export class OAuth2Client {
 
   constructor(clientSettings: ClientSettings) {
 
+    if (!clientSettings?.fetch) {
+      clientSettings.fetch = fetch;
+    }
     this.settings = clientSettings;
 
   }
@@ -243,7 +254,8 @@ export class OAuth2Client {
       console.warn('[oauth2] OAuth2 discovery endpoint could not be determined. Either specify the "server" or "discoveryEndpoint');
       return;
     }
-    const resp = await fetch(discoverUrl, { headers: { Accept: 'application/json' } });
+    const resp = await this.settings.fetch!(discoverUrl, { headers: { Accept: 'application/json' }});
+
     if (!resp.ok) return;
     if (!resp.headers.get('Content-Type')?.startsWith('application/json')) {
       console.warn('[oauth2] OAuth2 discovery endpoint was not a JSON response. Response is ignored');
@@ -303,7 +315,7 @@ export class OAuth2Client {
         throw new Error('Authentication method not yet supported:' + authMethod + '. Open a feature request if you want this!');
     }
 
-    const resp = await fetch(uri, {
+    const resp = await this.settings.fetch!(uri, {
       method: 'POST',
       body: generateQueryString(body),
       headers,
