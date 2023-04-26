@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.2.0 (????-??-??)
+------------------
+
+* Add an option to override which "fetch" implementation is used. (@bradjones1)
+
+
 2.1.1 (2023-04-23)
 ------------------
 
