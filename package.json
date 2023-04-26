@@ -1,6 +1,6 @@
 {
   "name": "@badgateway/oauth2-client",
-  "version": "2.0.17",
+  "version": "2.1.1",
   "description": "OAuth2 client for browsers and Node.js. Tiny footprint, PKCE support",
   "main": "dist/index.js",
   "scripts": {
@@ -30,8 +30,9 @@
     "node": ">= 14"
   },
   "devDependencies": {
-    "@curveball/bodyparser": "^0.5.0",
-    "@curveball/core": "^0.20.0",
+    "@curveball/bodyparser": "^0.6.1",
+    "@curveball/core": "^0.21.1",
+    "@curveball/http-errors": "^0.5.0",
     "@types/chai": "^4.3.1",
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.0.0",
@@ -43,9 +44,9 @@
     "node-fetch": "^2.6.7",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.7.0",
-    "typescript": "^4.4.4",
+    "typescript": "^5.0.4",
     "webpack": "^5.60.0",
-    "webpack-cli": "^4.9.1"
+    "webpack-cli": "^5.0.1"
   },
   "browser": "browser/oauth2-client.min.js",
   "files": [

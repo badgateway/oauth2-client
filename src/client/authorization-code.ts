@@ -118,7 +118,6 @@ export class OAuth2AuthorizationCodeClient {
     }
 
     if (!queryParams.has('code')) throw new Error(`The url did not contain a code parameter ${url}`);
-    if (!queryParams.has('state')) throw new Error(`The url did not contain state parameter ${url}`);
 
     if (params.state && params.state !== queryParams.get('state')) {
       throw new Error(`The "state" parameter in the url did not match the expected value of ${params.state}`);

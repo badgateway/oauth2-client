@@ -12,14 +12,14 @@ type OAuth2FetchOptions = {
 
   /**
    * You are responsible for implementing this function.
-   * it's purpose is to supply the 'intitial' oauth2 token.
+   * it's purpose is to supply the 'initial' oauth2 token.
    *
    * This function may be async. Return `null` to fail the process.
    */
   getNewToken(): OAuth2Token | null | Promise<OAuth2Token | null>;
 
   /**
-   * If set, will be called if authenticatin fatally failed.
+   * If set, will be called if authentication fatally failed.
    */
   onError?: (err: Error) => void;
 
@@ -32,12 +32,20 @@ type OAuth2FetchOptions = {
 
   /**
    * Also an optional feature. Implement this if you want the wrapper to try a
-   * stored token before attempting a full reauthentication.
+   * stored token before attempting a full re-authentication.
    *
    * This function may be async. Return null if there was no token.
    */
   getStoredToken?: () => OAuth2Token | null | Promise<OAuth2Token | null>;
 
+  /**
+   * Whether to automatically schedule token refresh.
+   *
+   * Certain execution environments, e.g. React Native, do not handle scheduled
+   * tasks with setTimeout() in a graceful or predictable fashion. The default
+   * behavior is to schedule refresh. Set this to false to disable scheduling.
+   */
+  scheduleRefresh?: boolean;
 }
 
 
@@ -54,6 +62,9 @@ export class OAuth2Fetch {
 
   constructor(options: OAuth2FetchOptions) {
 
+    if (options?.scheduleRefresh === undefined) {
+      options.scheduleRefresh = true;
+    }
     this.options = options;
     if (options.getStoredToken) {
       (async () => {
@@ -69,7 +80,7 @@ export class OAuth2Fetch {
    *
    * If the access token is not known, this function attempts to fetch it
    * first. If the access token is almost expiring, this function might attempt
-   1G* to refresh it.
+   * to refresh it.
    */
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
 
@@ -222,13 +233,15 @@ export class OAuth2Fetch {
   private refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   private scheduleRefresh() {
-
+    if (!this.options.scheduleRefresh) {
+      return;
+    }
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
     }
 
-    if (!this.token || !this.token.expiresAt || !this.token.refreshToken) {
+    if (!this.token?.expiresAt || !this.token.refreshToken) {
       // If we don't know when the token expires, or don't have a refresh_token, don't bother.
       return;
     }

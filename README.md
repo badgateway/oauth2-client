@@ -3,14 +3,14 @@
 This package contains an OAuth2 client. It aims to be a fully-featured OAuth2
 utility library, for Node.js, Browsers and written in Typescript.
 
-This OAuth2 client is only **3KB** gzipped, it has **0** dependencies and
-relies on modern APIs like `fetch()` and [Web Crypto][4] which are built in
-Node 18 (but it works with Polyfills on Node 14 and 16).
+This OAuth2 client is only **3.6KB** gzipped, it has **0** dependencies and
+relies on modern APIs like `fetch()` and [Web Crypto][4] which are built-in
+since Node 18 (but it works with Polyfills on Node 14 and 16).
 
 
 ## Highlights
 
-* 9KB minified (3KB gzipped).
+* 10KB minified (3.6KB gzipped).
 * No dependencies.
 * `authorization_code` grant with optional [PKCE][1] support.
 * `password` and `client_credentials` grant.
@@ -231,7 +231,7 @@ const fetchWrapper = new OAuth2Fetch({
 
   /**
    * You are responsible for implementing this function.
-   * it's purpose is to supply the 'intitial' oauth2 token.
+   * it's purpose is to supply the 'initial' oauth2 token.
    */
   getNewToken: async () => {
 
@@ -261,7 +261,7 @@ const fetchWrapper = new OAuth2Fetch({
 });
 ```
 
-After set up, you can just call `fetch` on the new object ot call your API, and
+After set up, you can just call `fetch` on the new object to call your API, and
 the library will ensure there's always a `Bearer` header.
 
 ```typescript
@@ -274,7 +274,8 @@ const response = fetchWrapper.fetch('https://my-api', {
 ### Storing tokens for later use with FetchWrapper
 
 To keep a user logged in between sessions, you may want to avoid full
-reauthentication. To do this, you'll need to store authentication token.
+reauthentication. To do this, you'll need to store authentication token
+somewhere.
 
 The fetch wrapper has 2 functions to help with this:
 
@@ -300,7 +301,7 @@ const fetchWrapper = new OAuth2Fetch({
 
   /**
    * Also an optional feature. Implement this if you want the wrapper to try a
-   * stored token before attempting a full reauthentication.
+   * stored token before attempting a full re-authentication.
    *
    * This function may be async. Return null if there was no token.
    */
