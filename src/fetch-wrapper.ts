@@ -46,6 +46,11 @@ type OAuth2FetchOptions = {
    * behavior is to schedule refresh. Set this to false to disable scheduling.
    */
   scheduleRefresh?: boolean;
+
+  /**
+   * The PKCE code verifier sent in refresh requests.
+   */
+  codeVerifier?: string;
 }
 
 
@@ -190,7 +195,7 @@ export class OAuth2Fetch {
       try {
         if (oldToken?.refreshToken) {
           // We had a refresh token, lets see if we can use it!
-          newToken = await this.options.client.refreshToken(oldToken);
+          newToken = await this.options.client.refreshToken(oldToken, this.options.codeVerifier);
         }
       } catch (err) {
         console.warn('[oauth2] refresh token not accepted, we\'ll try reauthenticating');

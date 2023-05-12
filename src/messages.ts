@@ -7,6 +7,8 @@ export type RefreshRequest = {
 
   client_id?: string;
   scope?: string;
+
+  codeVerifier?: string;
 }
 
 /**
