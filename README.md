@@ -297,7 +297,7 @@ const fetchWrapper = new OAuth2Fetch({
    */
   storeToken: (token) => {
     document.localStorage.setItem('token-store', JSON.stringify(token));
-  }
+  },
 
   /**
    * Also an optional feature. Implement this if you want the wrapper to try a
