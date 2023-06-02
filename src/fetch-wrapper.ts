@@ -201,7 +201,7 @@ export class OAuth2Fetch {
       }
 
       if (!newToken) {
-        const err = new Error('Unableto obtain OAuth2 tokens, a full reauth may be needed');
+        const err = new Error('Unable to obtain OAuth2 tokens, a full reauth may be needed');
         this.options.onError?.(err);
         throw err;
       }
