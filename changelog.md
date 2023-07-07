@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.2.1 (????-??-??)
+2.2.1 (2023-07-07)
 ------------------
 
 * #15: Fix for 'TypeError: Failed to execute 'fetch' on 'Window': Illegal
