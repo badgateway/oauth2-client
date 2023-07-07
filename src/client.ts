@@ -101,7 +101,7 @@ export class OAuth2Client {
   constructor(clientSettings: ClientSettings) {
 
     if (!clientSettings?.fetch) {
-      clientSettings.fetch = fetch;
+      clientSettings.fetch = fetch.bind(globalThis);
     }
     this.settings = clientSettings;
 
