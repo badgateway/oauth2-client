@@ -43,7 +43,8 @@ const client = new OAuth2Client({
   clientId: '...',
 
   // OAuth2 client secret. Only required for 'client_credentials', 'password'
-  // flows. You should not specify this for authorization_code.
+  // flows. Don't specify this in insecure contexts, such as a browser using
+  // the authorization_code flow.
   clientSecret: '...',
 
 
@@ -239,7 +240,7 @@ const fetchWrapper = new OAuth2Fetch({
     return client.clientCredentials();
 
     // Another example
-    return client.authorizationCode({
+    return client.authorizationCode.getToken({
       code: '..',
       redirectUri: '..',
     });
