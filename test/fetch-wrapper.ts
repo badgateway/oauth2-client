@@ -1,4 +1,4 @@
-import { OAuth2Fetch, OAuth2Client } from '../';
+import { OAuth2Fetch, OAuth2Client } from '../src';
 import { expect } from 'chai';
 
 describe('FetchWrapper', () => {
