@@ -64,7 +64,7 @@ export class OAuth2AuthorizationCodeClient {
    * Returns the URi that the user should open in a browser to initiate the
    * authorization_code flow.
    */
-  async getAuthorizeUri(params: GetAuthorizeUrlParams, customParams: GetAuthorizeUrlCustomParams): Promise<string> {
+  async getAuthorizeUri(params: GetAuthorizeUrlParams, customParams?: GetAuthorizeUrlCustomParams): Promise<string> {
 
     const [
       codeChallenge,
