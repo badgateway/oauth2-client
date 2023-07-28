@@ -28,6 +28,14 @@ type GetAuthorizeUrlParams = {
   scope?: string[];
 }
 
+type GetAuthorizeUrlCustomParams = {
+  /**
+   * List of non-standard parameters that may need, if your auth server want to have some additional info in url
+   */
+  [key: string]: string;
+}
+
+
 type ValidateResponseResult = {
 
   /**
@@ -56,7 +64,7 @@ export class OAuth2AuthorizationCodeClient {
    * Returns the URi that the user should open in a browser to initiate the
    * authorization_code flow.
    */
-  async getAuthorizeUri(params: GetAuthorizeUrlParams): Promise<string> {
+  async getAuthorizeUri(params: GetAuthorizeUrlParams, customParams: GetAuthorizeUrlCustomParams): Promise<string> {
 
     const [
       codeChallenge,
@@ -72,6 +80,7 @@ export class OAuth2AuthorizationCodeClient {
       redirect_uri: params.redirectUri,
       code_challenge_method: codeChallenge?.[0],
       code_challenge: codeChallenge?.[1],
+      ...customParams
     };
     if (params.state) {
       query.state = params.state;
