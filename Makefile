@@ -26,7 +26,7 @@ clean:
 	rm -r browser/
 	rm -r dist/
 
-dist/build:
+dist/build: ${SOURCE_FILES}
 	./node_modules/.bin/tsc
 	touch dist/build
 

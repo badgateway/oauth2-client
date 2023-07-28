@@ -46,12 +46,10 @@ type OAuth2FetchOptions = {
    * behavior is to schedule refresh. Set this to false to disable scheduling.
    */
   scheduleRefresh?: boolean;
+
 }
 
-
-
 export class OAuth2Fetch {
-
 
   private options: OAuth2FetchOptions;
 
@@ -60,6 +58,15 @@ export class OAuth2Fetch {
    */
   private token: OAuth2Token | null = null;
 
+  /**
+   * If the user had a storedToken, the process to fetch it
+   * may be async. We keep track of this process in this
+   * promise, so it may be awaited to avoid race conditions.
+   *
+   * As soon as this promise resolves, this property get nulled.
+   */
+  private activeGetStoredToken: null | Promise<void> = null;
+
   constructor(options: OAuth2FetchOptions) {
 
     if (options?.scheduleRefresh === undefined) {
@@ -67,8 +74,9 @@ export class OAuth2Fetch {
     }
     this.options = options;
     if (options.getStoredToken) {
-      (async () => {
+      this.activeGetStoredToken = (async () => {
         this.token = await options.getStoredToken!();
+        this.activeGetStoredToken = null;
       })();
     }
     this.scheduleRefresh();
@@ -105,6 +113,7 @@ export class OAuth2Fetch {
   mw(): FetchMiddleware {
 
     return async (request, next) => {
+
       const accessToken = await this.getAccessToken();
 
       // Make a clone. We need to clone if we need to retry the request later.
@@ -157,6 +166,9 @@ export class OAuth2Fetch {
    */
   async getAccessToken(): Promise<string> {
 
+    // Ensure getStoredToken finished.
+    await this.activeGetStoredToken;
+
     const token = await this.getToken();
     return token.accessToken;
 
@@ -169,7 +181,6 @@ export class OAuth2Fetch {
    * given time.
    */
   private activeRefresh: Promise<OAuth2Token> | null = null;
-
 
   /**
    * Forces an access token refresh
