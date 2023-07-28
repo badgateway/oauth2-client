@@ -17,10 +17,10 @@ describe('FetchWrapper', () => {
           accessToken: 'access',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
-        }
+        };
       },
     });
-  
+
     const mw = fetchWrapper.mw();
 
     const response = await mw(
@@ -49,10 +49,10 @@ describe('FetchWrapper', () => {
           accessToken: 'access',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
-        }
+        };
       },
     });
-  
+
     const mw = fetchWrapper.mw();
 
     const response = await mw(
@@ -81,10 +81,10 @@ describe('FetchWrapper', () => {
           accessToken: 'access',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
-        }
+        };
       },
     });
-  
+
     const mw = fetchWrapper.mw();
 
     const response = await mw(
@@ -114,10 +114,10 @@ describe('FetchWrapper', () => {
           accessToken: 'access',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
-        }
+        };
       },
     });
-  
+
     const mw = fetchWrapper.mw();
 
     const response = await mw(
