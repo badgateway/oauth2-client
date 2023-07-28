@@ -5,6 +5,8 @@ Changelog
 ------------------
 
 * #111 Some documentation fixes.
+* #110: Fix race condition with `getStoredToken` and calling `fetch()`
+  immediately after constructing `FetchWrapper`.
 
 
 2.2.1 (2023-07-07)
