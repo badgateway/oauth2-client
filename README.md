@@ -173,10 +173,10 @@ document.location = await client.authorizationCode.getAuthorizeUri({
 
   scope: ['scope1', 'scope2'],
 
-},{
-  // optional list of custom parameters to add redirect URL
-  customParam1: "customParam1value1",
-  customParam2: "customParam1value2"
+  // Optional parameters that may be need for 3rd party auth servers
+  extraParams: {
+    foo: 'bar'
+  }
 });
 ```
 

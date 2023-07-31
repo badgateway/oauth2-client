@@ -36,6 +36,75 @@ describe('authorization-code', () => {
       ).to.equal(server.url + '/authorize?' + params.toString());
 
     });
+    it('should support extraparams', async() => {
+
+      const server = testServer();
+      const client = new OAuth2Client({
+        server: server.url,
+        authorizationEndpoint: '/authorize',
+        clientId: 'test-client-id',
+      });
+
+      const redirectUri = 'http://my-app.example/redirect';
+
+      const params = new URLSearchParams({
+        client_id: 'test-client-id',
+        response_type: 'code',
+        redirect_uri: redirectUri,
+        scope: 'a b',
+        foo: 'bar',
+      });
+
+      expect(
+          await client.authorizationCode.getAuthorizeUri({
+            redirectUri,
+            scope: ['a', 'b'],
+            extraParams: {
+              foo: 'bar'
+            }
+          })
+      ).to.equal(server.url + '/authorize?' + params.toString());
+
+    });
+    it('should throw error when user rewrote params by extraparams', async() => {
+
+      const server = testServer();
+      const client = new OAuth2Client({
+        server: server.url,
+        authorizationEndpoint: '/authorize',
+        clientId: 'test-client-id',
+      });
+
+      const redirectUri = 'http://my-app.example/redirect';
+
+      const params  = {
+        redirectUri,
+        scope: ['a', 'b'],
+        state: 'some-state'
+
+      };
+
+      const extraParams = {
+        foo: 'bar',
+        scope: 'accidentally rewrote core parameter'
+      }
+
+      try {
+        await client.authorizationCode.getAuthorizeUri({
+          ...params,
+          extraParams
+        })
+      } catch (error: any) {
+        expect(error.message).to.equal(
+            'The following extraParams are disallowed: \'client_id\', \'response_type\', \'redirect_uri\', ' +
+             '\'code_challenge_method\', \'code_challenge\', \'state\', \'scope\''
+        );
+        return;
+      }
+
+      expect.fail('Should have thrown');
+
+    });
     it('should support PKCE', async() => {
 
       const server = testServer();

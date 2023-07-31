@@ -47,6 +47,7 @@ export type AuthorizationQueryParams = {
   scope?: string;
   code_challenge_method?: 'plain' | 'S256';
   code_challenge?: string;
+  [key: string]: string | undefined;
 }
 
 /**

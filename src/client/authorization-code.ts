@@ -26,15 +26,12 @@ type GetAuthorizeUrlParams = {
    * List of scopes.
    */
   scope?: string[];
-}
 
-type GetAuthorizeUrlCustomParams = {
   /**
    * List of non-standard parameters that may need, if your auth server want to have some additional info in url
    */
-  [key: string]: string;
+  extraParams?: Record<string, string>
 }
-
 
 type ValidateResponseResult = {
 
@@ -64,7 +61,7 @@ export class OAuth2AuthorizationCodeClient {
    * Returns the URi that the user should open in a browser to initiate the
    * authorization_code flow.
    */
-  async getAuthorizeUri(params: GetAuthorizeUrlParams, customParams?: GetAuthorizeUrlCustomParams): Promise<string> {
+  async getAuthorizeUri(params: GetAuthorizeUrlParams): Promise<string> {
 
     const [
       codeChallenge,
@@ -74,13 +71,12 @@ export class OAuth2AuthorizationCodeClient {
       this.client.getEndpoint('authorizationEndpoint')
     ]);
 
-    const query: AuthorizationQueryParams = {
+    let query: AuthorizationQueryParams = {
       client_id: this.client.settings.clientId,
       response_type: 'code',
       redirect_uri: params.redirectUri,
       code_challenge_method: codeChallenge?.[0],
       code_challenge: codeChallenge?.[1],
-      ...customParams
     };
     if (params.state) {
       query.state = params.state;
@@ -88,6 +84,15 @@ export class OAuth2AuthorizationCodeClient {
     if (params.scope) {
       query.scope = params.scope.join(' ');
     }
+
+    const disallowed = Object.keys(query)
+
+    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
+      throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
+    }
+
+    query = {...query, ...params?.extraParams}
+
 
     return authorizationEndpoint + '?' + generateQueryString(query);
 
