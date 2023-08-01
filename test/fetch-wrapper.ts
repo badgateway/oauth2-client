@@ -15,6 +15,7 @@ describe('FetchWrapper', () => {
       getNewToken: () => {
         return {
           accessToken: 'access',
+          idToken: 'id',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
         };
@@ -47,6 +48,7 @@ describe('FetchWrapper', () => {
         await new Promise(res => setTimeout(res, 200));
         return {
           accessToken: 'access',
+          idToken: 'id',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
         };
@@ -79,6 +81,7 @@ describe('FetchWrapper', () => {
       getStoredToken: () => {
         return {
           accessToken: 'access',
+          idToken: 'id',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
         };
@@ -112,6 +115,7 @@ describe('FetchWrapper', () => {
         await new Promise(res => setTimeout(res, 200));
         return {
           accessToken: 'access',
+          idToken: 'id',
           refreshToken: 'refresh',
           expiresAt: Date.now()+1000_0000,
         };

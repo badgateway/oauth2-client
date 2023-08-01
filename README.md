@@ -83,6 +83,7 @@ shape:
 ```typescript
 export type OAuth2Token = {
   accessToken: string;
+  idToken: string | null;
   refreshToken: string | null;
 
   /**

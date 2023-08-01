@@ -60,6 +60,7 @@ const issueToken: Middleware = (ctx, next) => {
   ctx.response.type = 'application/json';
   ctx.response.body = {
     access_token: 'access_token_000',
+    id_token: 'id_token_000',
     refresh_token: 'refresh_token_000',
     expires_in: 3600,
   };

@@ -362,6 +362,7 @@ export function tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promis
 
   return resp.then(body => ({
     accessToken: body.access_token,
+    idToken: body.id_token ?? null,
     expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
     refreshToken: body.refresh_token ?? null,
   }));

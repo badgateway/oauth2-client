@@ -84,6 +84,7 @@ describe('authorization-code', () => {
       });
 
       expect(result.accessToken).to.equal('access_token_000');
+      expect(result.idToken).to.equal('id_token_000');
       expect(result.refreshToken).to.equal('refresh_token_000');
       expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
       expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
@@ -117,6 +118,7 @@ describe('authorization-code', () => {
       });
 
       expect(result.accessToken).to.equal('access_token_000');
+      expect(result.idToken).to.equal('id_token_000');
       expect(result.refreshToken).to.equal('refresh_token_000');
       expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
       expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
@@ -150,6 +152,7 @@ describe('authorization-code', () => {
       });
 
       expect(result.accessToken).to.equal('access_token_000');
+      expect(result.idToken).to.equal('id_token_000');
       expect(result.refreshToken).to.equal('refresh_token_000');
       expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
       expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);

@@ -18,6 +18,7 @@ describe('client-credentials', () => {
     const result = await client.clientCredentials();
 
     expect(result.accessToken).to.equal('access_token_000');
+    expect(result.idToken).to.equal('id_token_000');
     expect(result.refreshToken).to.equal('refresh_token_000');
     expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
     expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
@@ -47,6 +48,7 @@ describe('client-credentials', () => {
     });
 
     expect(result.accessToken).to.equal('access_token_000');
+    expect(result.idToken).to.equal('id_token_000');
     expect(result.refreshToken).to.equal('refresh_token_000');
     expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
     expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
@@ -75,6 +77,7 @@ describe('client-credentials', () => {
     const result = await client.clientCredentials();
 
     expect(result.accessToken).to.equal('access_token_000');
+    expect(result.idToken).to.equal('id_token_000');
     expect(result.refreshToken).to.equal('refresh_token_000');
     expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
     expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
