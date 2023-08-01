@@ -161,7 +161,7 @@ export class OAuth2Fetch {
 
     const expiresAtOffset = this.options.expiresAtOffset ?? 0;
 
-    if (this.token && (this.token.expiresAt === null || (this.token.expiresAt - expiresAtOffset) > Date.now())) {
+    if (this.token && (this.token.expiresAt === null || (this.token.expiresAt - expiresAtOffset) >= Date.now())) {
 
       // The current token is still valid
       return this.token;
