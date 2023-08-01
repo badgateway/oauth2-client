@@ -46,6 +46,18 @@ type OAuth2FetchOptions = {
    * behavior is to schedule refresh. Set this to false to disable scheduling.
    */
   scheduleRefresh?: boolean;
+  
+  /**
+   * The offset in milliseconds to consider the token expiration. When checking
+   * if the token is still valid, the library will consider the token expired if
+   * the current time is within the `expiresAtOffset` milliseconds before the
+   * actual token expiration time.
+   *
+   * For example, if `expiresAtOffset` is set to 60000 (1 minute), and the token
+   * expires at 10:00 AM, the library will consider the token valid until 9:59:00 AM.
+   * If the current time is 9:59:01 AM, the library will attempt to refresh the token.
+   */
+  expiresAtOffset?: number;
 
 }
 
@@ -147,7 +159,9 @@ export class OAuth2Fetch {
    */
   async getToken(): Promise<OAuth2Token> {
 
-    if (this.token && (this.token.expiresAt === null || this.token.expiresAt > Date.now())) {
+    const expiresAtOffset = this.options.expiresAtOffset ?? 0;
+
+    if (this.token && (this.token.expiresAt === null || (this.token.expiresAt - expiresAtOffset) > Date.now())) {
 
       // The current token is still valid
       return this.token;
