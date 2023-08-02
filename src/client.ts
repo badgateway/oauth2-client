@@ -125,7 +125,7 @@ export class OAuth2Client {
       body.client_id = this.settings.clientId;
     }
 
-    return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
 
@@ -150,7 +150,7 @@ export class OAuth2Client {
       throw new Error('A clientSecret must be provided to use client_credentials');
     }
 
-    return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
 
@@ -164,7 +164,7 @@ export class OAuth2Client {
       ...params,
       scope: params.scope?.join(' '),
     };
-    return tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
 
@@ -350,21 +350,24 @@ export class OAuth2Client {
     throw new OAuth2Error(errorMessage, oauth2Code, resp.status);
   }
 
+  /**
+   * Converts the JSON response body from the token endpoint to an OAuth2Token type.
+   */
+  tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
+
+    return resp.then(body => ({
+      accessToken: body.access_token,
+      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
+      refreshToken: body.refresh_token ?? null,
+    }));
+
+  }
+
 }
 
 function resolve(uri: string, base?: string): string {
 
   return new URL(uri, base).toString();
-
-}
-
-export function tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
-
-  return resp.then(body => ({
-    accessToken: body.access_token,
-    expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-    refreshToken: body.refresh_token ?? null,
-  }));
 
 }
 

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.2.3 (????-??-??)
+------------------
+
+* Moved the `tokenResponseToOAuth2Token` function inside the OAuth2Client
+  class, allowing users to override the parsing logic more easily.
+
+
 2.2.2 (2023-07-28)
 ------------------
 
