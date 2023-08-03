@@ -28,7 +28,7 @@ type GetAuthorizeUrlParams = {
   scope?: string[];
 
   /**
-   * List of non-standard parameters that may need, if your auth server want to have some additional info in url
+   * Any parameters listed here will be added to the query string for the authorization server endpoint.
    */
   extraParams?: Record<string, string>
 }
