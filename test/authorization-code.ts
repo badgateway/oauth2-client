@@ -56,13 +56,13 @@ describe('authorization-code', () => {
       });
 
       expect(
-          await client.authorizationCode.getAuthorizeUri({
-            redirectUri,
-            scope: ['a', 'b'],
-            extraParams: {
-              foo: 'bar'
-            }
-          })
+        await client.authorizationCode.getAuthorizeUri({
+          redirectUri,
+          scope: ['a', 'b'],
+          extraParams: {
+            foo: 'bar'
+          }
+        })
       ).to.equal(server.url + '/authorize?' + params.toString());
 
     });
@@ -87,16 +87,16 @@ describe('authorization-code', () => {
       const extraParams = {
         foo: 'bar',
         scope: 'accidentally rewrote core parameter'
-      }
+      };
 
       try {
         await client.authorizationCode.getAuthorizeUri({
           ...params,
           extraParams
-        })
+        });
       } catch (error: any) {
         expect(error.message).to.equal(
-            'The following extraParams are disallowed: \'client_id\', \'response_type\', \'redirect_uri\', ' +
+          'The following extraParams are disallowed: \'client_id\', \'response_type\', \'redirect_uri\', ' +
              '\'code_challenge_method\', \'code_challenge\', \'state\', \'scope\''
         );
         return;
