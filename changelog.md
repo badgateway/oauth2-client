@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.2.3 (????-??-??)
+2.2.3 (2023-08-03)
 ------------------
 
 * Moved the `tokenResponseToOAuth2Token` function inside the OAuth2Client
