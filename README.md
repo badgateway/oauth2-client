@@ -173,10 +173,6 @@ document.location = await client.authorizationCode.getAuthorizeUri({
 
   scope: ['scope1', 'scope2'],
 
-  // Optional parameters that may be need for 3rd party auth servers
-  extraParams: {
-    foo: 'bar'
-  }
 });
 ```
 
