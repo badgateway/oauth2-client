@@ -26,6 +26,11 @@ type GetAuthorizeUrlParams = {
    * List of scopes.
    */
   scope?: string[];
+
+  /**
+   * Any parameters listed here will be added to the query string for the authorization server endpoint.
+   */
+  extraParams?: Record<string, string>;
 }
 
 type ValidateResponseResult = {
@@ -66,7 +71,7 @@ export class OAuth2AuthorizationCodeClient {
       this.client.getEndpoint('authorizationEndpoint')
     ]);
 
-    const query: AuthorizationQueryParams = {
+    let query: AuthorizationQueryParams = {
       client_id: this.client.settings.clientId,
       response_type: 'code',
       redirect_uri: params.redirectUri,
@@ -79,6 +84,15 @@ export class OAuth2AuthorizationCodeClient {
     if (params.scope) {
       query.scope = params.scope.join(' ');
     }
+
+    const disallowed = Object.keys(query);
+
+    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
+      throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
+    }
+
+    query = {...query, ...params?.extraParams};
+
 
     return authorizationEndpoint + '?' + generateQueryString(query);
 
