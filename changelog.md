@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.2.4 (2023-09-05)
+------------------
+
+* Added `extraParams` option to `getAuthorizeUri`, allowing users to add
+  non-standard arguments to the authorization URI for servers that require
+  this. (@pks1989)
+
+
 2.2.3 (2023-08-03)
 ------------------
 
