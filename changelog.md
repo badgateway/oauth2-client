@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.2.4 (????-??-??)
+2.2.4 (2023-09-05)
 ------------------
 
 * Added `extraParams` option to `getAuthorizeUri`, allowing users to add
