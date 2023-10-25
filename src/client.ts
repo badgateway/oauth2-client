@@ -213,7 +213,7 @@ export class OAuth2Client {
    *
    * This will revoke a token, provided that the server supports this feature.
    *
-   * @see https://datatracker.ietf.org/doc/html/rfc7662
+   * @see https://datatracker.ietf.org/doc/html/rfc7009
    */
   async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<RevocationResponse> {
     let tokenValue = token.accessToken;
