@@ -266,3 +266,10 @@ export type IntrospectionResponse = {
   jti?: string;
 
 }
+
+export type RevocationRequest = {
+  token: string;
+  token_type_hint?: OAuth2TokenTypeHint
+}
+
+export type RevocationResponse = {}

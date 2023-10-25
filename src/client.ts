@@ -5,7 +5,10 @@ import {
   IntrospectionRequest,
   IntrospectionResponse,
   PasswordRequest,
+  OAuth2TokenTypeHint,
   RefreshRequest,
+  RevocationRequest,
+  RevocationResponse,
   ServerMetadataResponse,
   TokenResponse,
 } from './messages';
@@ -62,6 +65,14 @@ export interface ClientSettings {
   introspectionEndpoint?: string;
 
   /**
+   * Revocatopm endpoint.
+   *
+   * Required for revoking tokens. Not supported by all servers.
+   * If not provided we'll try to discover it, or otherwise default to /revoke
+   */
+  revocationEndpoint?: string;
+
+  /**
    * OAuth 2.0 Authorization Server Metadata endpoint or OpenID
    * Connect Discovery 1.0 endpoint.
    *
@@ -92,7 +103,7 @@ export interface ClientSettings {
 }
 
 
-type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint' | 'introspectionEndpoint';
+type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint' | 'introspectionEndpoint' | 'revocationEndpoint';
 
 export class OAuth2Client {
 
@@ -198,6 +209,27 @@ export class OAuth2Client {
   }
 
   /**
+   * Revoke a token
+   *
+   * This will revoke a token, provided that the server supports this feature.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc7662
+   */
+  async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<RevocationResponse> {
+    let tokenValue = token.accessToken;
+    if (tokenTypeHint === 'refresh_token') {
+      tokenValue = token.refreshToken!;
+    }
+
+    const body: RevocationRequest = {
+      token: tokenValue,
+      token_type_hint: tokenTypeHint,
+    };
+    return this.request('revocationEndpoint', body);
+
+  }
+
+  /**
    * Returns a url for an OAuth2 endpoint.
    *
    * Potentially fetches a discovery document to get it.
@@ -230,6 +262,8 @@ export class OAuth2Client {
         return resolve('/.well-known/oauth-authorization-server', this.settings.server);
       case 'introspectionEndpoint':
         return resolve('/introspect', this.settings.server);
+      case 'revocationEndpoint':
+        return resolve('/revoke', this.settings.server);
     }
 
   }
@@ -267,6 +301,7 @@ export class OAuth2Client {
       ['authorization_endpoint', 'authorizationEndpoint'],
       ['token_endpoint', 'tokenEndpoint'],
       ['introspection_endpoint', 'introspectionEndpoint'],
+      ['revocation_endpoint', 'revocationEndpoint'],
     ] as const;
 
     if (this.serverMetadata === null) return;
@@ -287,6 +322,7 @@ export class OAuth2Client {
    */
   async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
   async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
+  async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<RevocationResponse>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
 
     const uri = await this.getEndpoint(endpoint);
