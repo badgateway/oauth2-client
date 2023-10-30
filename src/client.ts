@@ -65,7 +65,7 @@ export interface ClientSettings {
   introspectionEndpoint?: string;
 
   /**
-   * Revocatopm endpoint.
+   * Revocation endpoint.
    *
    * Required for revoking tokens. Not supported by all servers.
    * If not provided we'll try to discover it, or otherwise default to /revoke
