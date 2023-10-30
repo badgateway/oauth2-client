@@ -269,7 +269,7 @@ export type IntrospectionResponse = {
 
 export type RevocationRequest = {
   token: string;
-  token_type_hint?: OAuth2TokenTypeHint
+  token_type_hint?: OAuth2TokenTypeHint;
 }
 
-export type RevocationResponse = {}
+export type RevocationResponse = Record<string, never>;
