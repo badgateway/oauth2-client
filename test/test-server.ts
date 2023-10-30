@@ -27,6 +27,8 @@ export function testServer() {
     return next();
   });
   app.use(issueToken);
+  app.use(revokeToken);
+  app.use(discover);
   const port = 40000 + Math.round(Math.random()*9999);
   const server = app.listen(port);
 
@@ -64,4 +66,28 @@ const issueToken: Middleware = (ctx, next) => {
     expires_in: 3600,
   };
 
+};
+
+
+const revokeToken: Middleware = (ctx, next) => {
+
+  if (ctx.path !== '/revoke') {
+    return next();
+  }
+
+  ctx.response.type = 'application/json';
+  ctx.response.body = {};
+};
+
+
+const discover: Middleware = (ctx, next) => {
+
+  if (ctx.path !== '/discover') {
+    return next();
+  }
+
+  ctx.response.type = 'application/json';
+  ctx.response.body = {
+    revocation_endpoint: '/revoke',
+  };
 };
