@@ -105,7 +105,7 @@ const token = await client.clientCredentials();
 ### Refreshing tokens
 
 ```typescript
-const newToken = await client.refresh(oldToken);
+const newToken = await client.refreshToken(oldToken);
 ```
 
 
