@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.2.5 (????-??-??)
+------------------
+
+* Fix for #128: If there's no secret, we should never use Basic auth to encode
+  the `client_id`.
+
+
 2.2.4 (2023-09-05)
 ------------------
 

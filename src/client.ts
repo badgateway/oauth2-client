@@ -296,8 +296,18 @@ export class OAuth2Client {
     };
 
     let authMethod = this.settings.authenticationMethod;
+
+    if (!this.settings.clientSecret) {
+      // Basic auth should only be used when there's a client_secret, for
+      // non-confidential clients we may only have a client_id, which
+      // always gets added to the body.
+      authMethod = 'client_secret_post';
+    }
     if (!authMethod) {
-      authMethod = this.settings.clientSecret ? 'client_secret_basic' : 'client_secret_post';
+      // If we got here, it means no preference was provided by anything,
+      // and we have a secret. In this case its preferred to embed
+      // authentication in the Authorization header.
+      authMethod = 'client_secret_basic';
     }
 
     switch(authMethod) {
