@@ -235,6 +235,38 @@ describe('authorization-code', () => {
       });
 
     });
+    it('should not use Basic Auth if no secret is provided, even if client_secret_basic is set.', async() => {
+
+      const server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'test-client-id',
+        authenticationMethod: 'client_secret_basic',
+      });
+
+      const result = await client.authorizationCode.getToken({
+        code: 'code_000',
+        redirectUri: 'http://example/redirect',
+      });
+
+      expect(result.accessToken).to.equal('access_token_000');
+      expect(result.refreshToken).to.equal('refresh_token_000');
+      expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
+      expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+
+      const request = server.lastRequest();
+      expect(request.headers.get('Authorization')).to.equal(null);
+
+      expect(request.body).to.eql({
+        client_id: 'test-client-id',
+        grant_type: 'authorization_code',
+        code: 'code_000',
+        redirect_uri: 'http://example/redirect',
+      });
+
+    });
 
   });
 });
