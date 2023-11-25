@@ -20,3 +20,10 @@ export type OAuth2Token = {
    */
   refreshToken: string | null;
 };
+
+export type OidcToken = OAuth2Token & {
+  /**
+   * OIDC identity token
+   */
+  idToken: string;
+}

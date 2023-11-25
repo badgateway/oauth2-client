@@ -32,7 +32,7 @@ export type AuthorizationCodeRequest = {
   grant_type: 'authorization_code';
   code: string;
   redirect_uri: string;
-  code_verifier: string|undefined;
+  code_verifier: string | undefined;
 }
 
 /**
@@ -59,6 +59,8 @@ export type TokenResponse = {
   expires_in: number;
   refresh_token?: string;
   scope?: string;
+  /** Only for OIDC */
+  id_token?: string;
 }
 
 type OAuth2ResponseType = 'code' | 'token';
@@ -84,7 +86,7 @@ export type ServerMetadataResponse = {
   /**
    * URL of the authorization server's authorization endpoint.
    */
-  authorization_endpoint:string;
+  authorization_endpoint: string;
 
   /**
    * URL of the authorization server's token endpoint.

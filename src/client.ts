@@ -96,6 +96,8 @@ type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndp
 
 export class OAuth2Client {
 
+  static defaultDiscoveryEndpoint = '/.well-known/oauth-authorization-server';
+
   settings: ClientSettings;
 
   constructor(clientSettings: ClientSettings) {
@@ -227,7 +229,7 @@ export class OAuth2Client {
       case 'tokenEndpoint':
         return resolve('/token', this.settings.server);
       case 'discoveryEndpoint':
-        return resolve('/.well-known/oauth-authorization-server', this.settings.server);
+        return resolve((this.constructor as typeof OAuth2Client).defaultDiscoveryEndpoint, this.settings.server);
       case 'introspectionEndpoint':
         return resolve('/introspect', this.settings.server);
     }
@@ -236,7 +238,6 @@ export class OAuth2Client {
 
   private discoveryDone = false;
   private serverMetadata: ServerMetadataResponse | null = null;
-
 
   /**
    * Fetches the OAuth2 discovery document
@@ -254,7 +255,7 @@ export class OAuth2Client {
       console.warn('[oauth2] OAuth2 discovery endpoint could not be determined. Either specify the "server" or "discoveryEndpoint');
       return;
     }
-    const resp = await this.settings.fetch!(discoverUrl, { headers: { Accept: 'application/json' }});
+    const resp = await this.settings.fetch!(discoverUrl, { headers: { Accept: 'application/json' } });
 
     if (!resp.ok) return;
     if (!resp.headers.get('Content-Type')?.startsWith('application/json')) {
@@ -310,12 +311,12 @@ export class OAuth2Client {
       authMethod = 'client_secret_basic';
     }
 
-    switch(authMethod) {
-      case 'client_secret_basic' :
+    switch (authMethod) {
+      case 'client_secret_basic':
         headers.Authorization = 'Basic ' +
           btoa(this.settings.clientId + ':' + this.settings.clientSecret);
         break;
-      case 'client_secret_post' :
+      case 'client_secret_post':
         body.client_id = this.settings.clientId;
         if (this.settings.clientSecret) {
           body.client_secret = this.settings.clientSecret;

@@ -1,4 +1,4 @@
-import { OAuth2Token } from './token';
+import { OAuth2Token, OidcToken } from './token';
 import { OAuth2Client } from './client';
 
 type FetchMiddleware = (request: Request, next: (request: Request) => Promise<Response>) => Promise<Response>;
@@ -11,12 +11,17 @@ type OAuth2FetchOptions = {
   client: OAuth2Client;
 
   /**
+   * (for OIDC only) add id_token to Auth header (instead of access_token)
+   */
+  useIdToken: boolean;
+
+  /**
    * You are responsible for implementing this function.
    * it's purpose is to supply the 'initial' oauth2 token.
    *
    * This function may be async. Return `null` to fail the process.
    */
-  getNewToken(): OAuth2Token | null | Promise<OAuth2Token | null>;
+  getNewToken(): OAuth2Token | OidcToken | null | Promise<OAuth2Token | OidcToken | null>;
 
   /**
    * If set, will be called if authentication fatally failed.
@@ -28,7 +33,7 @@ type OAuth2FetchOptions = {
    * optional, but it may be used to (for example) put the token in off-line
    * storage for later usage.
    */
-  storeToken?: (token: OAuth2Token) => void;
+  storeToken?: (token: OAuth2Token | OidcToken) => void;
 
   /**
    * Also an optional feature. Implement this if you want the wrapper to try a
@@ -36,7 +41,7 @@ type OAuth2FetchOptions = {
    *
    * This function may be async. Return null if there was no token.
    */
-  getStoredToken?: () => OAuth2Token | null | Promise<OAuth2Token | null>;
+  getStoredToken?: () => OAuth2Token | OidcToken | null | Promise<OAuth2Token | OidcToken | null>;
 
   /**
    * Whether to automatically schedule token refresh.
@@ -56,7 +61,7 @@ export class OAuth2Fetch {
   /**
    * Current active token (if any)
    */
-  private token: OAuth2Token | null = null;
+  private token: OAuth2Token | OidcToken | null = null;
 
   /**
    * If the user had a storedToken, the process to fetch it
@@ -114,19 +119,20 @@ export class OAuth2Fetch {
 
     return async (request, next) => {
 
-      const accessToken = await this.getAccessToken();
+      const authToken = await this.getAuthToken();
 
       // Make a clone. We need to clone if we need to retry the request later.
       let authenticatedRequest = request.clone();
-      authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
+      authenticatedRequest.headers.set('Authorization', 'Bearer '  + authToken);
       let response = await next(authenticatedRequest);
 
       if (!response.ok && response.status === 401) {
 
-        const newToken = await this.refreshToken();
+        await this.refreshToken();
+        const authToken = await this.getAuthToken();
 
         authenticatedRequest = request.clone();
-        authenticatedRequest.headers.set('Authorization', 'Bearer '  + newToken.accessToken);
+        authenticatedRequest.headers.set('Authorization', 'Bearer '  + authToken);
         response = await next(authenticatedRequest);
 
       }
@@ -145,7 +151,7 @@ export class OAuth2Fetch {
    *
    * This function will attempt to automatically refresh if stale.
    */
-  async getToken(): Promise<OAuth2Token> {
+  async getToken(): Promise<OAuth2Token | OidcToken> {
 
     if (this.token && (this.token.expiresAt === null || this.token.expiresAt > Date.now())) {
 
@@ -159,17 +165,22 @@ export class OAuth2Fetch {
   }
 
   /**
-   * Returns an access token.
+   * Returns the token to use for authentication.
    *
-   * If the current access token is not known, it will attempt to fetch it.
-   * If the access token is expiring, it will attempt to refresh it.
+   * If the current token is not known, it will attempt to fetch it.
+   * If the token is expiring, it will attempt to refresh it.
    */
-  async getAccessToken(): Promise<string> {
+  async getAuthToken(): Promise<string> {
 
     // Ensure getStoredToken finished.
     await this.activeGetStoredToken;
 
     const token = await this.getToken();
+    if (this.options.useIdToken) {
+      if (!(token as any).idToken)
+        throw new Error(`useIdToken is set, but token doesn't have id_token field`);
+      return (token as OidcToken).idToken;
+    }
     return token.accessToken;
 
   }
@@ -180,12 +191,12 @@ export class OAuth2Fetch {
    * This will allow us to ensure only 1 such operation happens at any
    * given time.
    */
-  private activeRefresh: Promise<OAuth2Token> | null = null;
+  private activeRefresh: Promise<OAuth2Token | OidcToken> | null = null;
 
   /**
    * Forces an access token refresh
    */
-  async refreshToken(): Promise<OAuth2Token> {
+  async refreshToken(): Promise<OAuth2Token | OidcToken> {
 
     if (this.activeRefresh) {
       // If we are currently already doing this operation,
@@ -196,7 +207,7 @@ export class OAuth2Fetch {
     const oldToken = this.token;
     this.activeRefresh = (async() => {
 
-      let newToken: OAuth2Token|null = null;
+      let newToken: OAuth2Token | OidcToken | null = null;
 
       try {
         if (oldToken?.refreshToken) {

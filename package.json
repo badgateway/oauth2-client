@@ -2,8 +2,9 @@
   "name": "@badgateway/oauth2-client",
   "version": "2.2.4",
   "description": "OAuth2 client for browsers and Node.js. Tiny footprint, PKCE support",
-  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
+    "build": "vite build",
     "test": "make test",
     "prepublishOnly": "make build",
     "lint": "make lint"
@@ -34,21 +35,27 @@
     "@curveball/core": "^0.21.1",
     "@curveball/http-errors": "^0.5.0",
     "@types/chai": "^4.3.1",
+    "@types/eslint": "^8.44.7",
+    "@types/estree": "^1.0.5",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^18.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@types/node": "^18.18.13",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.2.0",
     "chai": "^4.3.6",
-    "eslint": "^8.1.0",
+    "eslint": "^8.54.0",
     "mocha": "^10.0.0",
     "node-fetch": "^2.6.7",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.7.0",
-    "typescript": "^5.0.4",
+    "typescript": "^5.3.2",
+    "vite": "^5.0.2",
+    "vite-plugin-dts": "^3.6.3",
     "webpack": "^5.60.0",
     "webpack-cli": "^5.0.1"
   },
-  "browser": "browser/oauth2-client.min.js",
+  "main": "./dist/oauth2-client.umd.cjs",
+  "module": "./dist/oauth2-client.js",
+  ".browser": "browser/oauth2-client.min.js",
   "files": [
     "dist/",
     "src/",
@@ -56,6 +63,12 @@
     "LICENSE",
     "README.md"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/oauth2-client.js",
+      "require": "./dist/oauth2-client.umd.cjs"
+    }
+  },
   "mocha": {
     "require": [
       "ts-node/register",

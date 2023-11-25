@@ -1,0 +1,4 @@
+{
+    "editor.minimap.enabled": false,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+}
