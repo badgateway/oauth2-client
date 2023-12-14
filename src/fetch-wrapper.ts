@@ -63,7 +63,7 @@ export class OAuth2Fetch {
    * may be async. We keep track of this process in this
    * promise, so it may be awaited to avoid race conditions.
    *
-   * As soon as this promise resolves, this property get nulled.
+   * As soon as this promise resolves, this property gets nulled.
    */
   private activeGetStoredToken: null | Promise<void> = null;
 
