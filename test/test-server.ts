@@ -75,8 +75,8 @@ const revokeToken: Middleware = (ctx, next) => {
     return next();
   }
 
-  ctx.response.type = 'application/json';
-  ctx.response.body = {};
+  ctx.response.type = 'application/octet-stream';
+  ctx.response.body = 'SUCCESS!';
 };
 
 
