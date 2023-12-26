@@ -89,6 +89,16 @@ export interface ClientSettings {
    * The default value is 'client_secret_basic' if not provided.
    */
   authenticationMethod?: string;
+
+  /**
+    * Some providers return additional parameters during the token call.
+    * If you want them returned, whitelist them by passing them as an
+    * array.
+    *
+    * Eg: extraParams: ["key1", "key2"]
+    *
+  */
+  extraParams?: string[];
 }
 
 
@@ -364,15 +374,25 @@ export class OAuth2Client {
    * Converts the JSON response body from the token endpoint to an OAuth2Token type.
    */
   tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
-
-    return resp.then(body => ({
-      accessToken: body.access_token,
-      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-      refreshToken: body.refresh_token ?? null,
-    }));
-
+    return resp.then(body => {
+      const extraParams = filterObjectByKeys(body, this.settings.extraParams || [])
+      return {
+        accessToken: body.access_token,
+        expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
+        refreshToken: body.refresh_token ?? null,
+        extraParams,
+      }
+    });
   }
+}
 
+function filterObjectByKeys(obj: Record<string, any>, whitelistedKeys: string[]): Record<string, any> {
+    return Object.keys(obj)
+        .filter(key => whitelistedKeys.includes(key))
+        .reduce((result: Record<string, any>, key: string) => {
+            result[key] = obj[key];
+            return result;
+        }, {});
 }
 
 function resolve(uri: string, base?: string): string {

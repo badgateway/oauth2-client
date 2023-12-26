@@ -62,6 +62,8 @@ const issueToken: Middleware = (ctx, next) => {
     access_token: 'access_token_000',
     refresh_token: 'refresh_token_000',
     expires_in: 3600,
+    foo: 'bar_000',
+    bar: 'foo_00'
   };
 
 };

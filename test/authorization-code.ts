@@ -187,6 +187,7 @@ describe('authorization-code', () => {
 
       expect(result.accessToken).to.equal('access_token_000');
       expect(result.refreshToken).to.equal('refresh_token_000');
+      expect(result.extraParams).to.be.undefined;
       expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
       expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
 
@@ -199,6 +200,29 @@ describe('authorization-code', () => {
         redirect_uri: 'http://example/redirect',
       });
 
+    });
+
+
+    it('should should allow extra parameters to be returned with tokens', async() => {
+
+      const server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'test-client-id',
+        clientSecret: 'test-client-secret',
+        extraParams: ['foo']
+      });
+
+      const result = await client.authorizationCode.getToken({
+        code: 'code_000',
+        redirectUri: 'http://example/redirect',
+      });
+
+      expect(result.extraParams).not.to.be.undefined;
+      expect(result.extraParams?.foo).to.equal('bar_000');
+      expect(result.extraParams?.bar).to.be.undefined;
     });
 
     it('should should support PKCE', async() => {
