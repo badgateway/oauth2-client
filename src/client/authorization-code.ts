@@ -1,6 +1,6 @@
-import { OAuth2Client, generateQueryString } from '../client';
+import { OAuth2Client } from '../client';
 import { OAuth2Token } from '../token';
-import { AuthorizationCodeRequest, AuthorizationQueryParams } from '../messages';
+import { AuthorizationCodeRequest } from '../messages';
 import { OAuth2Error } from '../error';
 
 type GetAuthorizeUrlParams = {
@@ -28,6 +28,13 @@ type GetAuthorizeUrlParams = {
   scope?: string[];
 
   /**
+   * The resource the client intends to access.
+   *
+   * This is defined in RFC 8707.
+   */
+  resource?: string[] | string;
+
+  /**
    * Any parameters listed here will be added to the query string for the authorization server endpoint.
    */
   extraParams?: Record<string, string>;
@@ -44,6 +51,23 @@ type ValidateResponseResult = {
    * List of scopes that the client requested.
    */
   scope?: string[];
+
+}
+
+type GetTokenParams = {
+
+  code: string;
+
+  redirectUri: string;
+  state?: string;
+  codeVerifier?:string;
+
+  /**
+   * The resource the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string[] | string;
 
 }
 
@@ -71,34 +95,35 @@ export class OAuth2AuthorizationCodeClient {
       this.client.getEndpoint('authorizationEndpoint')
     ]);
 
-    let query: AuthorizationQueryParams = {
+    const query = new URLSearchParams({
       client_id: this.client.settings.clientId,
       response_type: 'code',
       redirect_uri: params.redirectUri,
-      code_challenge_method: codeChallenge?.[0],
-      code_challenge: codeChallenge?.[1],
-    };
+    });
+    if (codeChallenge) {
+      query.set('code_challenge_method', codeChallenge[0]);
+      query.set('code_challenge', codeChallenge[1]);
+    }
     if (params.state) {
-      query.state = params.state;
+      query.set('state', params.state);
     }
     if (params.scope) {
-      query.scope = params.scope.join(' ');
+      query.set('scope', params.scope.join(' '));
     }
 
-    const disallowed = Object.keys(query);
-
-    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
-      throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
+    if (params.resource) for(const resource of [].concat(params.resource as any)) {
+      query.append('resource', resource);
+    }
+    if (params.extraParams) for(const [k,v] of Object.entries(params.extraParams)) {
+      if (query.has(k)) throw new Error(`Property in extraParams would overwrite standard property: ${k}`);
+      query.set(k, v);
     }
 
-    query = {...query, ...params?.extraParams};
-
-
-    return authorizationEndpoint + '?' + generateQueryString(query);
+    return authorizationEndpoint + '?' + query.toString();
 
   }
 
-  async getTokenFromCodeRedirect(url: string|URL, params: {redirectUri: string; state?: string; codeVerifier?:string} ): Promise<OAuth2Token> {
+  async getTokenFromCodeRedirect(url: string|URL, params: Omit<GetTokenParams, 'code'> ): Promise<OAuth2Token> {
 
     const { code } = await this.validateResponse(url, {
       state: params.state
@@ -126,7 +151,7 @@ export class OAuth2AuthorizationCodeClient {
     if (queryParams.has('error')) {
       throw new OAuth2Error(
         queryParams.get('error_description') ?? 'OAuth2 error',
-        queryParams.get('error')!,
+        queryParams.get('error') as any,
         0,
       );
     }
@@ -148,13 +173,14 @@ export class OAuth2AuthorizationCodeClient {
   /**
    * Receives an OAuth2 token using 'authorization_code' grant
    */
-  async getToken(params: { code: string; redirectUri: string; codeVerifier?: string }): Promise<OAuth2Token> {
+  async getToken(params: GetTokenParams): Promise<OAuth2Token> {
 
     const body:AuthorizationCodeRequest = {
       grant_type: 'authorization_code',
       code: params.code,
       redirect_uri: params.redirectUri,
       code_verifier: params.codeVerifier,
+      resource: params.resource,
     };
     return this.client.tokenResponseToOAuth2Token(this.client.request('tokenEndpoint', body));
 

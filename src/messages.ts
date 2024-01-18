@@ -7,6 +7,13 @@ export type RefreshRequest = {
 
   client_id?: string;
   scope?: string;
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
 }
 
 /**
@@ -15,7 +22,15 @@ export type RefreshRequest = {
 export type ClientCredentialsRequest = {
   grant_type: 'client_credentials';
   scope?: string;
-  [key: string]: string | undefined;
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+  [key: string]: string | undefined | string[];
 }
 
 /**
@@ -26,6 +41,13 @@ export type PasswordRequest = {
   username: string;
   password: string;
   scope?: string;
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
 }
 
 export type AuthorizationCodeRequest = {
@@ -33,21 +55,13 @@ export type AuthorizationCodeRequest = {
   code: string;
   redirect_uri: string;
   code_verifier: string|undefined;
-}
 
-/**
- * The query parameters that will be sent to the /authorization endpoint
- * for the authorization_code request.
- */
-export type AuthorizationQueryParams = {
-  response_type: 'code';
-  client_id: string;
-  redirect_uri: string;
-  state?: string;
-  scope?: string;
-  code_challenge_method?: 'plain' | 'S256';
-  code_challenge?: string;
-  [key: string]: string | undefined;
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
 }
 
 /**
@@ -266,3 +280,17 @@ export type IntrospectionResponse = {
   jti?: string;
 
 }
+
+export type OAuth2ErrorCode =
+  | 'invalid_request'
+  | 'invalid_client'
+  | 'invalid_grant'
+  | 'unauthorized_client'
+  | 'unsupported_grant_type'
+  | 'invalid_scope'
+
+  /**
+   * RFC 8707
+   */
+  | 'invalid_target';
+
