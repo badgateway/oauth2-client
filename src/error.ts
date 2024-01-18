@@ -1,3 +1,5 @@
+import { OAuth2ErrorCode } from './messages';
+
 /**
  * An error class for any error the server emits.
  *
@@ -12,10 +14,10 @@
  */
 export class OAuth2Error extends Error {
 
-  oauth2Code: string;
+  oauth2Code: OAuth2ErrorCode;
   httpCode: number;
 
-  constructor(message: string, oauth2Code: string, httpCode: number) {
+  constructor(message: string, oauth2Code: OAuth2ErrorCode, httpCode: number) {
 
     super(message);
 

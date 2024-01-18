@@ -12,6 +12,34 @@ import {
 import { OAuth2Error } from './error';
 import { OAuth2AuthorizationCodeClient } from './client/authorization-code';
 
+
+type ClientCredentialsParams = {
+  scope?: string[];
+  extraParams?: Record<string, string>;
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+}
+
+type PasswordParams = {
+  username: string;
+  password: string;
+
+  scope?: string[];
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+}
+
 export interface ClientSettings {
 
   /**
@@ -132,7 +160,7 @@ export class OAuth2Client {
   /**
    * Retrieves an OAuth2 token using the client_credentials grant.
    */
-  async clientCredentials(params?: { scope?: string[]; extraParams?: Record<string, string> }): Promise<OAuth2Token> {
+  async clientCredentials(params?: ClientCredentialsParams): Promise<OAuth2Token> {
 
     const disallowed = ['client_id', 'client_secret', 'grant_type', 'scope'];
 
@@ -143,6 +171,7 @@ export class OAuth2Client {
     const body: ClientCredentialsRequest = {
       grant_type: 'client_credentials',
       scope: params?.scope?.join(' '),
+      resource: params?.resource,
       ...params?.extraParams
     };
 
@@ -157,7 +186,7 @@ export class OAuth2Client {
   /**
    * Retrieves an OAuth2 token using the 'password' grant'.
    */
-  async password(params: { username: string; password: string; scope?: string[] }): Promise<OAuth2Token> {
+  async password(params: PasswordParams): Promise<OAuth2Token> {
 
     const body: PasswordRequest = {
       grant_type: 'password',
@@ -386,12 +415,14 @@ function resolve(uri: string, base?: string): string {
  *
  * This function filters out any undefined values.
  */
-export function generateQueryString(params: Record<string, undefined | number | string>): string {
+export function generateQueryString(params: Record<string, undefined | number | string | string[]>): string {
 
-  return new URLSearchParams(
-    Object.fromEntries(
-      Object.entries(params).filter(([k, v]) => v !== undefined)
-    ) as Record<string, string>
-  ).toString();
+  const query = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (Array.isArray(v)) {
+      for(const vItem of v) query.append(k, vItem);
+    } else if (v !== undefined) query.set(k, v.toString());
+  }
+  return query.toString();
 
 }
