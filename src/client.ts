@@ -40,6 +40,21 @@ type PasswordParams = {
 
 }
 
+/**
+ * Extra options that may be passed to refresh()
+ */
+type RefreshParams = {
+  scope?: string[];
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+}
+
 export interface ClientSettings {
 
   /**
@@ -138,7 +153,7 @@ export class OAuth2Client {
   /**
    * Refreshes an existing token, and returns a new one.
    */
-  async refreshToken(token: OAuth2Token): Promise<OAuth2Token> {
+  async refreshToken(token: OAuth2Token, params?: RefreshParams): Promise<OAuth2Token> {
 
     if (!token.refreshToken) {
       throw new Error('This token didn\'t have a refreshToken. It\'s not possible to refresh this');
@@ -152,6 +167,9 @@ export class OAuth2Client {
       // If there's no secret, send the clientId in the body.
       body.client_id = this.settings.clientId;
     }
+
+    if (params?.scope) body.scope = params.scope.join(' ');
+    if (params?.resource) body.resource = params.resource;
 
     return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 

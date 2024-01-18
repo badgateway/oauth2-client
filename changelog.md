@@ -7,6 +7,7 @@ Changelog
 * Fix for #128: If there's no secret, we should never use Basic auth to encode
   the `client_id`.
 * Support for the 'resource' parameter from RFC 8707.
+* Add support for "scope" parameter to "refresh().
 
 
 2.2.4 (2023-09-05)
