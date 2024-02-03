@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.3.0 (????-??-??)
+2.3.0 (2024-02-03)
 ------------------
 
 * Fix for #128: If there's no secret, we should never use Basic auth to encode
