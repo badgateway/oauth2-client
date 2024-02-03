@@ -19,4 +19,9 @@ export type OAuth2Token = {
    * OAuth2 refresh token
    */
   refreshToken: string | null;
+
+  /**
+   * Any extra parameters returned by the server which were whitelisted.
+   */
+  extraParams: Record<string, any>;
 };
