@@ -8,12 +8,54 @@ import {
   OAuth2TokenTypeHint,
   RefreshRequest,
   RevocationRequest,
-  RevocationResponse,
   ServerMetadataResponse,
   TokenResponse,
 } from './messages';
 import { OAuth2Error } from './error';
 import { OAuth2AuthorizationCodeClient } from './client/authorization-code';
+
+
+type ClientCredentialsParams = {
+  scope?: string[];
+  extraParams?: Record<string, string>;
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+}
+
+type PasswordParams = {
+  username: string;
+  password: string;
+
+  scope?: string[];
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+}
+
+/**
+ * Extra options that may be passed to refresh()
+ */
+type RefreshParams = {
+  scope?: string[];
+
+  /**
+   * The resource  the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+}
 
 export interface ClientSettings {
 
@@ -121,7 +163,7 @@ export class OAuth2Client {
   /**
    * Refreshes an existing token, and returns a new one.
    */
-  async refreshToken(token: OAuth2Token): Promise<OAuth2Token> {
+  async refreshToken(token: OAuth2Token, params?: RefreshParams): Promise<OAuth2Token> {
 
     if (!token.refreshToken) {
       throw new Error('This token didn\'t have a refreshToken. It\'s not possible to refresh this');
@@ -136,6 +178,9 @@ export class OAuth2Client {
       body.client_id = this.settings.clientId;
     }
 
+    if (params?.scope) body.scope = params.scope.join(' ');
+    if (params?.resource) body.resource = params.resource;
+
     return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
   }
@@ -143,7 +188,7 @@ export class OAuth2Client {
   /**
    * Retrieves an OAuth2 token using the client_credentials grant.
    */
-  async clientCredentials(params?: { scope?: string[]; extraParams?: Record<string, string> }): Promise<OAuth2Token> {
+  async clientCredentials(params?: ClientCredentialsParams): Promise<OAuth2Token> {
 
     const disallowed = ['client_id', 'client_secret', 'grant_type', 'scope'];
 
@@ -154,6 +199,7 @@ export class OAuth2Client {
     const body: ClientCredentialsRequest = {
       grant_type: 'client_credentials',
       scope: params?.scope?.join(' '),
+      resource: params?.resource,
       ...params?.extraParams
     };
 
@@ -168,7 +214,7 @@ export class OAuth2Client {
   /**
    * Retrieves an OAuth2 token using the 'password' grant'.
    */
-  async password(params: { username: string; password: string; scope?: string[] }): Promise<OAuth2Token> {
+  async password(params: PasswordParams): Promise<OAuth2Token> {
 
     const body: PasswordRequest = {
       grant_type: 'password',
@@ -215,7 +261,7 @@ export class OAuth2Client {
    *
    * @see https://datatracker.ietf.org/doc/html/rfc7009
    */
-  async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<RevocationResponse> {
+  async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<void> {
     let tokenValue = token.accessToken;
     if (tokenTypeHint === 'refresh_token') {
       tokenValue = token.refreshToken!;
@@ -322,7 +368,7 @@ export class OAuth2Client {
    */
   async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
   async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
-  async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<RevocationResponse>;
+  async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<void>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
 
     const uri = await this.getEndpoint(endpoint);
@@ -332,8 +378,18 @@ export class OAuth2Client {
     };
 
     let authMethod = this.settings.authenticationMethod;
+
+    if (!this.settings.clientSecret) {
+      // Basic auth should only be used when there's a client_secret, for
+      // non-confidential clients we may only have a client_id, which
+      // always gets added to the body.
+      authMethod = 'client_secret_post';
+    }
     if (!authMethod) {
-      authMethod = this.settings.clientSecret ? 'client_secret_basic' : 'client_secret_post';
+      // If we got here, it means no preference was provided by anything,
+      // and we have a secret. In this case its preferred to embed
+      // authentication in the Authorization header.
+      authMethod = 'client_secret_basic';
     }
 
     switch(authMethod) {
@@ -357,24 +413,24 @@ export class OAuth2Client {
       headers,
     });
 
+    let responseBody;
+    if (resp.status !== 204 && resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.startsWith('application/json')) {
+      responseBody = await resp.json();
+    }
     if (resp.ok) {
-      return await resp.json();
+      return responseBody;
     }
 
-    let jsonError;
     let errorMessage;
     let oauth2Code;
-    if (resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.startsWith('application/json')) {
-      jsonError = await resp.json();
-    }
 
-    if (jsonError?.error) {
+    if (responseBody.error) {
       // This is likely an OAUth2-formatted error
-      errorMessage = 'OAuth2 error ' + jsonError.error + '.';
-      if (jsonError.error_description) {
-        errorMessage += ' ' + jsonError.error_description;
+      errorMessage = 'OAuth2 error ' + responseBody.error + '.';
+      if (responseBody.error_description) {
+        errorMessage += ' ' + responseBody.error_description;
       }
-      oauth2Code = jsonError.error;
+      oauth2Code = responseBody.error;
 
     } else {
       errorMessage = 'HTTP Error ' + resp.status + ' ' + resp.statusText;
@@ -412,12 +468,14 @@ function resolve(uri: string, base?: string): string {
  *
  * This function filters out any undefined values.
  */
-export function generateQueryString(params: Record<string, undefined | number | string>): string {
+export function generateQueryString(params: Record<string, undefined | number | string | string[]>): string {
 
-  return new URLSearchParams(
-    Object.fromEntries(
-      Object.entries(params).filter(([k, v]) => v !== undefined)
-    ) as Record<string, string>
-  ).toString();
+  const query = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (Array.isArray(v)) {
+      for(const vItem of v) query.append(k, vItem);
+    } else if (v !== undefined) query.set(k, v.toString());
+  }
+  return query.toString();
 
 }

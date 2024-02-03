@@ -10,13 +10,14 @@ since Node 18 (but it works with Polyfills on Node 14 and 16).
 
 ## Highlights
 
-* 10KB minified (3.6KB gzipped).
+* 11KB minified (3.7KB gzipped).
 * No dependencies.
 * `authorization_code` grant with optional [PKCE][1] support.
 * `password` and `client_credentials` grant.
 * a `fetch()` wrapper that automatically adds Bearer tokens and refreshes them.
 * OAuth2 endpoint discovery via the Server metadata document ([RFC8414][2]).
 * OAuth2 Token Introspection ([RFC7662][3]).
+* Resource Indicators for OAuth 2.0 ([RFC8707][5]).
 
 
 ## Installation
@@ -105,7 +106,7 @@ const token = await client.clientCredentials();
 ### Refreshing tokens
 
 ```typescript
-const newToken = await client.refresh(oldToken);
+const newToken = await client.refreshToken(oldToken);
 ```
 
 
@@ -438,3 +439,4 @@ if (global.btoa === undefined) {
 [2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
 [3]: https://datatracker.ietf.org/doc/html/rfc7662 "OAuth 2.0 Token Introspection"
 [4]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API "Web Crypto API"
+[5]: https://datatracker.ietf.org/doc/html/rfc8707 "https://datatracker.ietf.org/doc/html/rfc8707"

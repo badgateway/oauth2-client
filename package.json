@@ -18,7 +18,11 @@
     "pkce",
     "security",
     "bearer",
-    "RFC6749"
+    "RFC6749",
+    "RFC7636",
+    "RFC7662",
+    "RFC8414",
+    "RFC8707"
   ],
   "author": "Evert Pot (https://evertpot.com)",
   "license": "MIT",
