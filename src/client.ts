@@ -5,7 +5,9 @@ import {
   IntrospectionRequest,
   IntrospectionResponse,
   PasswordRequest,
+  OAuth2TokenTypeHint,
   RefreshRequest,
+  RevocationRequest,
   ServerMetadataResponse,
   TokenResponse,
 } from './messages';
@@ -105,6 +107,14 @@ export interface ClientSettings {
   introspectionEndpoint?: string;
 
   /**
+   * Revocation endpoint.
+   *
+   * Required for revoking tokens. Not supported by all servers.
+   * If not provided we'll try to discover it, or otherwise default to /revoke
+   */
+  revocationEndpoint?: string;
+
+  /**
    * OAuth 2.0 Authorization Server Metadata endpoint or OpenID
    * Connect Discovery 1.0 endpoint.
    *
@@ -135,7 +145,7 @@ export interface ClientSettings {
 }
 
 
-type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint' | 'introspectionEndpoint';
+type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint' | 'introspectionEndpoint' | 'revocationEndpoint';
 
 export class OAuth2Client {
 
@@ -245,6 +255,27 @@ export class OAuth2Client {
   }
 
   /**
+   * Revoke a token
+   *
+   * This will revoke a token, provided that the server supports this feature.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc7009
+   */
+  async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<void> {
+    let tokenValue = token.accessToken;
+    if (tokenTypeHint === 'refresh_token') {
+      tokenValue = token.refreshToken!;
+    }
+
+    const body: RevocationRequest = {
+      token: tokenValue,
+      token_type_hint: tokenTypeHint,
+    };
+    return this.request('revocationEndpoint', body);
+
+  }
+
+  /**
    * Returns a url for an OAuth2 endpoint.
    *
    * Potentially fetches a discovery document to get it.
@@ -277,6 +308,8 @@ export class OAuth2Client {
         return resolve('/.well-known/oauth-authorization-server', this.settings.server);
       case 'introspectionEndpoint':
         return resolve('/introspect', this.settings.server);
+      case 'revocationEndpoint':
+        return resolve('/revoke', this.settings.server);
     }
 
   }
@@ -314,6 +347,7 @@ export class OAuth2Client {
       ['authorization_endpoint', 'authorizationEndpoint'],
       ['token_endpoint', 'tokenEndpoint'],
       ['introspection_endpoint', 'introspectionEndpoint'],
+      ['revocation_endpoint', 'revocationEndpoint'],
     ] as const;
 
     if (this.serverMetadata === null) return;
@@ -334,6 +368,7 @@ export class OAuth2Client {
    */
   async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
   async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
+  async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<void>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
 
     const uri = await this.getEndpoint(endpoint);
@@ -378,24 +413,24 @@ export class OAuth2Client {
       headers,
     });
 
+    let responseBody;
+    if (resp.status !== 204 && resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.startsWith('application/json')) {
+      responseBody = await resp.json();
+    }
     if (resp.ok) {
-      return await resp.json();
+      return responseBody;
     }
 
-    let jsonError;
     let errorMessage;
     let oauth2Code;
-    if (resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.startsWith('application/json')) {
-      jsonError = await resp.json();
-    }
 
-    if (jsonError?.error) {
+    if (responseBody.error) {
       // This is likely an OAUth2-formatted error
-      errorMessage = 'OAuth2 error ' + jsonError.error + '.';
-      if (jsonError.error_description) {
-        errorMessage += ' ' + jsonError.error_description;
+      errorMessage = 'OAuth2 error ' + responseBody.error + '.';
+      if (responseBody.error_description) {
+        errorMessage += ' ' + responseBody.error_description;
       }
-      oauth2Code = jsonError.error;
+      oauth2Code = responseBody.error;
 
     } else {
       errorMessage = 'HTTP Error ' + resp.status + ' ' + resp.statusText;

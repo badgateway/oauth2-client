@@ -281,6 +281,16 @@ export type IntrospectionResponse = {
 
 }
 
+/**
+ * Revocaton request.
+ *
+ * https://datatracker.ietf.org/doc/html/rfc7009#section-2.1
+ */
+export type RevocationRequest = {
+  token: string;
+  token_type_hint?: OAuth2TokenTypeHint;
+}
+
 export type OAuth2ErrorCode =
   | 'invalid_request'
   | 'invalid_client'
@@ -293,4 +303,3 @@ export type OAuth2ErrorCode =
    * RFC 8707
    */
   | 'invalid_target';
-
