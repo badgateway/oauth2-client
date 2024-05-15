@@ -61,6 +61,7 @@ type GetTokenParams = {
   redirectUri: string;
   state?: string;
   codeVerifier?:string;
+  extraParams?: Record<string, string>;
 
   /**
    * The resource the client intends to access.
@@ -125,6 +126,12 @@ export class OAuth2AuthorizationCodeClient {
 
   async getTokenFromCodeRedirect(url: string|URL, params: Omit<GetTokenParams, 'code'> ): Promise<OAuth2Token> {
 
+    const disallowed = ['codeVerifier', 'redirectUri', 'resource', 'state'];
+
+    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
+      throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
+    }
+
     const { code } = await this.validateResponse(url, {
       state: params.state
     });
@@ -133,6 +140,7 @@ export class OAuth2AuthorizationCodeClient {
       code,
       redirectUri: params.redirectUri,
       codeVerifier: params.codeVerifier,
+      extraParams: params.extraParams
     });
 
   }
@@ -181,6 +189,7 @@ export class OAuth2AuthorizationCodeClient {
       redirect_uri: params.redirectUri,
       code_verifier: params.codeVerifier,
       resource: params.resource,
+      ...params?.extraParams,
     };
     return this.client.tokenResponseToOAuth2Token(this.client.request('tokenEndpoint', body));
 
