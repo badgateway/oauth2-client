@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.4.0 (????-??-??)
+------------------
+
+* More robust error handling. When an error is emitted, you now give you access
+  to the emitted HTTP Response and response body.
+
+
 2.3.0 (2024-02-03)
 ------------------
 
@@ -8,7 +15,7 @@ Changelog
   the `client_id`.
 * Support for the `resource` parameter from RFC 8707.
 * Add support for `scope` parameter to `refresh()`.
-* Support for RFC 7009, Token Revocation.
+* Support for RFC 7009, Token Revocation (@adambom).
 
 
 2.2.4 (2023-09-05)
