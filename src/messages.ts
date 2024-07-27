@@ -76,6 +76,7 @@ export type TokenResponse = {
 }
 
 type OAuth2ResponseType = 'code' | 'token';
+type OAuth2ResponseMode = 'query' | 'fragment';
 type OAuth2GrantType = 'authorization_code' | 'implicit' | 'password' | 'client_credentials' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:jwt-bearer' | 'urn:ietf:params:oauth:grant-type:saml2-bearer';
 type OAuth2AuthMethod = 'none' | 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'tls_client_auth' | 'self_signed_tls_client_auth';
 type OAuth2CodeChallengeMethod = 'S256' | 'plain';
@@ -133,7 +134,7 @@ export type ServerMetadataResponse = {
    * JSON array containing a list of the OAuth 2.0 "response_mode"
    * values that this authorization server supports
    */
-  response_modes_supported?: string[];
+  response_modes_supported?: OAuth2ResponseMode[];
 
   /**
    * List of supported grant types by the server
