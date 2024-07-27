@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.4.0 (????-??-??)
+2.4.0 (2024-07-27)
 ------------------
 
 * More robust error handling. When an error is emitted, you now give you access
