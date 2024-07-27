@@ -6,6 +6,7 @@ Changelog
 
 * More robust error handling. When an error is emitted, you now give you access
   to the emitted HTTP Response and response body.
+* Support for `response_mode=fragment` in the `authorization_code` flow.
 
 
 2.3.0 (2024-02-03)

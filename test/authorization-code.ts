@@ -326,6 +326,59 @@ describe('authorization-code', () => {
 
     });
 
+  });
+
+
+  describe('validateResponse', () => {
+
+    const client = new OAuth2Client({
+      server: 'http://foo/',
+      tokenEndpoint: '/token',
+      clientId: 'test-client-id',
+    });
+
+    it('should correctly parse a valid URI from a OAUth2 server redirect', () => {
+
+      expect(
+        client.authorizationCode.validateResponse('https://example/?code=123&scope=scope1%20scope2', {})
+      ).to.deep.equal({
+        code: '123',
+        scope: ['scope1', 'scope2']
+      });
+
+    });
+    it('should work when paramaters are set into the fragment', () => {
+
+      expect(
+        client.authorizationCode.validateResponse('https://example/#code=123&scope=scope1%20scope2', {})
+      ).to.deep.equal({
+        code: '123',
+        scope: ['scope1', 'scope2']
+      });
+
+    });
+    it('should validate the state parameter', () => {
+
+      expect(
+        client.authorizationCode.validateResponse('https://example/?code=123&scope=scope1%20scope2&state=my-state', {state: 'my-state'})
+      ).to.deep.equal({
+        code: '123',
+        scope: ['scope1', 'scope2']
+      });
+
+    });
+    it('should error if the state did not match', () => {
+
+      let caught = false;
+      try {
+        client.authorizationCode.validateResponse('https://example/?code=123&scope=scope1%20scope2', {state: 'my-state'});
+      } catch (err) {
+        caught = true;
+      }
+      expect(caught).to.equal(true);
+
+    });
 
   });
+
 });

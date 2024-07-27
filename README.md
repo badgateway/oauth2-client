@@ -19,6 +19,7 @@ since Node 18 (but it works with Polyfills on Node 14 and 16).
 * OAuth2 Token Introspection ([RFC7662][3]).
 * Resource Indicators for OAuth 2.0 ([RFC8707][5]).
 * OAuth2 Token Revocation ([RFC7009][6]).
+* [OAuth 2.0 Multiple Response Type Encoding Practices](https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html)
 
 ## Installation
 

@@ -38,6 +38,19 @@ type GetAuthorizeUrlParams = {
    * Any parameters listed here will be added to the query string for the authorization server endpoint.
    */
   extraParams?: Record<string, string>;
+
+  /**
+   * By default response parameters for the authorization_flow will be added
+   * to the query string.
+   *
+   * Some servers let you put this in the fragment instead. This may be
+   * benefical if your client is a browser, as embedding the authorization
+   * code in the fragment part of the URI prevents it from being sent back
+   * to the server.
+   *
+   * See: https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html
+   */
+  responseMode?: 'query' | 'fragment';
 }
 
 type ValidateResponseResult = {
@@ -114,6 +127,11 @@ export class OAuth2AuthorizationCodeClient {
     if (params.resource) for(const resource of [].concat(params.resource as any)) {
       query.append('resource', resource);
     }
+
+    if (params.responseMode && params.responseMode!=='query') {
+      query.append('response_mode', params.responseMode);
+    }
+
     if (params.extraParams) for(const [k,v] of Object.entries(params.extraParams)) {
       if (query.has(k)) throw new Error(`Property in extraParams would overwrite standard property: ${k}`);
       query.set(k, v);
@@ -125,7 +143,7 @@ export class OAuth2AuthorizationCodeClient {
 
   async getTokenFromCodeRedirect(url: string|URL, params: Omit<GetTokenParams, 'code'> ): Promise<OAuth2Token> {
 
-    const { code } = await this.validateResponse(url, {
+    const { code } = this.validateResponse(url, {
       state: params.state
     });
 
@@ -144,9 +162,14 @@ export class OAuth2AuthorizationCodeClient {
    * This function takes the url and validate the response. If the user
    * redirected back with an error, an error will be thrown.
    */
-  async validateResponse(url: string|URL, params: {state?: string}): Promise<ValidateResponseResult> {
+  validateResponse(url: string|URL, params: {state?: string}): ValidateResponseResult {
 
-    const queryParams = new URL(url).searchParams;
+    url = new URL(url);
+    let queryParams = url.searchParams;
+    if (!queryParams.has('code') && !queryParams.has('error') && url.hash.length>0) {
+      // Try the fragment
+      queryParams = new URLSearchParams(url.hash.slice(1));
+    }
 
     if (queryParams.has('error')) {
       throw new OAuth2Error(
