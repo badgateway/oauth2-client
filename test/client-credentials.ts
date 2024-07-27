@@ -1,5 +1,5 @@
 import { testServer } from './test-server';
-import { OAuth2Client } from '../src';
+import { OAuth2Client, OAuth2HttpError } from '../src';
 import { expect } from 'chai';
 
 describe('client-credentials', () => {
@@ -121,5 +121,113 @@ describe('client-credentials', () => {
     });
   });
 
+  describe('error handling', async() => {
+
+    it('should create a OAuth2HttpError if an error was thrown', async() => {
+
+      const server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'oauth2-error',
+        clientSecret: 'test-client-secret',
+        authenticationMethod: 'client_secret_post'
+      });
+
+      const resource = [
+        'https://example/resource1',
+        'https://example/resource2',
+      ];
+
+      try {
+        await client.clientCredentials({
+          resource,
+        });
+        throw new Error('This operation should have failed');
+      } catch (err:any) {
+
+        expect(err).to.be.instanceof(OAuth2HttpError);
+        expect(err.response).to.be.instanceof(Response);
+        expect(err.oauth2Code).to.equal('invalid_client');
+        expect(err.parsedBody).to.deep.equal({
+          error: 'invalid_client',
+          error_description: 'OOps!',
+        });
+
+      }
+
+    });
+    it('should create a OAuth2HttpError also if a non-oauth2 error was thrown with a JSON response', async() => {
+
+      const server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'json-error',
+        clientSecret: 'test-client-secret',
+        authenticationMethod: 'client_secret_post'
+      });
+
+      const resource = [
+        'https://example/resource1',
+        'https://example/resource2',
+      ];
+
+      try {
+        await client.clientCredentials({
+          resource,
+        });
+        throw new Error('This operation should have failed');
+      } catch (err:any) {
+
+        expect(err).to.be.instanceof(OAuth2HttpError);
+        expect(err.response).to.be.instanceof(Response);
+        expect(err.httpCode).to.equal(418);
+        expect(err.oauth2Code).to.equal(null);
+        expect(err.parsedBody).to.deep.equal({
+          status: 418,
+          title: 'OOps!',
+          type: 'https://example/dummy',
+        });
+
+      }
+
+    });
+    it('should create a OAuth2HttpError when a generic HTTP error was thrown ', async() => {
+
+      const server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'general-http-error',
+        clientSecret: 'test-client-secret',
+        authenticationMethod: 'client_secret_post'
+      });
+
+      const resource = [
+        'https://example/resource1',
+        'https://example/resource2',
+      ];
+
+      try {
+        await client.clientCredentials({
+          resource,
+        });
+        throw new Error('This operation should have failed');
+      } catch (err:any) {
+
+        expect(err).to.be.instanceof(OAuth2HttpError);
+        expect(err.response).to.be.instanceof(Response);
+        expect(err.oauth2Code).to.equal(null);
+        expect(err.parsedBody).to.equal(undefined);
+
+      }
+
+    });
+
+  });
 
 });

@@ -11,7 +11,7 @@ import {
   ServerMetadataResponse,
   TokenResponse,
 } from './messages';
-import { OAuth2Error } from './error';
+import { OAuth2HttpError } from './error';
 import { OAuth2AuthorizationCodeClient } from './client/authorization-code';
 
 
@@ -414,7 +414,7 @@ export class OAuth2Client {
     });
 
     let responseBody;
-    if (resp.status !== 204 && resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.startsWith('application/json')) {
+    if (resp.status !== 204 && resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.match(/^application\/(.*\+)?json/)) {
       responseBody = await resp.json();
     }
     if (resp.ok) {
@@ -424,7 +424,7 @@ export class OAuth2Client {
     let errorMessage;
     let oauth2Code;
 
-    if (responseBody.error) {
+    if (responseBody?.error) {
       // This is likely an OAUth2-formatted error
       errorMessage = 'OAuth2 error ' + responseBody.error + '.';
       if (responseBody.error_description) {
@@ -439,7 +439,7 @@ export class OAuth2Client {
       }
       oauth2Code = null;
     }
-    throw new OAuth2Error(errorMessage, oauth2Code, resp.status);
+    throw new OAuth2HttpError(errorMessage, oauth2Code, resp, responseBody);
   }
 
   /**

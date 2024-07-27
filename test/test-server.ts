@@ -26,6 +26,9 @@ export function testServer() {
     lastRequest = ctx.request;
     return next();
   });
+  app.use(oauth2Error);
+  app.use(jsonError);
+  app.use(generalHttpError);
   app.use(issueToken);
   app.use(revokeToken);
   app.use(discover);
@@ -51,7 +54,49 @@ export function testServer() {
 
 }
 
+const oauth2Error: Middleware = (ctx, next) => {
 
+  if (ctx.request.body.client_id !== 'oauth2-error') {
+    return next();
+  }
+
+  ctx.response.body = {
+    error: 'invalid_client',
+    error_description: 'OOps!',
+  };
+
+  ctx.response.status = 400;
+  ctx.response.type = 'application/json';
+
+
+};
+const jsonError: Middleware = (ctx, next) => {
+
+  if (ctx.request.body.client_id !== 'json-error') {
+    return next();
+  }
+
+  ctx.response.body = {
+    type: 'https://example/dummy',
+    title: 'OOps!',
+    status: 418,
+  };
+
+  ctx.response.status = 418;
+  ctx.response.type = 'application/problem+json';
+
+};
+const generalHttpError: Middleware = (ctx, next) => {
+
+  if (ctx.request.body.client_id !== 'general-http-error') {
+    return next();
+  }
+
+  ctx.response.body = 'We\'re super broken RN!';
+  ctx.response.status = 500;
+  ctx.response.type = 'text/plain';
+
+};
 
 const issueToken: Middleware = (ctx, next) => {
 

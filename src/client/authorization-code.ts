@@ -152,7 +152,6 @@ export class OAuth2AuthorizationCodeClient {
       throw new OAuth2Error(
         queryParams.get('error_description') ?? 'OAuth2 error',
         queryParams.get('error') as any,
-        0,
       );
     }
 
