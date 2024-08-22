@@ -38,7 +38,7 @@ describe('tokenResponseToOAuth2Token', () => {
       expect(err).to.be.an.instanceof(TypeError);
       caught = true;
     }
-    
+
     expect(caught).to.equal(true);
 
   });
@@ -55,7 +55,7 @@ describe('tokenResponseToOAuth2Token', () => {
       expect(err).to.be.an.instanceof(TypeError);
       caught = true;
     }
-    
+
     expect(caught).to.equal(true);
 
   });
