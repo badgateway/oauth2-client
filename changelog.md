@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.4.1 (????-??-??)
+2.4.1 (2024-08-22)
 ------------------
 
 * #151: Add 'Accept' header on token requests to fix a Github compatibility
