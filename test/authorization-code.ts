@@ -182,6 +182,7 @@ describe('authorization-code', () => {
 
       const request = server.lastRequest();
       expect(request.headers.get('Authorization')).to.equal(null);
+      expect(request.headers.get('Accept')).to.equal('application/json');
 
       expect(request.body).to.eql({
         client_id: 'test-client-id',
@@ -215,6 +216,7 @@ describe('authorization-code', () => {
 
       const request = server.lastRequest();
       expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
+      expect(request.headers.get('Accept')).to.equal('application/json');
 
       expect(request.body).to.eql({
         grant_type: 'authorization_code',
@@ -248,6 +250,7 @@ describe('authorization-code', () => {
 
       const request = server.lastRequest();
       expect(request.headers.get('Authorization')).to.equal(null);
+      expect(request.headers.get('Accept')).to.equal('application/json');
 
       expect(request.body).to.eql({
         client_id: 'test-client-id',
@@ -281,6 +284,7 @@ describe('authorization-code', () => {
 
       const request = server.lastRequest();
       expect(request.headers.get('Authorization')).to.equal(null);
+      expect(request.headers.get('Accept')).to.equal('application/json');
 
       expect(request.body).to.eql({
         client_id: 'test-client-id',
@@ -315,6 +319,7 @@ describe('authorization-code', () => {
 
       const request = server.lastRequest();
       expect(request.headers.get('Authorization')).to.equal(null);
+      expect(request.headers.get('Accept')).to.equal('application/json');
 
       expect(request.body).to.eql({
         client_id: 'test-client-id',
