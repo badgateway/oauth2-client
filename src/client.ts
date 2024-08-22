@@ -448,15 +448,20 @@ export class OAuth2Client {
   /**
    * Converts the JSON response body from the token endpoint to an OAuth2Token type.
    */
-  tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
+  async tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
 
-    return resp.then(body => {
-      return {
-        accessToken: body.access_token,
-        expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-        refreshToken: body.refresh_token ?? null,
-      };
-    });
+    const body = await resp;
+
+    if (!body?.access_token) {
+      console.warn('Invalid OAuth2 Token Response: ', body);
+      throw new TypeError('We received an invalid token response from an OAuth2 server.');
+    }
+
+    return {
+      accessToken: body.access_token,
+      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
+      refreshToken: body.refresh_token ?? null,
+    };
 
   }
 
