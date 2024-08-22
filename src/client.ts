@@ -375,6 +375,9 @@ export class OAuth2Client {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/x-www-form-urlencoded',
+      // Although it shouldn't be needed, Github OAUth2 will return JSON
+      // unless this is set.
+      'Accept': 'application/json',
     };
 
     let authMethod = this.settings.authenticationMethod;
@@ -447,11 +450,13 @@ export class OAuth2Client {
    */
   tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
 
-    return resp.then(body => ({
-      accessToken: body.access_token,
-      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-      refreshToken: body.refresh_token ?? null,
-    }));
+    return resp.then(body => {
+      return {
+        accessToken: body.access_token,
+        expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
+        refreshToken: body.refresh_token ?? null,
+      };
+    });
 
   }
 
