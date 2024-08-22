@@ -6,6 +6,7 @@ Changelog
 
 * #151: Add 'Accept' header on token requests to fix a Github compatibility
   issue.
+* #151: Throw error when we get an invalid reply from a token endpoint.
 
 
 2.4.0 (2024-07-27)
