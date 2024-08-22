@@ -1,8 +1,8 @@
-module.exports = [
+export default [
   {
     entry: './src/index',
     output: {
-      path: __dirname + '/browser',
+      path: import.meta.dirname + '/browser',
       filename: 'oauth2-client.min.js',
       library: 'OAuth2Client',
       libraryTarget: 'umd'
