@@ -5,6 +5,7 @@ import {
   IntrospectionRequest,
   IntrospectionResponse,
   PasswordRequest,
+  JwtBearerRequest,
   OAuth2TokenTypeHint,
   RefreshRequest,
   RevocationRequest,
@@ -40,6 +41,15 @@ type PasswordParams = {
    */
   resource?: string | string[];
 
+}
+
+type JwtBearerParams = {
+  /**
+   * The JSON Web Token to use for the JWT Bearer token request.
+   */
+  assertion: string;
+
+  scope?: string[];
 }
 
 /**
@@ -79,8 +89,8 @@ export interface ClientSettings {
    * OAuth2 clientSecret
    *
    * This is required when using the 'client_secret_basic' authenticationMethod
-   * for the client_credentials and password flows, but not authorization_code
-   * or implicit.
+   * for the client_credentials and password flows, but not authorization_code,
+   * implicit or JWT Bearer.
    */
   clientSecret?: string;
 
@@ -226,6 +236,19 @@ export class OAuth2Client {
   }
 
   /**
+   * Retrieves an OAuth2 token using the 'urn:ietf:params:oauth:grant-type:jwt-bearer' grant.
+   */
+  async jwtBearer(params: JwtBearerParams): Promise<OAuth2Token> {
+
+    const body: JwtBearerRequest = {
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: params.assertion,
+      scope: params.scope?.join(' '),
+    };
+    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+  }
+
+  /**
    * Returns the helper object for the `authorization_code` grant.
    */
   get authorizationCode(): OAuth2AuthorizationCodeClient {
@@ -366,7 +389,7 @@ export class OAuth2Client {
   /**
    * Does a HTTP request on the 'token' endpoint.
    */
-  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
+  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | JwtBearerRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
   async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
   async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<void>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
