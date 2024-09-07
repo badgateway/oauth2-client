@@ -6,7 +6,7 @@ build: dist/build browser/oauth2-client.min.js
 
 .PHONY:test
 test:
-	node --require ts-node/register --test ./test/*.ts
+	./node_modules/.bin/tsx --test test/*.ts
 
 .PHONY:lint
 lint:

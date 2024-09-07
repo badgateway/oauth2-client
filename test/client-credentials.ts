@@ -1,11 +1,19 @@
 import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client, OAuth2HttpError } from '../src';
-import { describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 
 describe('client-credentials', () => {
+  let server: ReturnType<typeof testServer>;
+
+  after(() => {
+    if (server) {
+      server.close();
+    }
+
+  });
   it('should work with client_secret_basic', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -32,7 +40,7 @@ describe('client-credentials', () => {
     });
   });
   it('should support extra parameters', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -66,7 +74,7 @@ describe('client-credentials', () => {
   });
 
   it('should work with client_secret_post', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -85,14 +93,14 @@ describe('client-credentials', () => {
 
     const request = server.lastRequest();
 
-    assert.equal(request.body, {
+    assert.deepEqual(request.body, {
       client_id: 'test-client-id',
       client_secret: 'test-client-secret',
       grant_type: 'client_credentials',
     });
   });
   it('should support the resource parameter', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -126,7 +134,7 @@ describe('client-credentials', () => {
 
   describe('error handling', async () => {
     it('should create a OAuth2HttpError if an error was thrown', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
@@ -157,7 +165,7 @@ describe('client-credentials', () => {
       }
     });
     it('should create a OAuth2HttpError also if a non-oauth2 error was thrown with a JSON response', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
@@ -190,7 +198,7 @@ describe('client-credentials', () => {
       }
     });
     it('should create a OAuth2HttpError when a generic HTTP error was thrown ', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,

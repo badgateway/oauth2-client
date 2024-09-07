@@ -1,10 +1,17 @@
 import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client } from '../src';
-import { describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 
 describe('Token revocation', () => {
   const server = testServer();
+
+  after(() => {
+    if (server) {
+      server.close();
+    }
+  });
+
   describe('should revoke access token when requested', async () => {
     const client = new OAuth2Client({
       server: server.url,

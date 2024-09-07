@@ -1,16 +1,24 @@
 import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client } from '../src';
-import { describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 
 // Example directly taken from https://datatracker.ietf.org/doc/html/rfc7636
 const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
 const codeChallenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';
 
 describe('authorization-code', () => {
+  let server: ReturnType<typeof testServer>;
+
+  after(() => {
+    if (server) {
+      server.close();
+    }
+  });
+
   describe('Authorization endpoint redirect', () => {
     it('should generate correct urls for the authorization endpoint', async () => {
-      const server = testServer();
+      server = testServer();
       const client = new OAuth2Client({
         server: server.url,
         authorizationEndpoint: '/authorize',
@@ -35,7 +43,7 @@ describe('authorization-code', () => {
       );
     });
     it('should support extraparams', async () => {
-      const server = testServer();
+      server = testServer();
       const client = new OAuth2Client({
         server: server.url,
         authorizationEndpoint: '/authorize',
@@ -64,7 +72,7 @@ describe('authorization-code', () => {
       );
     });
     it('should throw error when user rewrote params by extraparams', async () => {
-      const server = testServer();
+      server = testServer();
       const client = new OAuth2Client({
         server: server.url,
         authorizationEndpoint: '/authorize',
@@ -97,7 +105,7 @@ describe('authorization-code', () => {
       assert.fail('Should have thrown');
     });
     it('should support PKCE', async () => {
-      const server = testServer();
+      server = testServer();
       const client = new OAuth2Client({
         server: server.url,
         authorizationEndpoint: '/authorize',
@@ -123,7 +131,7 @@ describe('authorization-code', () => {
       );
     });
     it('should support the resource parameter', async () => {
-      const server = testServer();
+      server = testServer();
       const client = new OAuth2Client({
         server: server.url,
         authorizationEndpoint: '/authorize',
@@ -139,7 +147,7 @@ describe('authorization-code', () => {
       });
       for (const r of resource) params.append('resource', r);
 
-      assert(
+      assert.equal(
         await client.authorizationCode.getAuthorizeUri({
           redirectUri,
           resource,
@@ -151,7 +159,7 @@ describe('authorization-code', () => {
 
   describe('Token endpoint calls', () => {
     it('should send requests to the token endpoint', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
@@ -182,7 +190,7 @@ describe('authorization-code', () => {
     });
 
     it('should send client_id and client_secret in the Authorization header if secret was specified', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
@@ -216,7 +224,7 @@ describe('authorization-code', () => {
     });
 
     it('should should support PKCE', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
@@ -248,7 +256,7 @@ describe('authorization-code', () => {
       });
     });
     it('should not use Basic Auth if no secret is provided, even if client_secret_basic is set.', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
@@ -280,7 +288,7 @@ describe('authorization-code', () => {
     });
 
     it('should support the resource parameter', async () => {
-      const server = testServer();
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,

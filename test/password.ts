@@ -1,11 +1,19 @@
 import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client } from '../src';
-import { describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 
 describe('password', () => {
+  let server: ReturnType<typeof testServer>;
+
+  after(() => {
+    if (server) {
+      server.close();
+    }
+  });
+
   it('should work with client_secret_basic', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -39,7 +47,7 @@ describe('password', () => {
   });
 
   it('should work with client_secret_post', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -69,7 +77,7 @@ describe('password', () => {
   });
 
   it('should support the resource parameter', async () => {
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -92,7 +100,7 @@ describe('password', () => {
 
     const request = server.lastRequest();
 
-    assert.equal(request.body, {
+    assert.deepEqual(request.body, {
       grant_type: 'password',
       password: 'password',
       username: 'user123',
