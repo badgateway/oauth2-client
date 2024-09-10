@@ -1,15 +1,23 @@
 import * as assert from 'node:assert';
 import { OAuth2Fetch, OAuth2Client } from '../src';
-import { describe, it } from 'node:test';
+import { afterEach, describe, it } from 'node:test';
 
 describe('FetchWrapper', () => {
+  let fetchWrapper: any;
+
+  afterEach(() => {
+    if (fetchWrapper) {
+      clearTimeout(fetchWrapper.refreshTimer);
+    }
+  });
+
   it('should use the token from getNewToken', async () => {
     const client = new OAuth2Client({
       clientId: 'foo',
       clientSecret: 'bar',
     });
 
-    const fetchWrapper = new OAuth2Fetch({
+    fetchWrapper = new OAuth2Fetch({
       client,
       getNewToken: () => {
         return {
@@ -36,7 +44,7 @@ describe('FetchWrapper', () => {
       clientSecret: 'bar',
     });
 
-    const fetchWrapper = new OAuth2Fetch({
+    fetchWrapper = new OAuth2Fetch({
       client,
       getNewToken: async () => {
         await new Promise((res) => setTimeout(res, 200));
@@ -64,7 +72,7 @@ describe('FetchWrapper', () => {
       clientSecret: 'bar',
     });
 
-    const fetchWrapper = new OAuth2Fetch({
+    fetchWrapper = new OAuth2Fetch({
       client,
       getNewToken: () => null,
       getStoredToken: () => {
@@ -92,7 +100,7 @@ describe('FetchWrapper', () => {
       clientSecret: 'bar',
     });
 
-    const fetchWrapper = new OAuth2Fetch({
+    fetchWrapper = new OAuth2Fetch({
       client,
       getNewToken: () => null,
       getStoredToken: async () => {

@@ -28,7 +28,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build --if-present
-    - run: node --require ts-node/register --test ./test/*.ts
+    - run: npx tsx --test test/*.ts
 
   lint:
     name: Lint
