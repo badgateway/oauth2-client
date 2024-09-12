@@ -476,7 +476,8 @@ function resolve(uri: string, base?: string): string {
 /**
  * Generates a query string.
  *
- * This function filters out any undefined values.
+ * If a value is undefined, it will be ignored.
+ * If a value is an array, it will add the parameter multiple times for each array value.
  */
 export function generateQueryString(params: Record<string, undefined | number | string | string[]>): string {
 
