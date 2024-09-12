@@ -1,4 +1,4 @@
-import { OAuth2Token } from './token';
+import { OAuth2Token } from './token.js';
 import {
   AuthorizationCodeRequest,
   ClientCredentialsRequest,
@@ -10,9 +10,9 @@ import {
   RevocationRequest,
   ServerMetadataResponse,
   TokenResponse,
-} from './messages';
-import { OAuth2HttpError } from './error';
-import { OAuth2AuthorizationCodeClient } from './client/authorization-code';
+} from './messages.js';
+import { OAuth2HttpError } from './error.js';
+import { OAuth2AuthorizationCodeClient } from './client/authorization-code.js';
 
 
 type ClientCredentialsParams = {

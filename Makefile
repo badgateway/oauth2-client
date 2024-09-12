@@ -30,7 +30,7 @@ dist/build: ${SOURCE_FILES}
 	./node_modules/.bin/tsc
 	touch dist/build
 
-browser/oauth2-client.min.js: ${SOURCE_FILES}
+browser/oauth2-client.min.js: ${SOURCE_FILES} webpack.config.js
 	mkdir -p browser
 	./node_modules/.bin/webpack
 
