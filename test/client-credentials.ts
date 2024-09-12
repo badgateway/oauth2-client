@@ -1,12 +1,19 @@
+import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client, OAuth2HttpError } from '../src';
-import { expect } from 'chai';
+import { after, describe, it } from 'node:test';
 
 describe('client-credentials', () => {
+  let server: ReturnType<typeof testServer>;
 
+  after(async () => {
+    if (server) {
+      await server.close();
+    }
+
+  });
   it('should work with client_secret_basic', async () => {
-
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -17,21 +24,23 @@ describe('client-credentials', () => {
 
     const result = await client.clientCredentials();
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
-    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('test-client-id:test-client-secret')
+    );
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       grant_type: 'client_credentials',
     });
   });
-  it('should support extra parameters', async() => {
-
-    const server = testServer();
+  it('should support extra parameters', async () => {
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -43,54 +52,55 @@ describe('client-credentials', () => {
     const result = await client.clientCredentials({
       extraParams: {
         foo: 'bar',
-      }
+      },
     });
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
-    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
-    expect(request.headers.get('Accept')).to.equal('application/json');
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('test-client-id:test-client-secret')
+    );
+    assert.equal(request.headers.get('Accept'), 'application/json');
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       grant_type: 'client_credentials',
       foo: 'bar',
     });
   });
 
   it('should work with client_secret_post', async () => {
-
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
-      authenticationMethod: 'client_secret_post'
+      authenticationMethod: 'client_secret_post',
     });
 
     const result = await client.clientCredentials();
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       client_id: 'test-client-id',
       client_secret: 'test-client-secret',
-      grant_type: 'client_credentials'
+      grant_type: 'client_credentials',
     });
   });
-  it('should support the resource parameter', async() => {
-
-    const server = testServer();
+  it('should support the resource parameter', async () => {
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -99,41 +109,39 @@ describe('client-credentials', () => {
       clientSecret: 'test-client-secret',
     });
 
-    const resource = [
-      'https://example/resource1',
-      'https://example/resource2',
-    ];
+    const resource = ['https://example/resource1', 'https://example/resource2'];
 
     const result = await client.clientCredentials({
       resource,
     });
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
-    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('test-client-id:test-client-secret')
+    );
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       grant_type: 'client_credentials',
       resource,
     });
   });
 
-  describe('error handling', async() => {
-
-    it('should create a OAuth2HttpError if an error was thrown', async() => {
-
-      const server = testServer();
+  describe('error handling', async () => {
+    it('should create a OAuth2HttpError if an error was thrown', async () => {
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
         tokenEndpoint: '/token',
         clientId: 'oauth2-error',
         clientSecret: 'test-client-secret',
-        authenticationMethod: 'client_secret_post'
+        authenticationMethod: 'client_secret_post',
       });
 
       const resource = [
@@ -146,29 +154,25 @@ describe('client-credentials', () => {
           resource,
         });
         throw new Error('This operation should have failed');
-      } catch (err:any) {
-
-        expect(err).to.be.instanceof(OAuth2HttpError);
-        expect(err.response).to.be.instanceof(Response);
-        expect(err.oauth2Code).to.equal('invalid_client');
-        expect(err.parsedBody).to.deep.equal({
+      } catch (err: any) {
+        assert.ok(err instanceof OAuth2HttpError);
+        assert.ok(err.response instanceof Response);
+        assert.equal(err.oauth2Code, 'invalid_client');
+        assert.deepEqual(err.parsedBody, {
           error: 'invalid_client',
           error_description: 'OOps!',
         });
-
       }
-
     });
-    it('should create a OAuth2HttpError also if a non-oauth2 error was thrown with a JSON response', async() => {
-
-      const server = testServer();
+    it('should create a OAuth2HttpError also if a non-oauth2 error was thrown with a JSON response', async () => {
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
         tokenEndpoint: '/token',
         clientId: 'json-error',
         clientSecret: 'test-client-secret',
-        authenticationMethod: 'client_secret_post'
+        authenticationMethod: 'client_secret_post',
       });
 
       const resource = [
@@ -181,31 +185,27 @@ describe('client-credentials', () => {
           resource,
         });
         throw new Error('This operation should have failed');
-      } catch (err:any) {
-
-        expect(err).to.be.instanceof(OAuth2HttpError);
-        expect(err.response).to.be.instanceof(Response);
-        expect(err.httpCode).to.equal(418);
-        expect(err.oauth2Code).to.equal(null);
-        expect(err.parsedBody).to.deep.equal({
+      } catch (err: any) {
+        assert.ok(err instanceof OAuth2HttpError);
+        assert.ok(err.response instanceof Response);
+        assert.equal(err.httpCode, 418);
+        assert.equal(err.oauth2Code, null);
+        assert.deepEqual(err.parsedBody, {
           status: 418,
           title: 'OOps!',
           type: 'https://example/dummy',
         });
-
       }
-
     });
-    it('should create a OAuth2HttpError when a generic HTTP error was thrown ', async() => {
-
-      const server = testServer();
+    it('should create a OAuth2HttpError when a generic HTTP error was thrown ', async () => {
+      server = testServer();
 
       const client = new OAuth2Client({
         server: server.url,
         tokenEndpoint: '/token',
         clientId: 'general-http-error',
         clientSecret: 'test-client-secret',
-        authenticationMethod: 'client_secret_post'
+        authenticationMethod: 'client_secret_post',
       });
 
       const resource = [
@@ -218,17 +218,12 @@ describe('client-credentials', () => {
           resource,
         });
         throw new Error('This operation should have failed');
-      } catch (err:any) {
-
-        expect(err).to.be.instanceof(OAuth2HttpError);
-        expect(err.response).to.be.instanceof(Response);
-        expect(err.oauth2Code).to.equal(null);
-        expect(err.parsedBody).to.equal(undefined);
-
+      } catch (err: any) {
+        assert.ok(err instanceof OAuth2HttpError);
+        assert.ok(err.response instanceof Response);
+        assert.equal(err.oauth2Code, null);
+        assert.equal(err.parsedBody, undefined);
       }
-
     });
-
   });
-
 });

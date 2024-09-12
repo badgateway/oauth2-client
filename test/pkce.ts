@@ -1,6 +1,7 @@
+import * as assert from 'node:assert';
 import { generateCodeVerifier } from '../src';
 import { getCodeChallenge } from '../src/client/authorization-code';
-import { expect } from 'chai';
+import { describe, it } from 'node:test';
 
 describe('generateCodeVerifier', () => {
 
@@ -8,7 +9,7 @@ describe('generateCodeVerifier', () => {
 
     const out = await generateCodeVerifier();
     //console.debug(out, out.length);
-    expect(out).to.match(/^[A-Za-z0-9-_]{43}$/);
+    assert.match(out,/^[A-Za-z0-9-_]{43}$/);
 
   });
 
@@ -21,7 +22,7 @@ describe('getCodeChallenge', () => {
     const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
     const codeChallenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';
 
-    expect(await getCodeChallenge(codeVerifier)).to.eql(['S256', codeChallenge]);
+    assert.deepEqual(await getCodeChallenge(codeVerifier),['S256', codeChallenge]);
 
   });
 

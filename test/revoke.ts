@@ -1,11 +1,18 @@
+import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client } from '../src';
-import { expect } from 'chai';
+import { after, describe, it } from 'node:test';
 
 describe('Token revocation', () => {
   const server = testServer();
-  describe('should revoke access token when requested', async () => {
 
+  after(async () => {
+    if (server) {
+      await server.close();
+    }
+  });
+
+  describe('should revoke access token when requested', async () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
@@ -21,7 +28,7 @@ describe('Token revocation', () => {
         await client.revoke(token);
 
         const request = server.lastRequest();
-        expect(request.body).to.eql({
+        assert.deepEqual(request.body, {
           token: token.accessToken,
           token_type_hint: 'access_token',
         });
@@ -33,7 +40,7 @@ describe('Token revocation', () => {
         await client.revoke(token, 'access_token');
 
         const request = server.lastRequest();
-        expect(request.body).to.eql({
+        assert.deepEqual(request.body, {
           token: token.accessToken,
           token_type_hint: 'access_token',
         });
@@ -45,7 +52,7 @@ describe('Token revocation', () => {
         await client.revoke(token, 'refresh_token');
 
         const request = server.lastRequest();
-        expect(request.body).to.eql({
+        assert.deepEqual(request.body, {
           token: token.refreshToken,
           token_type_hint: 'refresh_token',
         });
@@ -62,7 +69,7 @@ describe('Token revocation', () => {
 
     it('Should discover revocation endpoint', async () => {
       const result = await client.getEndpoint('revocationEndpoint');
-      expect(result).to.equal(server.url + '/revoke');
+      assert.deepEqual(result, server.url + '/revoke');
     });
   });
 });
