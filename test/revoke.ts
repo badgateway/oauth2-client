@@ -6,9 +6,9 @@ import { after, describe, it } from 'node:test';
 describe('Token revocation', () => {
   const server = testServer();
 
-  after(() => {
+  after(async () => {
     if (server) {
-      server.close();
+      await server.close();
     }
   });
 

@@ -10,9 +10,9 @@ const codeChallenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';
 describe('authorization-code', () => {
   let server: ReturnType<typeof testServer>;
 
-  after(() => {
+  after(async () => {
     if (server) {
-      server.close();
+      await server.close();
     }
   });
 

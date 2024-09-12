@@ -6,9 +6,9 @@ import { after, describe, it } from 'node:test';
 describe('password', () => {
   let server: ReturnType<typeof testServer>;
 
-  after(() => {
+  after(async () => {
     if (server) {
-      server.close();
+      await server.close();
     }
   });
 
