@@ -213,45 +213,20 @@ export class OAuth2AuthorizationCodeClient {
 
 export async function generateCodeVerifier(): Promise<string> {
 
-  const webCrypto = getWebCrypto();
-  if (webCrypto) {
-    const arr = new Uint8Array(32);
-    webCrypto.getRandomValues(arr);
-    return base64Url(arr);
-  } else {
-
-    // Old node doesn't have 'webcrypto', so this is a fallback
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeCrypto = require('crypto');
-    return new Promise<string>((res, rej) => {
-      nodeCrypto.randomBytes(32, (err:Error, buf: Buffer) => {
-        if (err) rej(err);
-        res(buf.toString('base64url'));
-      });
-    });
-
-  }
+  const webCrypto = await getWebCrypto();
+  const arr = new Uint8Array(32);
+  webCrypto.getRandomValues(arr);
+  return base64Url(arr);
 
 }
 
 export async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
 
-  const webCrypto = getWebCrypto();
-  if (webCrypto?.subtle) {
-    return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
-  } else {
-    // Node 14.x fallback
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeCrypto = require('crypto');
-    const hash = nodeCrypto.createHash('sha256');
-    hash.update(stringToBuffer(codeVerifier));
-    return ['S256', hash.digest('base64url')];
-  }
-
+  const webCrypto = await getWebCrypto();
+  return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
 }
 
-function getWebCrypto() {
+async function getWebCrypto(): Promise<typeof window.crypto> {
 
   // Browsers
   if ((typeof window !== 'undefined' && window.crypto)) {
@@ -262,12 +237,8 @@ function getWebCrypto() {
     return self.crypto;
   }
   // Node
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const crypto = require('crypto');
-  if (crypto.webcrypto) {
-    return crypto.webcrypto;
-  }
-  return null;
+  return crypto.webcrypto;
 
 }
 
