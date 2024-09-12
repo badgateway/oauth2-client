@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.0.0 (????-??-??)
+------------------
+
+* Dropped support for Node 14 and 16.
+* Migrated the test suite from Mocha and Chai to node:test and node:assert
+  (@Zen-cronic).
+
+
 2.4.1 (2024-08-22)
 ------------------
 

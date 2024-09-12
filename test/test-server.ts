@@ -56,7 +56,7 @@ export function testServer() {
 
 const oauth2Error: Middleware = (ctx, next) => {
 
-  if (ctx.request.body.client_id !== 'oauth2-error') {
+  if (ctx.request.body?.client_id !== 'oauth2-error') {
     return next();
   }
 
@@ -72,7 +72,7 @@ const oauth2Error: Middleware = (ctx, next) => {
 };
 const jsonError: Middleware = (ctx, next) => {
 
-  if (ctx.request.body.client_id !== 'json-error') {
+  if (ctx.request.body?.client_id !== 'json-error') {
     return next();
   }
 
@@ -88,7 +88,7 @@ const jsonError: Middleware = (ctx, next) => {
 };
 const generalHttpError: Middleware = (ctx, next) => {
 
-  if (ctx.request.body.client_id !== 'general-http-error') {
+  if (ctx.request.body?.client_id !== 'general-http-error') {
     return next();
   }
 

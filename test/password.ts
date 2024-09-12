@@ -1,12 +1,19 @@
+import * as assert from 'node:assert';
 import { testServer } from './test-server';
 import { OAuth2Client } from '../src';
-import { expect } from 'chai';
+import { after, describe, it } from 'node:test';
 
 describe('password', () => {
+  let server: ReturnType<typeof testServer>;
+
+  after(async () => {
+    if (server) {
+      await server.close();
+    }
+  });
 
   it('should work with client_secret_basic', async () => {
-
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -17,70 +24,68 @@ describe('password', () => {
 
     const result = await client.password({
       username: 'user123',
-      password: 'password'
+      password: 'password',
     });
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
-    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
-    expect(request.headers.get('Accept')).to.equal('application/json');
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('test-client-id:test-client-secret')
+    );
+    assert.equal(request.headers.get('Accept'), 'application/json');
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       grant_type: 'password',
       password: 'password',
-      username: 'user123'
+      username: 'user123',
     });
   });
 
   it('should work with client_secret_post', async () => {
-
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
       clientId: 'test-client-id',
-      authenticationMethod: 'client_secret_post'
+      authenticationMethod: 'client_secret_post',
     });
 
     const result = await client.password({
       username: 'user123',
-      password: 'password'
+      password: 'password',
     });
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       grant_type: 'password',
       password: 'password',
       username: 'user123',
-      client_id: 'test-client-id'
+      client_id: 'test-client-id',
     });
   });
 
   it('should support the resource parameter', async () => {
-
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
       clientId: 'test-client-id',
-      authenticationMethod: 'client_secret_post'
+      authenticationMethod: 'client_secret_post',
     });
-    const resource = [
-      'https://example/resource1',
-      'https://example/resource2',
-    ];
+    const resource = ['https://example/resource1', 'https://example/resource2'];
 
     const result = await client.password({
       username: 'user123',
@@ -88,14 +93,14 @@ describe('password', () => {
       resource,
     });
 
-    expect(result.accessToken).to.equal('access_token_000');
-    expect(result.refreshToken).to.equal('refresh_token_000');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body, {
       grant_type: 'password',
       password: 'password',
       username: 'user123',
@@ -103,5 +108,4 @@ describe('password', () => {
       resource,
     });
   });
-
 });
