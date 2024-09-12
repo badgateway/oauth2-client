@@ -237,6 +237,7 @@ async function getWebCrypto(): Promise<typeof window.crypto> {
     return self.crypto;
   }
   // Node
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const crypto = require('crypto');
   return crypto.webcrypto;
 
