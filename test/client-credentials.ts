@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
-import { testServer } from './test-server';
-import { OAuth2Client, OAuth2HttpError } from '../src';
+import { testServer } from './test-server.js';
+import { OAuth2Client, OAuth2HttpError } from '../src/index.js';
 import { after, describe, it } from 'node:test';
 
 describe('client-credentials', () => {

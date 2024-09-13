@@ -1,5 +1,5 @@
 import * as assert from 'node:assert';
-import { OAuth2Client } from '../src';
+import { OAuth2Client } from '../src/index.js';
 import { describe, it } from 'node:test';
 
 describe('tokenResponseToOAuth2Token', () => {
