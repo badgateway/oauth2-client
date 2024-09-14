@@ -335,7 +335,7 @@ export class OAuth2Client {
     let discoverUrl;
     try {
       discoverUrl = await this.getEndpoint('discoveryEndpoint');
-    } catch (err) {
+    } catch (_err) {
       console.warn('[oauth2] OAuth2 discovery endpoint could not be determined. Either specify the "server" or "discoveryEndpoint');
       return;
     }
