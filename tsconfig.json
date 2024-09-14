@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "esnext",
         "target": "es2019",
 
         "strict": true,

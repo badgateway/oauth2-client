@@ -1,4 +1,4 @@
-import { OAuth2ErrorCode } from './messages';
+import { OAuth2ErrorCode } from './messages.js';
 
 /**
  * An error class for any error the server emits.

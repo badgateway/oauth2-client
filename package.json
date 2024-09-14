@@ -3,6 +3,7 @@
   "version": "2.4.2",
   "description": "OAuth2 client for browsers and Node.js. Tiny footprint, PKCE support",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "test": "make test",
     "prepublishOnly": "make build",

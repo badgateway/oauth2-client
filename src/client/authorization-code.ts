@@ -1,7 +1,7 @@
-import { OAuth2Client } from '../client';
-import { OAuth2Token } from '../token';
-import { AuthorizationCodeRequest } from '../messages';
-import { OAuth2Error } from '../error';
+import { OAuth2Client } from '../client.js';
+import { OAuth2Token } from '../token.js';
+import { AuthorizationCodeRequest } from '../messages.js';
+import { OAuth2Error } from '../error.js';
 
 type GetAuthorizeUrlParams = {
   /**
@@ -238,8 +238,8 @@ async function getWebCrypto(): Promise<typeof window.crypto> {
   }
   // Node
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const crypto = require('crypto');
-  return crypto.webcrypto;
+  const crypto = await import('crypto');
+  return crypto.webcrypto as typeof window.crypto;
 
 }
 
