@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.4.2 (????-??-??)
+2.4.2 (2024-09-14)
 ------------------
 
 * #161: Re-use old refresh_token if no new one was issued after a refresh.
