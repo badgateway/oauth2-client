@@ -203,7 +203,7 @@ export class OAuth2Fetch {
           // We had a refresh token, lets see if we can use it!
           newToken = await this.options.client.refreshToken(oldToken);
         }
-      } catch (err) {
+      } catch (_err) {
         console.warn('[oauth2] refresh token not accepted, we\'ll try reauthenticating');
       }
 

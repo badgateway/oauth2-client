@@ -372,7 +372,7 @@ describe('authorization-code', () => {
           'https://example/?code=123&scope=scope1%20scope2',
           { state: 'my-state' }
         );
-      } catch (err) {
+      } catch (_err) {
         caught = true;
       }
       assert.equal(caught, true);
