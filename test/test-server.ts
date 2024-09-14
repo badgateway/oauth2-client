@@ -105,11 +105,29 @@ const issueToken: Middleware = (ctx, next) => {
   }
 
   ctx.response.type = 'application/json';
-  ctx.response.body = {
-    access_token: 'access_token_000',
-    refresh_token: 'refresh_token_000',
-    expires_in: 3600,
-  };
+  if (ctx.request.body.refresh_token === 'refresh_token_000') {
+
+    ctx.response.body = {
+      access_token: 'access_token_001',
+      refresh_token: 'refresh_token_001',
+      expires_in: 3600,
+    };
+
+  } else if (ctx.request.body.refresh_token === 'refresh_token_001') {
+
+    ctx.response.body = {
+      access_token: 'access_token_002',
+      expires_in: 3600,
+    };
+
+  } else {
+
+    ctx.response.body = {
+      access_token: 'access_token_000',
+      refresh_token: 'refresh_token_000',
+      expires_in: 3600,
+    };
+  }
 
 };
 
