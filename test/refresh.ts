@@ -1,12 +1,20 @@
 import { testServer } from './test-server';
 import { OAuth2Client } from '../src';
-import { expect } from 'chai';
+import * as assert from 'node:assert';
+import { after, describe, it } from 'node:test';
 
 describe('refreshing tokens', () => {
 
+  let server: ReturnType<typeof testServer>;
+  after(async () => {
+    if (server) {
+      await server.close();
+    }
+
+  });
   it('should work', async () => {
 
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -21,16 +29,22 @@ describe('refreshing tokens', () => {
       expiresAt: null,
     });
 
-    expect(result.accessToken).to.equal('access_token_001');
-    expect(result.refreshToken).to.equal('refresh_token_001');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_001');
+    assert.equal(result.refreshToken, 'refresh_token_001');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
-    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
-    expect(request.headers.get('Accept')).to.equal('application/json');
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('test-client-id:test-client-secret')
+    );
+    assert.equal(
+      request.headers.get('Accept'),
+      'application/json'
+    );
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body,{
       grant_type: 'refresh_token',
       refresh_token: 'refresh_token_000',
     });
@@ -38,7 +52,7 @@ describe('refreshing tokens', () => {
 
   it('should re-use the old refresh token if no new one was issued', async () => {
 
-    const server = testServer();
+    server = testServer();
 
     const client = new OAuth2Client({
       server: server.url,
@@ -53,16 +67,22 @@ describe('refreshing tokens', () => {
       expiresAt: null,
     });
 
-    expect(result.accessToken).to.equal('access_token_002');
-    expect(result.refreshToken).to.equal('refresh_token_001');
-    expect(result.expiresAt).to.be.lessThanOrEqual(Date.now() + 3600_000);
-    expect(result.expiresAt).to.be.greaterThanOrEqual(Date.now() + 3500_000);
+    assert.equal(result.accessToken, 'access_token_002');
+    assert.equal(result.refreshToken, 'refresh_token_001');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
     const request = server.lastRequest();
-    expect(request.headers.get('Authorization')).to.equal('Basic ' + btoa('test-client-id:test-client-secret'));
-    expect(request.headers.get('Accept')).to.equal('application/json');
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('test-client-id:test-client-secret')
+    );
+    assert.equal(
+      request.headers.get('Accept'),
+      'application/json'
+    );
 
-    expect(request.body).to.eql({
+    assert.deepEqual(request.body,{
       grant_type: 'refresh_token',
       refresh_token: 'refresh_token_001',
     });
