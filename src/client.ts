@@ -181,7 +181,12 @@ export class OAuth2Client {
     if (params?.scope) body.scope = params.scope.join(' ');
     if (params?.resource) body.resource = params.resource;
 
-    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+    const newToken = await this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+    if (!newToken.refreshToken && token.refreshToken) {
+      // Reuse old refresh token if we didn't get a new one.
+      newToken.refreshToken = token.refreshToken;
+    }
+    return newToken;
 
   }
 
