@@ -7,6 +7,7 @@ Changelog
 * Dropped support for Node 14 and 16.
 * Migrated the test suite from Mocha and Chai to node:test and node:assert
   (@Zen-cronic).
+* Full conversion to ESM.
 
 
 2.4.2 (2024-09-14)
