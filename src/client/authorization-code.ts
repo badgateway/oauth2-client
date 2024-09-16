@@ -40,6 +40,11 @@ type GetAuthorizeUrlParams = {
   extraParams?: Record<string, string>;
 
   /**
+   * The authorization grant type being requested. Defaults to 'code'.
+   */
+  responseType?: string;
+
+  /**
    * By default response parameters for the authorization_flow will be added
    * to the query string.
    *
@@ -110,7 +115,7 @@ export class OAuth2AuthorizationCodeClient {
 
     const query = new URLSearchParams({
       client_id: this.client.settings.clientId,
-      response_type: 'code',
+      response_type: params.responseType || 'code',
       redirect_uri: params.redirectUri,
     });
     if (codeChallenge) {
