@@ -226,7 +226,7 @@ export async function getCodeChallenge(codeVerifier: string): Promise<['plain' |
   return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
 }
 
-async function getWebCrypto(): Promise<typeof window.crypto> | never {
+async function getWebCrypto(): Promise<typeof window.crypto> {
 
   // Browsers
   if ((typeof window !== 'undefined' && window.crypto)) {
