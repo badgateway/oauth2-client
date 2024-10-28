@@ -226,10 +226,15 @@ export async function getCodeChallenge(codeVerifier: string): Promise<['plain' |
   return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
 }
 
-async function getWebCrypto(): Promise<typeof window.crypto> {
+async function getWebCrypto(): Promise<typeof window.crypto> | never {
 
   // Browsers
   if ((typeof window !== 'undefined' && window.crypto)) {
+    if (!window.crypto.subtle?.digest) {
+      throw new Error(
+        "The context/environment is not secure, and does not support the 'crypto.subtle' module. See: https://developer.mozilla.org/en-US/docs/Web/API/Crypto/subtle for details"
+      );
+    }
     return window.crypto;
   }
   // Web workers possibly
