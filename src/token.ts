@@ -1,21 +1,19 @@
+interface OAuth2TokenExternal {
+  expiresAt: number;
+  token: string;
+  type: string;
+}
+
+interface OAuth2TokenInternal {
+  expiresAt: number;
+  token: string;
+  type: string;
+}
+
 /**
  * Token information
  */
-export type OAuth2Token = {
-  /**
-   * OAuth2 Access Token
-   */
-  accessToken: string;
-
-  /**
-   * When the Access Token expires.
-   *
-   * This is expressed as a unix timestamp in milliseconds.
-   */
-  expiresAt: number | null;
-
-  /**
-   * OAuth2 refresh token
-   */
-  refreshToken: string | null;
+export interface OAuth2Token {
+  external: OAuth2TokenExternal;
+  internal: OAuth2TokenInternal;
 };

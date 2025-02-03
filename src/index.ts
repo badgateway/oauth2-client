@@ -4,3 +4,5 @@ export { OAuth2Error, OAuth2HttpError } from './error.js';
 export { OAuth2Fetch } from './fetch-wrapper.js';
 export type { IntrospectionResponse } from './messages.js';
 export type { OAuth2Token } from './token.js';
+export { jwtDecode } from 'jwt-decode';
+export { default as pkceChallenge } from 'pkce-challenge';

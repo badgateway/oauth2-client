@@ -3,7 +3,7 @@ import { after, describe, it } from 'node:test';
 
 import { OAuth2Client } from '../src/index.js';
 
-import { testServer } from './test-server.js';
+import { testServer, TOKEN_TYPE } from './test-server.js';
 
 describe('password', () => {
   let server: ReturnType<typeof testServer>;
@@ -29,10 +29,12 @@ describe('password', () => {
       password: 'password',
     });
 
-    assert.equal(result.accessToken, 'access_token_000');
-    assert.equal(result.refreshToken, 'refresh_token_000');
-    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+    assert.equal(result.external.token, 'access_token_000');
+    assert.equal(result.internal.token, 'refresh_token_000');
+    assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+    assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+    assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+    assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
     const request = server.lastRequest();
     assert.equal(
@@ -63,10 +65,12 @@ describe('password', () => {
       password: 'password',
     });
 
-    assert.equal(result.accessToken, 'access_token_000');
-    assert.equal(result.refreshToken, 'refresh_token_000');
-    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+    assert.equal(result.external.token, 'access_token_000');
+    assert.equal(result.internal.token, 'refresh_token_000');
+    assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+    assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+    assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+    assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
     const request = server.lastRequest();
 
@@ -95,10 +99,12 @@ describe('password', () => {
       resource,
     });
 
-    assert.equal(result.accessToken, 'access_token_000');
-    assert.equal(result.refreshToken, 'refresh_token_000');
-    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+    assert.equal(result.external.token, 'access_token_000');
+    assert.equal(result.internal.token, 'refresh_token_000');
+    assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+    assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+    assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+    assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
     const request = server.lastRequest();
 

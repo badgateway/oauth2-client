@@ -1,7 +1,9 @@
 import * as assert from 'node:assert';
 import { after, describe, it } from 'node:test';
 
+import { OAuth2Endpoint } from '../src/client.js';
 import { OAuth2Client } from '../src/index.js';
+import { OAuth2TokenTypeHint } from '../src/messages.js';
 
 import { testServer } from './test-server.js';
 
@@ -31,32 +33,32 @@ describe('Token revocation', () => {
 
         const request = server.lastRequest();
         assert.deepEqual(request.body, {
-          token: token.accessToken,
-          token_type_hint: 'access_token',
+          token: token.external.token,
+          token_type_hint: OAuth2TokenTypeHint.AccessToken,
         });
       });
     });
 
     describe('When token type is specified as access token', () => {
       it('should supply access token', async () => {
-        await client.revoke(token, 'access_token');
+        await client.revoke(token, OAuth2TokenTypeHint.AccessToken);
 
         const request = server.lastRequest();
         assert.deepEqual(request.body, {
-          token: token.accessToken,
-          token_type_hint: 'access_token',
+          token: token.external.token,
+          token_type_hint: OAuth2TokenTypeHint.AccessToken,
         });
       });
     });
 
     describe('When token type is specified as refresh token', () => {
       it('should supply access token', async () => {
-        await client.revoke(token, 'refresh_token');
+        await client.revoke(token, OAuth2TokenTypeHint.RefreshToken);
 
         const request = server.lastRequest();
         assert.deepEqual(request.body, {
-          token: token.refreshToken,
-          token_type_hint: 'refresh_token',
+          token: token.internal.token,
+          token_type_hint: OAuth2TokenTypeHint.RefreshToken,
         });
       });
     });
@@ -70,7 +72,7 @@ describe('Token revocation', () => {
     });
 
     it('Should discover revocation endpoint', async () => {
-      const result = await client.getEndpoint('revocationEndpoint');
+      const result = await client.getEndpoint(OAuth2Endpoint.RevocationEndpoint);
       assert.deepEqual(result, server.url + '/revoke');
     });
   });

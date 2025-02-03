@@ -56,5 +56,9 @@
     "browser/",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "dependencies": {
+    "jwt-decode": "^4.0.0",
+    "pkce-challenge": "^4.1.0"
+  }
 }

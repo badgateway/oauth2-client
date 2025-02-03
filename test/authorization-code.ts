@@ -3,7 +3,7 @@ import { after, describe, it } from 'node:test';
 
 import { OAuth2Client } from '../src/index.js';
 
-import { testServer } from './test-server.js';
+import { testServer, TOKEN_TYPE } from './test-server.js';
 
 // Example directly taken from https://datatracker.ietf.org/doc/html/rfc7636
 const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
@@ -174,10 +174,12 @@ describe('authorization-code', () => {
         redirectUri: 'http://example/redirect',
       });
 
-      assert.equal(result.accessToken, 'access_token_000');
-      assert.equal(result.refreshToken, 'refresh_token_000');
-      assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-      assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+      assert.equal(result.external.token, 'access_token_000');
+      assert.equal(result.internal.token, 'refresh_token_000');
+      assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+      assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+      assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+      assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
       const request = server.lastRequest();
       assert.equal(request.headers.get('Authorization'), null);
@@ -206,10 +208,12 @@ describe('authorization-code', () => {
         redirectUri: 'http://example/redirect',
       });
 
-      assert.equal(result.accessToken, 'access_token_000');
-      assert.equal(result.refreshToken, 'refresh_token_000');
-      assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-      assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+      assert.equal(result.external.token, 'access_token_000');
+      assert.equal(result.internal.token, 'refresh_token_000');
+      assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+      assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+      assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+      assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
       const request = server.lastRequest();
       assert.equal(
@@ -240,10 +244,12 @@ describe('authorization-code', () => {
         codeVerifier,
       });
 
-      assert.equal(result.accessToken, 'access_token_000');
-      assert.equal(result.refreshToken, 'refresh_token_000');
-      assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-      assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+      assert.equal(result.external.token, 'access_token_000');
+      assert.equal(result.internal.token, 'refresh_token_000');
+      assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+      assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+      assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+      assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
       const request = server.lastRequest();
       assert.equal(request.headers.get('Authorization'), null);
@@ -272,10 +278,12 @@ describe('authorization-code', () => {
         redirectUri: 'http://example/redirect',
       });
 
-      assert.equal(result.accessToken, 'access_token_000');
-      assert.equal(result.refreshToken, 'refresh_token_000');
-      assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-      assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+      assert.equal(result.external.token, 'access_token_000');
+      assert.equal(result.internal.token, 'refresh_token_000');
+      assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+      assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+      assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+      assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
       const request = server.lastRequest();
       assert.equal(request.headers.get('Authorization'), null);
@@ -305,10 +313,12 @@ describe('authorization-code', () => {
         resource,
       });
 
-      assert.equal(result.accessToken, 'access_token_000');
-      assert.equal(result.refreshToken, 'refresh_token_000');
-      assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
-      assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+      assert.equal(result.external.token, 'access_token_000');
+      assert.equal(result.internal.token, 'refresh_token_000');
+      assert.ok((result.external.expiresAt as number) <= Date.now() + 300_000);
+      assert.ok((result.internal.expiresAt as number) <= Date.now() + 3600_000);
+      assert.equal(result.external.type, TOKEN_TYPE.Bearer);
+      assert.equal(result.internal.type, TOKEN_TYPE.Bearer);
 
       const request = server.lastRequest();
       assert.equal(request.headers.get('Authorization'), null);

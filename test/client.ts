@@ -3,6 +3,8 @@ import { describe, it } from 'node:test';
 
 import { OAuth2Client } from '../src/index.js';
 
+import { TOKEN_TYPE } from './test-server.js';
+
 describe('tokenResponseToOAuth2Token', () => {
   it('should convert a JSON response to a OAuth2Token', async () => {
     const client = new OAuth2Client({
@@ -10,16 +12,25 @@ describe('tokenResponseToOAuth2Token', () => {
     });
     const token = await client.tokenResponseToOAuth2Token(
       Promise.resolve({
-        token_type: 'bearer',
-        access_token: 'foo-bar',
+        external: {
+          access_token: 'foo-bar',
+          expires_in: 300,
+          token_type: TOKEN_TYPE.Bearer,
+        },
+        internal: {
+          access_token: 'foo-bar',
+          expires_in: 3600,
+          token_type: TOKEN_TYPE.Bearer,
+        }
       })
     );
 
-    assert.deepEqual(token, {
-      accessToken: 'foo-bar',
-      expiresAt: null,
-      refreshToken: null,
-    });
+    assert.equal(token.external.token, 'foo-bar');
+    assert.equal(token.internal.token, 'foo-bar');
+    assert.ok((token.external.expiresAt as number) <= Date.now() + 300_000);
+    assert.ok((token.internal.expiresAt as number) <= Date.now() + 3600_000);
+    assert.equal(token.external.type, TOKEN_TYPE.Bearer);
+    assert.equal(token.internal.type, TOKEN_TYPE.Bearer);
   });
 
   it('should error when an invalid JSON object is passed', async () => {
