@@ -1,7 +1,7 @@
 {
-  "name": "@badgateway/oauth2-client",
-  "version": "2.4.2",
-  "description": "OAuth2 client for browsers and Node.js. Tiny footprint, PKCE support",
+  "name": "@gtdevteamgt/oauth2-client",
+  "version": "1.0.0",
+  "description": "OAuth2 client for browsers and Node.js oriented for the Gaimngtec OAuth implementation https://gmntc.atlassian.net/wiki/spaces/SS/pages/319324165/Front+End. Tiny footprint, PKCE support.",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/badgateway/oauth2-client.git"
+    "url": "git+ssh://git@github.com:GTdevteamGT/oauth2-client.git"
   },
   "keywords": [
     "fetch",
@@ -25,28 +25,29 @@
     "RFC8414",
     "RFC8707"
   ],
-  "author": "Evert Pot (https://evertpot.com)",
-  "license": "MIT",
+  "author": "Gamingtec",
+  "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/badgateway/oauth2-client/issues"
+    "url": "https://github.com/GTdevteamGT/oauth2-client/issues"
   },
-  "homepage": "https://github.com/badgateway/oauth2-client#readme",
+  "homepage": "https://github.com/GTdevteamGT/oauth2-client#readme",
   "engines": {
     "node": ">= 14"
   },
   "devDependencies": {
     "@curveball/bodyparser": "^1.0.0",
-    "@curveball/core": "^1.0.0",
+    "@curveball/core": "^1.0.2",
     "@curveball/http-errors": "^1.0.1",
-    "@types/node": "^18.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
-    "eslint": "^9.10.0",
-    "ts-loader": "^9.2.6",
-    "tsx": "^4.19.0",
-    "typescript": "^5.0.4",
-    "webpack": "^5.60.0",
-    "webpack-cli": "^5.0.1"
+    "@types/node": "^22.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "eslint": "^9.19.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "ts-loader": "^9.5.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
   },
   "browser": "browser/oauth2-client.min.js",
   "files": [

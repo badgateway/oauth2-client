@@ -1,7 +1,9 @@
 import * as assert from 'node:assert';
-import { testServer } from './test-server.js';
-import { OAuth2Client } from '../src/index.js';
 import { after, describe, it } from 'node:test';
+
+import { OAuth2Client } from '../src/index.js';
+
+import { testServer } from './test-server.js';
 
 // Example directly taken from https://datatracker.ietf.org/doc/html/rfc7636
 const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';

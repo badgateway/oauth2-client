@@ -1,21 +1,21 @@
-import { OAuth2Token } from './token.js';
+import { OAuth2AuthorizationCodeClient } from './client/authorization-code.js';
+import { OAuth2HttpError } from './error.js';
 import {
   AuthorizationCodeRequest,
   ClientCredentialsRequest,
   IntrospectionRequest,
   IntrospectionResponse,
-  PasswordRequest,
   OAuth2TokenTypeHint,
+  PasswordRequest,
   RefreshRequest,
   RevocationRequest,
   ServerMetadataResponse,
   TokenResponse,
 } from './messages.js';
-import { OAuth2HttpError } from './error.js';
-import { OAuth2AuthorizationCodeClient } from './client/authorization-code.js';
+import { OAuth2Token } from './token.js';
 
 
-type ClientCredentialsParams = {
+interface ClientCredentialsParams {
   scope?: string[];
   extraParams?: Record<string, string>;
 
@@ -27,7 +27,7 @@ type ClientCredentialsParams = {
   resource?: string | string[];
 }
 
-type PasswordParams = {
+interface PasswordParams {
   username: string;
   password: string;
 
@@ -39,13 +39,12 @@ type PasswordParams = {
    * @see https://datatracker.ietf.org/doc/html/rfc8707
    */
   resource?: string | string[];
-
 }
 
 /**
  * Extra options that may be passed to refresh()
  */
-type RefreshParams = {
+interface RefreshParams {
   scope?: string[];
 
   /**
@@ -58,7 +57,6 @@ type RefreshParams = {
 }
 
 export interface ClientSettings {
-
   /**
    * The hostname of the OAuth2 server.
    * If provided, we'll attempt to discover all the other related endpoints.
@@ -145,26 +143,29 @@ export interface ClientSettings {
 }
 
 
-type OAuth2Endpoint = 'tokenEndpoint' | 'authorizationEndpoint' | 'discoveryEndpoint' | 'introspectionEndpoint' | 'revocationEndpoint';
+export enum OAuth2Endpoint {
+  TokenEndpoint = 'tokenEndpoint',
+  AuthorizationEndpoint = 'authorizationEndpoint',
+  DiscoveryEndpoint = 'discoveryEndpoint',
+  IntrospectionEndpoint = 'introspectionEndpoint',
+  RevocationEndpoint = 'revocationEndpoint',
+}
 
 export class OAuth2Client {
-
   settings: ClientSettings;
 
   constructor(clientSettings: ClientSettings) {
-
     if (!clientSettings?.fetch) {
       clientSettings.fetch = fetch.bind(globalThis);
     }
-    this.settings = clientSettings;
 
+    this.settings = clientSettings;
   }
 
   /**
    * Refreshes an existing token, and returns a new one.
    */
   async refreshToken(token: OAuth2Token, params?: RefreshParams): Promise<OAuth2Token> {
-
     if (!token.refreshToken) {
       throw new Error('This token didn\'t have a refreshToken. It\'s not possible to refresh this');
     }
@@ -173,31 +174,40 @@ export class OAuth2Client {
       grant_type: 'refresh_token',
       refresh_token: token.refreshToken,
     };
+
     if (!this.settings.clientSecret) {
       // If there's no secret, send the clientId in the body.
       body.client_id = this.settings.clientId;
     }
 
-    if (params?.scope) body.scope = params.scope.join(' ');
-    if (params?.resource) body.resource = params.resource;
+    if (params?.scope) {
+      body.scope = params.scope.join(' ');
+    }
 
-    const newToken = await this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+    if (params?.resource) {
+      body.resource = params.resource;
+    }
+
+    const newToken = await this.tokenResponseToOAuth2Token(this.request(OAuth2Endpoint.TokenEndpoint, body));
+
     if (!newToken.refreshToken && token.refreshToken) {
       // Reuse old refresh token if we didn't get a new one.
       newToken.refreshToken = token.refreshToken;
     }
-    return newToken;
 
+    return newToken;
   }
 
   /**
    * Retrieves an OAuth2 token using the client_credentials grant.
    */
   async clientCredentials(params?: ClientCredentialsParams): Promise<OAuth2Token> {
-
     const disallowed = ['client_id', 'client_secret', 'grant_type', 'scope'];
 
-    if (params?.extraParams && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0) {
+    if (
+      params?.extraParams
+      && Object.keys(params.extraParams).filter((key) => disallowed.includes(key)).length > 0
+    ) {
       throw new Error(`The following extraParams are disallowed: '${disallowed.join("', '")}'`);
     }
 
@@ -212,33 +222,29 @@ export class OAuth2Client {
       throw new Error('A clientSecret must be provided to use client_credentials');
     }
 
-    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
-
+    return this.tokenResponseToOAuth2Token(this.request(OAuth2Endpoint.TokenEndpoint, body));
   }
 
   /**
    * Retrieves an OAuth2 token using the 'password' grant'.
    */
   async password(params: PasswordParams): Promise<OAuth2Token> {
-
     const body: PasswordRequest = {
       grant_type: 'password',
       ...params,
       scope: params.scope?.join(' '),
     };
-    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
 
+    return this.tokenResponseToOAuth2Token(this.request(OAuth2Endpoint.TokenEndpoint, body));
   }
 
   /**
    * Returns the helper object for the `authorization_code` grant.
    */
   get authorizationCode(): OAuth2AuthorizationCodeClient {
-
     return new OAuth2AuthorizationCodeClient(
       this,
     );
-
   }
 
   /**
@@ -250,13 +256,12 @@ export class OAuth2Client {
    * @see https://datatracker.ietf.org/doc/html/rfc7662
    */
   async introspect(token: OAuth2Token): Promise<IntrospectionResponse> {
-
     const body: IntrospectionRequest = {
       token: token.accessToken,
       token_type_hint: 'access_token',
     };
-    return this.request('introspectionEndpoint', body);
 
+    return this.request(OAuth2Endpoint.IntrospectionEndpoint, body);
   }
 
   /**
@@ -268,6 +273,7 @@ export class OAuth2Client {
    */
   async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<void> {
     let tokenValue = token.accessToken;
+
     if (tokenTypeHint === 'refresh_token') {
       tokenValue = token.refreshToken!;
     }
@@ -276,8 +282,8 @@ export class OAuth2Client {
       token: tokenValue,
       token_type_hint: tokenTypeHint,
     };
-    return this.request('revocationEndpoint', body);
 
+    return this.request(OAuth2Endpoint.RevocationEndpoint, body);
   }
 
   /**
@@ -286,7 +292,6 @@ export class OAuth2Client {
    * Potentially fetches a discovery document to get it.
    */
   async getEndpoint(endpoint: OAuth2Endpoint): Promise<string> {
-
     if (this.settings[endpoint] !== undefined) {
       return resolve(this.settings[endpoint] as string, this.settings.server);
     }
@@ -294,6 +299,7 @@ export class OAuth2Client {
     if (endpoint !== 'discoveryEndpoint') {
       // This condition prevents infinite loops.
       await this.discover();
+
       if (this.settings[endpoint] !== undefined) {
         return resolve(this.settings[endpoint] as string, this.settings.server);
       }
@@ -305,47 +311,47 @@ export class OAuth2Client {
     }
 
     switch (endpoint) {
-      case 'authorizationEndpoint':
+      case OAuth2Endpoint.AuthorizationEndpoint:
         return resolve('/authorize', this.settings.server);
-      case 'tokenEndpoint':
+      case OAuth2Endpoint.TokenEndpoint:
         return resolve('/token', this.settings.server);
-      case 'discoveryEndpoint':
+      case OAuth2Endpoint.DiscoveryEndpoint:
         return resolve('/.well-known/oauth-authorization-server', this.settings.server);
-      case 'introspectionEndpoint':
+      case OAuth2Endpoint.IntrospectionEndpoint:
         return resolve('/introspect', this.settings.server);
-      case 'revocationEndpoint':
+      case OAuth2Endpoint.RevocationEndpoint:
         return resolve('/revoke', this.settings.server);
     }
-
   }
 
   private discoveryDone = false;
   private serverMetadata: ServerMetadataResponse | null = null;
 
-
   /**
    * Fetches the OAuth2 discovery document
    */
   private async discover(): Promise<void> {
-
     // Never discover twice
     if (this.discoveryDone) return;
     this.discoveryDone = true;
 
     let discoverUrl;
     try {
-      discoverUrl = await this.getEndpoint('discoveryEndpoint');
+      discoverUrl = await this.getEndpoint(OAuth2Endpoint.DiscoveryEndpoint);
     } catch (_err) {
       console.warn('[oauth2] OAuth2 discovery endpoint could not be determined. Either specify the "server" or "discoveryEndpoint');
       return;
     }
+
     const resp = await this.settings.fetch!(discoverUrl, { headers: { Accept: 'application/json' }});
 
     if (!resp.ok) return;
+
     if (!resp.headers.get('Content-Type')?.startsWith('application/json')) {
       console.warn('[oauth2] OAuth2 discovery endpoint was not a JSON response. Response is ignored');
       return;
     }
+
     this.serverMetadata = await resp.json();
 
     const urlMap = [
@@ -365,17 +371,15 @@ export class OAuth2Client {
     if (this.serverMetadata.token_endpoint_auth_methods_supported && !this.settings.authenticationMethod) {
       this.settings.authenticationMethod = this.serverMetadata.token_endpoint_auth_methods_supported[0];
     }
-
   }
 
   /**
    * Does a HTTP request on the 'token' endpoint.
    */
-  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
-  async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
-  async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<void>;
+  async request(endpoint: OAuth2Endpoint.TokenEndpoint, body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
+  async request(endpoint: OAuth2Endpoint.IntrospectionEndpoint, body: IntrospectionRequest): Promise<IntrospectionResponse>;
+  async request(endpoint: OAuth2Endpoint.RevocationEndpoint, body: RevocationRequest): Promise<void>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {
-
     const uri = await this.getEndpoint(endpoint);
 
     const headers: Record<string, string> = {
@@ -393,6 +397,7 @@ export class OAuth2Client {
       // always gets added to the body.
       authMethod = 'client_secret_post';
     }
+
     if (!authMethod) {
       // If we got here, it means no preference was provided by anything,
       // and we have a secret. In this case its preferred to embed
@@ -422,9 +427,11 @@ export class OAuth2Client {
     });
 
     let responseBody;
+
     if (resp.status !== 204 && resp.headers.has('Content-Type') && resp.headers.get('Content-Type')!.match(/^application\/(.*\+)?json/)) {
       responseBody = await resp.json();
     }
+
     if (resp.ok) {
       return responseBody;
     }
@@ -435,18 +442,22 @@ export class OAuth2Client {
     if (responseBody?.error) {
       // This is likely an OAUth2-formatted error
       errorMessage = 'OAuth2 error ' + responseBody.error + '.';
+
       if (responseBody.error_description) {
         errorMessage += ' ' + responseBody.error_description;
       }
-      oauth2Code = responseBody.error;
 
+      oauth2Code = responseBody.error;
     } else {
       errorMessage = 'HTTP Error ' + resp.status + ' ' + resp.statusText;
+
       if (resp.status === 401 && this.settings.clientSecret) {
         errorMessage += '. It\'s likely that the clientId and/or clientSecret was incorrect';
       }
+
       oauth2Code = null;
     }
+
     throw new OAuth2HttpError(errorMessage, oauth2Code, resp, responseBody);
   }
 
@@ -454,7 +465,6 @@ export class OAuth2Client {
    * Converts the JSON response body from the token endpoint to an OAuth2Token type.
    */
   async tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
-
     const body = await resp;
 
     if (!body?.access_token) {
@@ -467,15 +477,11 @@ export class OAuth2Client {
       expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
       refreshToken: body.refresh_token ?? null,
     };
-
   }
-
 }
 
 function resolve(uri: string, base?: string): string {
-
   return new URL(uri, base).toString();
-
 }
 
 /**
@@ -485,13 +491,17 @@ function resolve(uri: string, base?: string): string {
  * If a value is an array, it will add the parameter multiple times for each array value.
  */
 export function generateQueryString(params: Record<string, undefined | number | string | string[]>): string {
-
   const query = new URLSearchParams();
+
   for (const [k, v] of Object.entries(params)) {
     if (Array.isArray(v)) {
-      for(const vItem of v) query.append(k, vItem);
-    } else if (v !== undefined) query.set(k, v.toString());
+      for(const vItem of v) {
+        query.append(k, vItem);
+      }
+    } else if (v !== undefined) {
+      query.set(k, v.toString());
+    }
   }
-  return query.toString();
 
+  return query.toString();
 }

@@ -1,9 +1,9 @@
-import { OAuth2Client } from '../client.js';
-import { OAuth2Token } from '../token.js';
-import { AuthorizationCodeRequest } from '../messages.js';
+import { OAuth2Client, OAuth2Endpoint } from '../client.js';
 import { OAuth2Error } from '../error.js';
+import { AuthorizationCodeRequest } from '../messages.js';
+import { OAuth2Token } from '../token.js';
 
-type GetAuthorizeUrlParams = {
+interface GetAuthorizeUrlParams {
   /**
    * Where to redirect the user back to after authentication.
    */
@@ -53,8 +53,7 @@ type GetAuthorizeUrlParams = {
   responseMode?: 'query' | 'fragment';
 }
 
-type ValidateResponseResult = {
-
+interface ValidateResponseResult {
   /**
    * The authorization code. This code should be used to obtain an access token.
    */
@@ -64,11 +63,9 @@ type ValidateResponseResult = {
    * List of scopes that the client requested.
    */
   scope?: string[];
-
 }
 
-type GetTokenParams = {
-
+interface GetTokenParams {
   code: string;
 
   redirectUri: string;
@@ -81,17 +78,13 @@ type GetTokenParams = {
    * @see https://datatracker.ietf.org/doc/html/rfc8707
    */
   resource?: string[] | string;
-
 }
 
 export class OAuth2AuthorizationCodeClient {
-
   client: OAuth2Client;
 
   constructor(client: OAuth2Client) {
-
     this.client = client;
-
   }
 
   /**
@@ -99,27 +92,28 @@ export class OAuth2AuthorizationCodeClient {
    * authorization_code flow.
    */
   async getAuthorizeUri(params: GetAuthorizeUrlParams): Promise<string> {
-
     const [
       codeChallenge,
       authorizationEndpoint
     ] = await Promise.all([
       params.codeVerifier ? getCodeChallenge(params.codeVerifier) : undefined,
-      this.client.getEndpoint('authorizationEndpoint')
+      this.client.getEndpoint(OAuth2Endpoint.AuthorizationEndpoint),
     ]);
-
     const query = new URLSearchParams({
       client_id: this.client.settings.clientId,
       response_type: 'code',
       redirect_uri: params.redirectUri,
     });
+
     if (codeChallenge) {
       query.set('code_challenge_method', codeChallenge[0]);
       query.set('code_challenge', codeChallenge[1]);
     }
+
     if (params.state) {
       query.set('state', params.state);
     }
+
     if (params.scope) {
       query.set('scope', params.scope.join(' '));
     }
@@ -138,11 +132,9 @@ export class OAuth2AuthorizationCodeClient {
     }
 
     return authorizationEndpoint + '?' + query.toString();
-
   }
 
   async getTokenFromCodeRedirect(url: string|URL, params: Omit<GetTokenParams, 'code'> ): Promise<OAuth2Token> {
-
     const { code } = this.validateResponse(url, {
       state: params.state
     });
@@ -152,7 +144,6 @@ export class OAuth2AuthorizationCodeClient {
       redirectUri: params.redirectUri,
       codeVerifier: params.codeVerifier,
     });
-
   }
 
   /**
@@ -163,12 +154,12 @@ export class OAuth2AuthorizationCodeClient {
    * redirected back with an error, an error will be thrown.
    */
   validateResponse(url: string|URL, params: {state?: string}): ValidateResponseResult {
+    const eURL = new URL(url);
+    let queryParams = eURL.searchParams;
 
-    url = new URL(url);
-    let queryParams = url.searchParams;
-    if (!queryParams.has('code') && !queryParams.has('error') && url.hash.length>0) {
+    if (!queryParams.has('code') && !queryParams.has('error') && eURL.hash.length > 0) {
       // Try the fragment
-      queryParams = new URLSearchParams(url.hash.slice(1));
+      queryParams = new URLSearchParams(eURL.hash.slice(1));
     }
 
     if (queryParams.has('error')) {
@@ -178,7 +169,9 @@ export class OAuth2AuthorizationCodeClient {
       );
     }
 
-    if (!queryParams.has('code')) throw new Error(`The url did not contain a code parameter ${url}`);
+    if (!queryParams.has('code')) {
+      throw new Error(`The url did not contain a code parameter ${url}`);
+    }
 
     if (params.state && params.state !== queryParams.get('state')) {
       throw new Error(`The "state" parameter in the url did not match the expected value of ${params.state}`);
@@ -188,15 +181,12 @@ export class OAuth2AuthorizationCodeClient {
       code: queryParams.get('code')!,
       scope: queryParams.has('scope') ? queryParams.get('scope')!.split(' ') : undefined,
     };
-
   }
-
 
   /**
    * Receives an OAuth2 token using 'authorization_code' grant
    */
   async getToken(params: GetTokenParams): Promise<OAuth2Token> {
-
     const body:AuthorizationCodeRequest = {
       grant_type: 'authorization_code',
       code: params.code,
@@ -204,30 +194,27 @@ export class OAuth2AuthorizationCodeClient {
       code_verifier: params.codeVerifier,
       resource: params.resource,
     };
-    return this.client.tokenResponseToOAuth2Token(this.client.request('tokenEndpoint', body));
 
+    return this.client.tokenResponseToOAuth2Token(this.client.request(OAuth2Endpoint.TokenEndpoint, body));
   }
-
-
 }
 
 export async function generateCodeVerifier(): Promise<string> {
-
   const webCrypto = await getWebCrypto();
   const arr = new Uint8Array(32);
-  webCrypto.getRandomValues(arr);
-  return base64Url(arr);
 
+  webCrypto.getRandomValues(arr);
+
+  return base64Url(arr);
 }
 
 export async function getCodeChallenge(codeVerifier: string): Promise<['plain' | 'S256', string]> {
-
   const webCrypto = await getWebCrypto();
+
   return ['S256', base64Url(await webCrypto.subtle.digest('SHA-256', stringToBuffer(codeVerifier)))];
 }
 
 async function getWebCrypto(): Promise<typeof window.crypto> {
-
   // Browsers
   if ((typeof window !== 'undefined' && window.crypto)) {
     if (!window.crypto.subtle?.digest) {
@@ -237,25 +224,26 @@ async function getWebCrypto(): Promise<typeof window.crypto> {
     }
     return window.crypto;
   }
+
   // Web workers possibly
   if ((typeof self !== 'undefined' && self.crypto)) {
     return self.crypto;
   }
-  // Node
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const crypto = await import('crypto');
-  return crypto.webcrypto as typeof window.crypto;
 
+  // Node
+  const crypto = await import('crypto');
+
+  return crypto.webcrypto as typeof window.crypto;
 }
 
 function stringToBuffer(input: string): ArrayBuffer {
-
   const buf = new Uint8Array(input.length);
+
   for(let i=0; i<input.length;i++) {
     buf[i] = input.charCodeAt(i) & 0xFF;
   }
-  return buf;
 
+  return buf;
 }
 
 function base64Url(buf: ArrayBuffer) {

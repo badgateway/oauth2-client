@@ -13,16 +13,12 @@ import { OAuth2ErrorCode } from './messages.js';
  * - invalid_scope
  */
 export class OAuth2Error extends Error {
+  oauth2Code: OAuth2ErrorCode | string;
 
-  oauth2Code: OAuth2ErrorCode|string;
-
-  constructor(message: OAuth2ErrorCode|string, oauth2Code: OAuth2ErrorCode) {
-
+  constructor(message: OAuth2ErrorCode | string, oauth2Code: OAuth2ErrorCode) {
     super(message);
     this.oauth2Code = oauth2Code;
-
   }
-
 }
 
 /**
@@ -40,20 +36,16 @@ export class OAuth2Error extends Error {
  * This Error also gives you access to the HTTP status code and response body.
  */
 export class OAuth2HttpError extends OAuth2Error {
-
   httpCode: number;
 
   response: Response;
   parsedBody: Record<string, any>;
 
   constructor(message: string, oauth2Code: OAuth2ErrorCode, response: Response, parsedBody: Record<string, any>) {
-
     super(message, oauth2Code);
 
     this.httpCode = response.status;
     this.response = response;
     this.parsedBody = parsedBody;
-
   }
-
 }

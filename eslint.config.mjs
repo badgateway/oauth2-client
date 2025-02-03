@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,7 @@ export default [...compat.extends(
 ), {
     plugins: {
         "@typescript-eslint": typescriptEslint,
+        "simple-import-sort": simpleImportSort,
     },
 
     languageOptions: {
@@ -88,5 +90,24 @@ export default [...compat.extends(
 
         "@typescript-eslint/prefer-for-of": ["error"],
         "@typescript-eslint/prefer-ts-expect-error": ["error"],
+
+        'simple-import-sort/imports': [
+            'error',
+            {
+            groups: [
+                ['^react', '^@?\\w'],
+                ['^(@|src)(/.*|$)'],
+                ['^\\u0000'],
+                ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
+                ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+                ['^.+\\.?(css)$'],
+            ],
+            },
+        ],
+
+        'simple-import-sort/exports': 'error',
+        'consistent-return': 0,
+        'import/no-cycle': 0,
+        'no-redeclare': 'error',
     },
 }];

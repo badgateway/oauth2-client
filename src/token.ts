@@ -2,7 +2,6 @@
  * Token information
  */
 export type OAuth2Token = {
-
   /**
    * OAuth2 Access Token
    */

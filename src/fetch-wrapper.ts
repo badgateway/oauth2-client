@@ -1,10 +1,9 @@
-import { OAuth2Token } from './token.js';
 import { OAuth2Client } from './client.js';
+import { OAuth2Token } from './token.js';
 
 type FetchMiddleware = (request: Request, next: (request: Request) => Promise<Response>) => Promise<Response>;
 
-type OAuth2FetchOptions = {
-
+interface OAuth2FetchOptions {
   /**
    * Reference to OAuth2 client.
    */
@@ -46,11 +45,9 @@ type OAuth2FetchOptions = {
    * behavior is to schedule refresh. Set this to false to disable scheduling.
    */
   scheduleRefresh?: boolean;
-
 }
 
 export class OAuth2Fetch {
-
   private options: OAuth2FetchOptions;
 
   /**
@@ -68,19 +65,20 @@ export class OAuth2Fetch {
   private activeGetStoredToken: null | Promise<void> = null;
 
   constructor(options: OAuth2FetchOptions) {
-
     if (options?.scheduleRefresh === undefined) {
       options.scheduleRefresh = true;
     }
+
     this.options = options;
+
     if (options.getStoredToken) {
       this.activeGetStoredToken = (async () => {
         this.token = await options.getStoredToken!();
         this.activeGetStoredToken = null;
       })();
     }
-    this.scheduleRefresh();
 
+    this.scheduleRefresh();
   }
 
   /**
@@ -91,7 +89,6 @@ export class OAuth2Fetch {
    * to refresh it.
    */
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-
     // input might be a string or a Request object, we want to make sure this
     // is always a fully-formed Request object.
     const request = new Request(input, init);
@@ -100,7 +97,6 @@ export class OAuth2Fetch {
       request,
       req => fetch(req)
     );
-
   }
 
   /**
@@ -111,14 +107,14 @@ export class OAuth2Fetch {
    *    (request, next): Response
    */
   mw(): FetchMiddleware {
-
     return async (request, next) => {
-
       const accessToken = await this.getAccessToken();
 
       // Make a clone. We need to clone if we need to retry the request later.
       let authenticatedRequest = request.clone();
+
       authenticatedRequest.headers.set('Authorization', 'Bearer '  + accessToken);
+
       let response = await next(authenticatedRequest);
 
       if (!response.ok && response.status === 401) {
@@ -130,9 +126,9 @@ export class OAuth2Fetch {
         response = await next(authenticatedRequest);
 
       }
+
       return response;
     };
-
   }
 
   /**
@@ -146,16 +142,12 @@ export class OAuth2Fetch {
    * This function will attempt to automatically refresh if stale.
    */
   async getToken(): Promise<OAuth2Token> {
-
     if (this.token && (this.token.expiresAt === null || this.token.expiresAt > Date.now())) {
-
       // The current token is still valid
       return this.token;
-
     }
 
     return this.refreshToken();
-
   }
 
   /**
@@ -165,13 +157,12 @@ export class OAuth2Fetch {
    * If the access token is expiring, it will attempt to refresh it.
    */
   async getAccessToken(): Promise<string> {
-
     // Ensure getStoredToken finished.
     await this.activeGetStoredToken;
 
     const token = await this.getToken();
-    return token.accessToken;
 
+    return token.accessToken;
   }
 
   /**
@@ -186,7 +177,6 @@ export class OAuth2Fetch {
    * Forces an access token refresh
    */
   async refreshToken(): Promise<OAuth2Token> {
-
     if (this.activeRefresh) {
       // If we are currently already doing this operation,
       // make sure we don't do it twice in parallel.
@@ -194,8 +184,8 @@ export class OAuth2Fetch {
     }
 
     const oldToken = this.token;
-    this.activeRefresh = (async() => {
 
+    this.activeRefresh = (async() => {
       let newToken: OAuth2Token|null = null;
 
       try {
@@ -213,29 +203,33 @@ export class OAuth2Fetch {
 
       if (!newToken) {
         const err = new Error('Unable to obtain OAuth2 tokens, a full reauth may be needed');
+
         this.options.onError?.(err);
+
         throw err;
       }
-      return newToken;
 
+      return newToken;
     })();
 
     try {
       const token = await this.activeRefresh;
+
       this.token = token;
       this.options.storeToken?.(token);
       this.scheduleRefresh();
+
       return token;
     } catch (err: any) {
       if (this.options.onError) {
         this.options.onError(err);
       }
+
       throw err;
     } finally {
       // Make sure we clear the current refresh operation.
       this.activeRefresh = null;
     }
-
   }
 
   /**
@@ -247,6 +241,7 @@ export class OAuth2Fetch {
     if (!this.options.scheduleRefresh) {
       return;
     }
+
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
@@ -269,11 +264,8 @@ export class OAuth2Fetch {
       try {
         await this.refreshToken();
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error('[fetch-mw-oauth2] error while doing a background OAuth2 auto-refresh', err);
       }
     }, expiresIn - 60*1000);
-
   }
-
 }

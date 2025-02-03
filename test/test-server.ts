@@ -1,5 +1,5 @@
-import { Application, Middleware, Request } from '@curveball/core';
 import bodyParser from '@curveball/bodyparser';
+import { Application, Middleware, Request } from '@curveball/core';
 import * as http from 'http';
 
 type TestServer = {

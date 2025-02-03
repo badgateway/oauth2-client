@@ -1,7 +1,7 @@
 /**
  * refresh_token request body
  */
-export type RefreshRequest = {
+export interface RefreshRequest {
   grant_type: 'refresh_token';
   refresh_token: string;
 
@@ -19,7 +19,7 @@ export type RefreshRequest = {
 /**
  * client_credentials request body
  */
-export type ClientCredentialsRequest = {
+export interface ClientCredentialsRequest {
   grant_type: 'client_credentials';
   scope?: string;
 
@@ -36,7 +36,7 @@ export type ClientCredentialsRequest = {
 /**
  * password grant_type request body
  */
-export type PasswordRequest = {
+export interface PasswordRequest {
   grant_type: 'password';
   username: string;
   password: string;
@@ -50,7 +50,7 @@ export type PasswordRequest = {
   resource?: string | string[];
 }
 
-export type AuthorizationCodeRequest = {
+export interface AuthorizationCodeRequest {
   grant_type: 'authorization_code';
   code: string;
   redirect_uri: string;
@@ -67,7 +67,7 @@ export type AuthorizationCodeRequest = {
 /**
  * Response from the /token endpoint
  */
-export type TokenResponse = {
+export interface TokenResponse {
   access_token: string;
   token_type: string;
   expires_in?: number;
@@ -75,11 +75,36 @@ export type TokenResponse = {
   scope?: string;
 }
 
-type OAuth2ResponseType = 'code' | 'token';
-type OAuth2ResponseMode = 'query' | 'fragment';
-type OAuth2GrantType = 'authorization_code' | 'implicit' | 'password' | 'client_credentials' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:jwt-bearer' | 'urn:ietf:params:oauth:grant-type:saml2-bearer';
-type OAuth2AuthMethod = 'none' | 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'tls_client_auth' | 'self_signed_tls_client_auth';
-type OAuth2CodeChallengeMethod = 'S256' | 'plain';
+enum OAuth2ResponseType {
+  Code = 'code',
+  Token = 'token',
+}
+enum OAuth2ResponseMode {
+  Query = 'query',
+  Fragment = 'fragment',
+}
+enum OAuth2GrantType {
+  AuthorizationCode = 'authorization_code',
+  Implicit = 'implicit',
+  Password = 'password',
+  ClientCredentials = 'client_credentials',
+  RefreshToken = 'refresh_token',
+  JWTBearer = 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+  SAML2Bearer = 'urn:ietf:params:oauth:grant-type:saml2-bearer',
+}
+enum OAuth2AuthMethod {
+  None = 'none',
+  ClientSecretBasic = 'client_secret_basic',
+  CLientSecretPost = 'client_secret_post',
+  ClientSecretJWT = 'client_secret_jwt',
+  PrivateKeyJWT = 'private_key_jwt',
+  TLSClientAuth = 'tls_client_auth',
+  SSTLSClientAuth = 'self_signed_tls_client_auth',
+};
+enum OAuth2CodeChallengeMethod {
+  S256 = 'S256',
+  Plain = 'plain',
+}
 
 export type OAuth2TokenTypeHint = 'access_token' | 'refresh_token';
 
@@ -88,8 +113,7 @@ export type OAuth2TokenTypeHint = 'access_token' | 'refresh_token';
  *
  * https://datatracker.ietf.org/doc/html/rfc8414
  */
-export type ServerMetadataResponse = {
-
+export interface ServerMetadataResponse {
   /**
    * The authorization server's issuer identifier, which is a URL that uses
    * the "https" scheme and has no query or fragment.
@@ -211,14 +235,13 @@ export type ServerMetadataResponse = {
 
 }
 
-export type IntrospectionRequest = {
+export interface IntrospectionRequest {
   token: string;
   token_type_hint?: OAuth2TokenTypeHint;
 };
 
 
-export type IntrospectionResponse = {
-
+export interface IntrospectionResponse {
   /**
    * Whether or not the token is still active.
    */
@@ -279,7 +302,6 @@ export type IntrospectionResponse = {
    * String identifier of the token.
    */
   jti?: string;
-
 }
 
 /**
@@ -287,7 +309,7 @@ export type IntrospectionResponse = {
  *
  * https://datatracker.ietf.org/doc/html/rfc7009#section-2.1
  */
-export type RevocationRequest = {
+export interface RevocationRequest {
   token: string;
   token_type_hint?: OAuth2TokenTypeHint;
 }

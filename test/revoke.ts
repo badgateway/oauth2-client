@@ -1,7 +1,9 @@
 import * as assert from 'node:assert';
-import { testServer } from './test-server.js';
-import { OAuth2Client } from '../src/index.js';
 import { after, describe, it } from 'node:test';
+
+import { OAuth2Client } from '../src/index.js';
+
+import { testServer } from './test-server.js';
 
 describe('Token revocation', () => {
   const server = testServer();
