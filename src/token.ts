@@ -19,4 +19,9 @@ export type OAuth2Token = {
    * OAuth2 refresh token
    */
   refreshToken: string | null;
+
+  /**
+   * OAuth2 ID Token
+   */
+  idToken: string | null;
 };
