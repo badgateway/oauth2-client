@@ -402,8 +402,11 @@ export class OAuth2Client {
 
     switch(authMethod) {
       case 'client_secret_basic' :
+        // Per RFC 6749 section 2.3.1, the client_id and client_secret need
+        // to be encoded using application/x-www-form-urlencoded for the
+        // basic auth.
         headers.Authorization = 'Basic ' +
-          btoa(this.settings.clientId + ':' + this.settings.clientSecret);
+          btoa(encodeURIComponent(this.settings.clientId) + ':' + encodeURIComponent(this.settings.clientSecret!));
         break;
       case 'client_secret_post' :
         body.client_id = this.settings.clientId;
