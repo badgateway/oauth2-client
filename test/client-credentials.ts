@@ -18,8 +18,8 @@ describe('client-credentials', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
+      clientId: 'test-client-id:10',
+      clientSecret: 'test=client=secret',
     });
 
     const result = await client.clientCredentials();
@@ -32,7 +32,7 @@ describe('client-credentials', () => {
     const request = server.lastRequest();
     assert.equal(
       request.headers.get('Authorization'),
-      'Basic ' + btoa('test-client-id:test-client-secret')
+      'Basic ' + btoa('test-client-id%3A10:test%3Dclient%3Dsecret')
     );
 
     assert.deepEqual(request.body, {
