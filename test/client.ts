@@ -1,5 +1,6 @@
 import * as assert from 'node:assert';
 import { OAuth2Client } from '../src/index.js';
+import { legacyFormUrlEncode } from '../src/client.js';
 import { describe, it } from 'node:test';
 
 describe('tokenResponseToOAuth2Token', () => {
@@ -56,5 +57,14 @@ describe('tokenResponseToOAuth2Token', () => {
     }
 
     assert.equal(caught, true);
+  });
+});
+
+describe('legacyFormUrlEncode', () => {
+  it('correctly encodes full character set', () => {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ ó';
+    assert.equal(
+      legacyFormUrlEncode(chars),
+      '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ%21%22%23%24%25%26%27%28%29%2A%2B%2C%2D%2E%2F%3A%3B%3C%3D%3E%3F%40%5B%5C%5D%5E%5F%60%7B%7C%7D%7E+%C3%B3');
   });
 });
