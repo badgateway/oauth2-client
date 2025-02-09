@@ -406,7 +406,7 @@ export class OAuth2Client {
         // to be encoded using application/x-www-form-urlencoded for the
         // basic auth.
         headers.Authorization = 'Basic ' +
-          btoa(encodeURIComponent(this.settings.clientId) + ':' + encodeURIComponent(this.settings.clientSecret!));
+          btoa(legacyFormUrlEncode(this.settings.clientId) + ':' + legacyFormUrlEncode(this.settings.clientSecret!));
         break;
       case 'client_secret_post' :
         body.client_id = this.settings.clientId;
@@ -497,4 +497,16 @@ export function generateQueryString(params: Record<string, undefined | number | 
   }
   return query.toString();
 
+}
+
+/**
+ * Encodes string according to the most strict interpretation of RFC 6749 Appendix B.
+ *
+ * All non-alphanumeric characters are percent encoded, with exception of space which
+ * is replaced with '+'.
+ */
+export function legacyFormUrlEncode(value: string): string {
+  return encodeURIComponent(value)
+    .replace(/%20/g, '+')
+    .replace(/[-_.!~*'()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }

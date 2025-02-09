@@ -18,7 +18,7 @@ describe('client-credentials', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id:10',
+      clientId: 'testClientId:10',
       clientSecret: 'test=client=secret',
     });
 
@@ -32,7 +32,7 @@ describe('client-credentials', () => {
     const request = server.lastRequest();
     assert.equal(
       request.headers.get('Authorization'),
-      'Basic ' + btoa('test-client-id%3A10:test%3Dclient%3Dsecret')
+      'Basic ' + btoa('testClientId%3A10:test%3Dclient%3Dsecret')
     );
 
     assert.deepEqual(request.body, {
@@ -45,8 +45,8 @@ describe('client-credentials', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
+      clientId: 'testClientId',
+      clientSecret: 'testClientSecret',
     });
 
     const result = await client.clientCredentials({
@@ -63,7 +63,7 @@ describe('client-credentials', () => {
     const request = server.lastRequest();
     assert.equal(
       request.headers.get('Authorization'),
-      'Basic ' + btoa('test-client-id:test-client-secret')
+      'Basic ' + btoa('testClientId:testClientSecret')
     );
     assert.equal(request.headers.get('Accept'), 'application/json');
 
@@ -79,8 +79,8 @@ describe('client-credentials', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
+      clientId: 'testClientId',
+      clientSecret: 'testClientSecret',
       authenticationMethod: 'client_secret_post',
     });
 
@@ -94,8 +94,8 @@ describe('client-credentials', () => {
     const request = server.lastRequest();
 
     assert.deepEqual(request.body, {
-      client_id: 'test-client-id',
-      client_secret: 'test-client-secret',
+      client_id: 'testClientId',
+      client_secret: 'testClientSecret',
       grant_type: 'client_credentials',
     });
   });
@@ -105,8 +105,8 @@ describe('client-credentials', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
+      clientId: 'testClientId',
+      clientSecret: 'testClientSecret',
     });
 
     const resource = ['https://example/resource1', 'https://example/resource2'];
@@ -123,7 +123,7 @@ describe('client-credentials', () => {
     const request = server.lastRequest();
     assert.equal(
       request.headers.get('Authorization'),
-      'Basic ' + btoa('test-client-id:test-client-secret')
+      'Basic ' + btoa('testClientId:testClientSecret')
     );
 
     assert.deepEqual(request.body, {
@@ -140,7 +140,7 @@ describe('client-credentials', () => {
         server: server.url,
         tokenEndpoint: '/token',
         clientId: 'oauth2-error',
-        clientSecret: 'test-client-secret',
+        clientSecret: 'testClientSecret',
         authenticationMethod: 'client_secret_post',
       });
 
@@ -171,7 +171,7 @@ describe('client-credentials', () => {
         server: server.url,
         tokenEndpoint: '/token',
         clientId: 'json-error',
-        clientSecret: 'test-client-secret',
+        clientSecret: 'testClientSecret',
         authenticationMethod: 'client_secret_post',
       });
 
@@ -204,7 +204,7 @@ describe('client-credentials', () => {
         server: server.url,
         tokenEndpoint: '/token',
         clientId: 'general-http-error',
-        clientSecret: 'test-client-secret',
+        clientSecret: 'testClientSecret',
         authenticationMethod: 'client_secret_post',
       });
 

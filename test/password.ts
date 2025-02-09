@@ -18,8 +18,8 @@ describe('password', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
+      clientId: 'testClientId',
+      clientSecret: 'testClientSecret',
     });
 
     const result = await client.password({
@@ -35,7 +35,7 @@ describe('password', () => {
     const request = server.lastRequest();
     assert.equal(
       request.headers.get('Authorization'),
-      'Basic ' + btoa('test-client-id:test-client-secret')
+      'Basic ' + btoa('testClientId:testClientSecret')
     );
     assert.equal(request.headers.get('Accept'), 'application/json');
 
@@ -52,7 +52,7 @@ describe('password', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
+      clientId: 'testClientId',
       authenticationMethod: 'client_secret_post',
     });
 
@@ -72,7 +72,7 @@ describe('password', () => {
       grant_type: 'password',
       password: 'password',
       username: 'user123',
-      client_id: 'test-client-id',
+      client_id: 'testClientId',
     });
   });
 
@@ -82,7 +82,7 @@ describe('password', () => {
     const client = new OAuth2Client({
       server: server.url,
       tokenEndpoint: '/token',
-      clientId: 'test-client-id',
+      clientId: 'testClientId',
       authenticationMethod: 'client_secret_post',
     });
     const resource = ['https://example/resource1', 'https://example/resource2'];
@@ -104,7 +104,7 @@ describe('password', () => {
       grant_type: 'password',
       password: 'password',
       username: 'user123',
-      client_id: 'test-client-id',
+      client_id: 'testClientId',
       resource,
     });
   });
