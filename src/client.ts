@@ -467,7 +467,7 @@ export class OAuth2Client {
 
     return {
       accessToken: body.access_token,
-      idToken: body.id_token ?? null,
+      idToken: body.id_token,
       expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
       refreshToken: body.refresh_token ?? null,
     };

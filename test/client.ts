@@ -16,8 +16,30 @@ describe('tokenResponseToOAuth2Token', () => {
 
     assert.deepEqual(token, {
       accessToken: 'foo-bar',
+      idToken: undefined,
       expiresAt: null,
       refreshToken: null,
+    });
+  });
+
+  it('should respond with all tokens', async () => {
+    const client = new OAuth2Client({
+      clientId: 'foo',
+    });
+    const token = await client.tokenResponseToOAuth2Token(
+      Promise.resolve({
+        token_type: 'bearer',
+        access_token: 'foo',
+        id_token: 'bar',
+        refresh_token: 'baz',
+      })
+    );
+
+    assert.deepEqual(token, {
+      accessToken: 'foo',
+      idToken: 'bar',
+      expiresAt: null,
+      refreshToken: 'baz',
     });
   });
 

@@ -23,5 +23,5 @@ export type OAuth2Token = {
   /**
    * OAuth2 ID Token
    */
-  idToken: string | null;
+  idToken?: string;
 };
