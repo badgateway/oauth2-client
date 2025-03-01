@@ -53,7 +53,7 @@ pipeline {
                     sh "git tag"
 
                     // Получаем тег коммита
-                    OAUTH2_VERSION = sh(script: "git tag --points-at HEAD | tail -n 1 || echo ''", returnStdout: true).trim()
+                    OAUTH2_VERSION = sh(script: "git describe --tags --abbrev=0 || echo ''", returnStdout: true).trim()
 
                     if (OAUTH2_VERSION == '') {
                         echo 'No tag found. Skipping build.'
