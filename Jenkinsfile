@@ -1,113 +1,297 @@
-pipeline {
-    agent { label 'docker-ci-stage' }
+def AWS_ACCESS_KEY_ID = ''
+def AWS_SECRET_ACCESS_KEY = ''
+def REGION = ''
+def REGISTRY_URL = ''
+def REGISTRY_ENDPOINT = ''
+def DOMAIN_OWNER = ''
+def OAUTH2_VERSION = ''
+def REPOSITORY_NAME = ''
 
-    triggers {
-        pollSCM('H/5 * * * *')
+
+pipeline {
+    agent {
+        label 'docker-ci-stage'
     }
 
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(
+            logRotator(
+                numToKeepStr: '30'
+            )
+        )
+    }
+
+    triggers {
+        pollSCM 'H/5 * * * *'
+    }
+
+    parameters{
+        REGISTRY_URL=""
+    }
     environment {
-        AWS_CREDENTIALS_ID = 'AWSCodeArtifactCredentials'
-        AWS_REGION         = 'eu-north-1'
-        CODEARTIFACT_DOMAIN      = 'gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com'
-        CODEARTIFACT_DOMAIN_OWNER= '481745976483'
-        CODEARTIFACT_REPO        = 'npm/npm-aws'
+
     }
 
     stages {
-
-        stage('Install AWS CLI') {
-            steps {
-                script {
-                    sh '''
-                        mkdir -p awscli-dist
-                        cd awscli-dist
-
-                        echo "Скачиваем AWS CLI..."
-                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-
-                        unzip awscliv2.zip 
-                        ./aws/install --bin-dir $PWD/bin --install-dir $PWD/aws-cli --update
-                        export PATH=$PWD/bin:$PATH
-                        cd ..
-                        aws --version
-                    '''
+        stage('Prepare parameters') {
+            when {
+                anyOf {
+                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
+                    expression {params.FORCE_BUILD}
+                    expression {params.ANALYSIS}
+// Should be enabled when unit-tests will created in repo
+                    // expression {params.UNIT_TESTS}
                 }
             }
-        }
-
-        stage('Checkout') {
             steps {
                 script {
-                    checkout scm
-                    def branchParts = env.GIT_BRANCH?.tokenize('/')
-                    if (branchParts?.size() >= 3 && branchParts[1] == 'tags') {
-                        env.GIT_TAG = branchParts[2]
-                    } else {
-                        env.GIT_TAG = 'no-tag-found'
+                    def POM = readMavenPom file: INITIAL_POM
+                    APPLICATION_VERSION = POM.version
+                    TAG = env.BRANCH_NAME.replaceAll("[^a-zA-Z0-9.-]+","_")
+                    TAG_UNIQUE = "${TAG}-${CURRENT_DATE}-${env.GIT_COMMIT[0..6]}"
+
+                    COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
+                    BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
+                    SLACK_MESSAGE =
+                        "//auth// service, ${BUILD_TRIGGERED_BY}\n" +
+                        "branch: //${env.BRANCH_NAME}//, version: //${APPLICATION_VERSION}//, commit: //${env.GIT_COMMIT[0..6]}//, commit author: //${COMMIT_AUTHOR_NAME}//\n" +
+                        "Docker image tag: //${TAG_UNIQUE}//\n" +
+                        "${env.BUILD_URL}"
+
+                    switch (env.BRANCH_NAME) {
+                        case 'master':
+                            MAVEN_PROFILE = "release"
+                            ARTIFACTORY_REPO = 'core-release-local'
+                            TAG_DEPLOY = TAG_UNIQUE
+                            break;
+                        case ~/\d+\.\d+\.\d+/:
+                            MAVEN_PROFILE = "release"
+                            ARTIFACTORY_REPO = 'core-release-local'
+                            TAG_DEPLOY = TAG
+                            break;
+                        default:
+                            MAVEN_PROFILE = "dev"
+                            ARTIFACTORY_REPO = 'core-dev-local'
+                            TAG_DEPLOY = TAG_UNIQUE
+                            break;
                     }
-                    echo "Checked from GitHub: ${env.GIT_TAG}"
+
+                    currentBuild.description = TAG_DEPLOY
                 }
             }
         }
 
-        stage('AWS Auth') {
+        stage('Analysis') {
+            when {
+                anyOf {
+                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
+                    expression {params.ANALYSIS}
+                }
+            }
             steps {
                 script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
-                        sh """
-                            export PATH=\$(pwd)/awscli-dist/bin:\$PATH
-                            aws configure set aws_access_key_id \$AWS_ACCESS_KEY_ID
-                            aws configure set aws_secret_access_key \$AWS_SECRET_ACCESS_KEY
-                            aws configure set default.region ${AWS_REGION}
-                        """
+                    echo "Temporary disabled - https://gmntc.atlassian.net/browse/GC-7006"
+//                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactory-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+//                         IMAGE_ANALYSIS = docker.build(
+//                             "${env.DOCKER_REGISTRY}/${env.DOCKER_IMAGE_NAME}:${TAG}-analysis",
+//                             "--build-arg MAVEN_TAG=${params.MAVEN_TAG} " +
+//                             "--build-arg MAVEN_GOALS='clean checkstyle:checkstyle-aggregate pmd:aggregate-pmd compile' " +
+//                             "--build-arg MAVEN_PROFILE=${MAVEN_PROFILE} " +
+//                             "--build-arg MAVEN_ARTIFACTORY_REPO=${ARTIFACTORY_REPO} " +
+//                             "--build-arg MAVEN_REPO_USERNAME=${USERNAME} " +
+//                             "--build-arg MAVEN_REPO_PASSWORD=${PASSWORD} " +
+//                             "--build-arg OPENJDK_TAG=${params.OPENJDK_TAG} " +
+//                             "--build-arg PROMETHEUS_JAVAAGENT_VERSION=${params.PROMETHEUS_JAVAAGENT_VERSION} " +
+//                             "--build-arg ELASTIC_APM_AGENT_VERSION=${params.ELASTIC_APM_AGENT_VERSION} " +
+//                             "--build-arg PROTOBUF_VERSION=${params.PROTOBUF_VERSION} " +
+//                             "--target build " +
+//                             "--progress plain " +
+//                             "."
+//                         )
+//                     }
+                }
+            }
+//             post {
+//                 always {
+//                     script {
+//                         IMAGE_ANALYSIS.withRun("--name extract-from-${TAG_UNIQUE}") {c ->
+//                             sh "docker cp extract-from-${TAG_UNIQUE}:/app/target/checkstyle-result.xml ."
+//                             sh "docker cp extract-from-${TAG_UNIQUE}:/app/target/pmd.xml ."
+//                         }
+//
+//                         recordIssues(
+//                             tools: [
+//                                 checkStyle(),
+//                                 pmdParser()
+//                             ],
+// //                            failOnError: true,  // fail build if violations found in analysis
+//                             enabledForFailure: true,
+//                             ignoreFailedBuilds: false
+//                         )
+//
+//                         sh "docker rmi --force ${IMAGE_ANALYSIS.id}"
+//                     }
+//                 }
+//                 unsuccessful {
+//                     script {
+//                         currentBuild.result = 'FAILURE'
+//                         error("Errors found in analysis")
+//                     }
+//                     slackSend(
+//                         color: 'danger',
+//                         message: "BUILD ANALYSIS ${currentBuild.currentResult}: " + SLACK_MESSAGE
+//                     )
+//                 }
+//             }
+        }
+
+// Should be enabled when unit-tests will created in repo
+        // stage('Unit tests') {
+        //     when {
+        //         anyOf {
+        //             branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
+        //             expression {params.UNIT_TESTS}
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             USER_UID = sh(script: "id -u", returnStdout: true).trim()
+        //             DOCKER_SOCKET_GID = sh(script: "stat -c %g /var/run/docker.sock", returnStdout: true).trim()
+        //             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactory-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+        //                 docker.image("maven:${params.MAVEN_TAG}").inside("-u $USER_UID:$DOCKER_SOCKET_GID -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:$PWD -e MAVEN_USERNAME=${USERNAME} -e MAVEN_PASSWORD=${PASSWORD}") {
+        //                     sh "mvn -f pom.xml --settings settings.xml --activate-profiles ${MAVEN_PROFILE} --quiet clean test"
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         unsuccessful {
+        //             slackSend(
+        //                 color: 'danger',
+        //                 message: "BUILD UNIT TESTS ${currentBuild.currentResult}: " + SLACK_MESSAGE
+        //             )
+        //         }
+        //     }
+        // }
+
+        stage('Docker build') {
+            when {
+                anyOf {
+                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
+                    expression {
+                        params.FORCE_BUILD
                     }
                 }
             }
-        }
-
-        stage('CodeArtifact Login') {
             steps {
                 script {
-                    sh """
-                       export PATH=\$(pwd)/awscli-dist/bin:\$PATH
-                       export CODEARTIFACT_AUTH_TOKEN=\$(aws codeartifact get-authorization-token --domain gtec --domain-owner 481745976483 --region eu-north-1 --query authorizationToken --output text)
-                       npm login --registry https://${CODEARTIFACT_DOMAIN}/${CODEARTIFACT_REPO}/ --auth-token=\"\$CODEARTIFACT_AUTH_TOKEN\" --auth-type=legacy
-                    """
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactory-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        IMAGE = docker.build(
+                            "${env.DOCKER_REGISTRY}/${env.DOCKER_IMAGE_NAME}:${TAG}",
+                            "--build-arg MAVEN_TAG=${params.MAVEN_TAG} " +
+                            "--build-arg MAVEN_GOALS='clean install deploy' " +
+                            "--build-arg MAVEN_PROFILE=${MAVEN_PROFILE} " +
+                            "--build-arg MAVEN_ARTIFACTORY_REPO=${ARTIFACTORY_REPO} " +
+                            "--build-arg MAVEN_REPO_USERNAME=${USERNAME} " +
+                            "--build-arg MAVEN_REPO_PASSWORD=${PASSWORD} " +
+                            "--build-arg OPENJDK_TAG=${params.OPENJDK_TAG} " +
+                            "--build-arg PROMETHEUS_JAVAAGENT_VERSION=${params.PROMETHEUS_JAVAAGENT_VERSION} " +
+                            "--build-arg ELASTIC_APM_AGENT_VERSION=${params.ELASTIC_APM_AGENT_VERSION} " +
+                            "--progress plain " +
+                            "."
+                        )
+                    }
+                }
+            }
+            post {
+                unsuccessful {
+                    slackSend(
+                        color: 'danger',
+                        message: "BUILD ${currentBuild.currentResult}: " + SLACK_MESSAGE
+                    )
                 }
             }
         }
 
-        stage('Install NodeJS Dependencies') {
+        stage('Docker push') {
+            when {
+                anyOf {
+                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
+                    expression {
+                        params.FORCE_BUILD
+                    }
+                }
+            }
             steps {
                 script {
-                    sh "npm install"
+                    docker.withRegistry('', env.DOCKER_HUB_CREDENTIALS) {
+                        IMAGE.push()
+                        if (!(env.BRANCH_NAME ==~ '\\d+\\.\\d+\\.\\d+')) {
+                            IMAGE.push(TAG_UNIQUE)
+                        }
+                        if (env.BRANCH_NAME == 'master') {
+                            IMAGE.push('latest')
+                        }
+                    }
+
+                    // cleanup
+                    sh "docker rmi ${IMAGE.id}"
+                }
+            }
+            post {
+                unsuccessful {
+                    slackSend(
+                        color: 'danger',
+                        message: "BUILD ${currentBuild.currentResult}: " + SLACK_MESSAGE
+                    )
                 }
             }
         }
 
-        stage('Prepublish') {
-            steps {
-                script {
-                    sh "npm run prepublishOnly -- --tag=${env.GIT_TAG}"
+        stage('Send notifications') {
+            when {
+                anyOf {
+                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
+                    expression {
+                        params.FORCE_BUILD
+                    }
                 }
+            }
+            steps {
+                slackSend(
+                    color: 'good',
+                    message: "BUILD SUCCESS: " + SLACK_MESSAGE
+                )
             }
         }
 
-        stage('Publish to CodeArtifact') {
-            steps {
-                script {
-                    sh "npm publish"
+        stage('Deploy') {
+            when {
+                anyOf {
+                    // branch pattern: 'dev', comparator: 'REGEXP'
+                    expression {
+                        params.FORCE_BUILD && params.DEPLOY
+                    }
                 }
             }
-        }
-
-        stage('Cleanup Workspace') {
             steps {
                 script {
-                    cleanWs()
+                    build(
+                        job: 'deploy_auth',
+                        parameters: [
+                            string(name: 'TAG', value: TAG_DEPLOY),
+                            string(name: 'ENV', value: params.ENV)
+                        ]
+                    )
                 }
             }
         }
     }
-}
 
+    post {
+        cleanup {
+            cleanWs()
+        }
+    }
+}
