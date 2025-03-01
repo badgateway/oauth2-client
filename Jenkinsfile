@@ -1,7 +1,7 @@
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
-def OAUTH2_VERSION = '0.0.3'
+def OAUTH2_VERSION = ''
 
 pipeline {
     agent {
@@ -23,6 +23,7 @@ pipeline {
         REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         DOMAIN_OWNER = '481745976483'
         REPOSITORY_NAME = 'npm-aws'
+        OAUTH2_VERSION = '0.0.3'
     }
 
     stages {
@@ -52,7 +53,7 @@ pipeline {
                     sh "git tag"
 
                     // Получаем тег коммита
-                    OAUTH2_VERSION = sh(script: "git describe --tags --abbrev=0 || echo ''", returnStdout: true).trim()
+                    OAUTH2_VERSION = sh(script: "git describe --tags --abbrev=0 || echo '0.0.0'", returnStdout: true).trim()
 
                     if (OAUTH2_VERSION == '') {
                         echo 'No tag found. Skipping build.'
