@@ -1,113 +1,133 @@
+def CURRENT_DATE = new Date().format('yyyyMMdd')
+def COMMIT_AUTHOR_NAME = ''
+def BUILD_TRIGGERED_BY = ''
+
+def OAUTH2_VERSION = ''
+def SLACK_MESSAGE = ''
+
 pipeline {
-    agent { label 'docker-ci-stage' }
+    agent {
+        label 'docker-ci-stage'
+    }
+
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+    }
 
     triggers {
         pollSCM('H/5 * * * *')
     }
 
     environment {
-        AWS_CREDENTIALS_ID = 'AWSCodeArtifactCredentials'
-        AWS_REGION         = 'eu-north-1'
-        CODEARTIFACT_DOMAIN      = 'gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com'
-        CODEARTIFACT_DOMAIN_OWNER= '481745976483'
-        CODEARTIFACT_REPO        = 'npm/npm-aws'
+        REGION = 'eu-north-1'
+        REGISTRY_URL = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
+        REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
+        DOMAIN_OWNER = '481745976483'
+        OAUTH2_VERSION = ''
+        REPOSITORY_NAME = 'npm-aws'
+        SLACK_WEBHOOK = credentials('SLACK_WEBHOOK')
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-        stage('Install AWS CLI') {
+        stage('Prepare parameters') {
+            steps {
+                script {
+                    OAUTH2_VERSION = sh(script: "git describe --exact-match --tags $(git rev-parse HEAD) || echo ''", returnStdout: true).trim()
+                    
+                    if (OAUTH2_VERSION == '') {
+                        echo 'No tag found. Skipping build.'
+                        return
+                    } else {
+                        OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
+                        echo "Processed Tag: ${OAUTH2_VERSION}"
+                    }
+                    
+                    COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
+                    BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
+                    SLACK_MESSAGE =
+                        "Build triggered by: ${BUILD_TRIGGERED_BY}\n" +
+                        "Branch: ${env.BRANCH_NAME}, Version: ${OAUTH2_VERSION}, Commit: ${env.GIT_COMMIT[0..6]}, Author: ${COMMIT_AUTHOR_NAME}\n" +
+                        "Docker Image: ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION}\n" +
+                        "${env.BUILD_URL}"
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            when {
+                expression { OAUTH2_VERSION != '' }
+            }
+            steps {
+                withAWS(credentials: 'aws-credentials') {
+                    script {
+                        sh '''
+                        docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+                                     --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+                                     --build-arg REGION=${REGION} \
+                                     --build-arg REGISTRY_URL=${REGISTRY_URL} \
+                                     --build-arg REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT} \
+                                     --build-arg DOMAIN_OWNER=${DOMAIN_OWNER} \
+                                     --build-arg OAUTH2_VERSION=${OAUTH2_VERSION} \
+                                     --build-arg REPOSITORY_NAME=${REPOSITORY_NAME} \
+                                     -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} .
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            when {
+                expression { OAUTH2_VERSION != '' }
+            }
             steps {
                 script {
                     sh '''
-                        mkdir -p awscli-dist
-                        cd awscli-dist
-
-                        echo "Скачиваем AWS CLI..."
-                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-
-                        unzip awscliv2.zip 
-                        ./aws/install --bin-dir $PWD/bin --install-dir $PWD/aws-cli --update
-                        export PATH=$PWD/bin:$PATH
-                        cd ..
-                        aws --version
+                    docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
+                    docker rmi ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} || true
                     '''
                 }
             }
         }
+    }
 
-        stage('Checkout') {
-            steps {
-                script {
-                    checkout scm
-                    def branchParts = env.GIT_BRANCH?.tokenize('/')
-                    if (branchParts?.size() >= 3 && branchParts[1] == 'tags') {
-                        env.GIT_TAG = branchParts[2]
-                    } else {
-                        env.GIT_TAG = 'no-tag-found'
-                    }
-                    echo "Checked from GitHub: ${env.GIT_TAG}"
-                }
+    post {
+        success {
+            script {
+                sh '''
+                curl -X POST -H 'Content-type: application/json' \
+                    --data '{"text":"BUILD SUCCESS: ${SLACK_MESSAGE}"}' \
+                    ${SLACK_WEBHOOK}
+                '''
             }
         }
-
-        stage('AWS Auth') {
-            steps {
-                script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
-                        sh """
-                            export PATH=\$(pwd)/awscli-dist/bin:\$PATH
-                            aws configure set aws_access_key_id \$AWS_ACCESS_KEY_ID
-                            aws configure set aws_secret_access_key \$AWS_SECRET_ACCESS_KEY
-                            aws configure set default.region ${AWS_REGION}
-                        """
-                    }
-                }
+        failure {
+            script {
+                sh '''
+                curl -X POST -H 'Content-type: application/json' \
+                    --data '{"text":"BUILD FAILURE: ${SLACK_MESSAGE}"}' \
+                    ${SLACK_WEBHOOK}
+                '''
             }
         }
-
-        stage('CodeArtifact Login') {
-            steps {
-                script {
-                    sh """
-                       export PATH=\$(pwd)/awscli-dist/bin:\$PATH
-                       export CODEARTIFACT_AUTH_TOKEN=\$(aws codeartifact get-authorization-token --domain gtec --domain-owner 481745976483 --region eu-north-1 --query authorizationToken --output text)
-                       npm login --registry https://${CODEARTIFACT_DOMAIN}/${CODEARTIFACT_REPO}/ --auth-token=\"\$CODEARTIFACT_AUTH_TOKEN\" --auth-type=legacy
-                    """
-                }
+        unsuccessful {
+            script {
+                sh '''
+                curl -X POST -H 'Content-type: application/json' \
+                    --data '{"text":"BUILD UNSUCCESSFUL: ${SLACK_MESSAGE}"}' \
+                    ${SLACK_WEBHOOK}
+                '''
             }
         }
-
-        stage('Install NodeJS Dependencies') {
-            steps {
-                script {
-                    sh "npm install"
-                }
-            }
-        }
-
-        stage('Prepublish') {
-            steps {
-                script {
-                    sh "npm run prepublishOnly -- --tag=${env.GIT_TAG}"
-                }
-            }
-        }
-
-        stage('Publish to CodeArtifact') {
-            steps {
-                script {
-                    sh "npm publish"
-                }
-            }
-        }
-
-        stage('Cleanup Workspace') {
-            steps {
-                script {
-                    cleanWs()
-                }
-            }
+        cleanup {
+            cleanWs()
         }
     }
 }
-
