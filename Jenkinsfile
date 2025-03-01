@@ -4,7 +4,7 @@ def BUILD_TRIGGERED_BY = ''
 
 def OAUTH2_VERSION = ''
 
-def pipeline {
+pipeline {
     agent {
         label 'docker-ci-stage'
     }
