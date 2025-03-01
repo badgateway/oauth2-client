@@ -1,12 +1,9 @@
-def AWS_ACCESS_KEY_ID = ''
-def AWS_SECRET_ACCESS_KEY = ''
-def REGION = ''
-def REGISTRY_URL = ''
-def REGISTRY_ENDPOINT = ''
-def DOMAIN_OWNER = ''
-def OAUTH2_VERSION = ''
-def REPOSITORY_NAME = ''
+def CURRENT_DATE = new Date().format('yyyyMMdd')
+def COMMIT_AUTHOR_NAME = ''
+def BUILD_TRIGGERED_BY = ''
 
+def OAUTH2_VERSION = ''
+def SLACK_MESSAGE = ''
 
 pipeline {
     agent {
@@ -15,281 +12,121 @@ pipeline {
 
     options {
         disableConcurrentBuilds()
-        buildDiscarder(
-            logRotator(
-                numToKeepStr: '30'
-            )
-        )
+        buildDiscarder(logRotator(numToKeepStr: '3'))
     }
 
     triggers {
-        pollSCM 'H/5 * * * *'
+        pollSCM('H/5 * * * *')
     }
 
-    parameters{
-        REGISTRY_URL=""
-    }
     environment {
-
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        REGION = 'us-east-1'
+        REGISTRY_URL = 'https://your-registry-url'
+        REGISTRY_ENDPOINT = 'your-registry-endpoint'
+        DOMAIN_OWNER = 'your-domain-owner'
+        OAUTH2_VERSION = 'your-oauth2-version'
+        REPOSITORY_NAME = 'your-repository-name'
+        SLACK_WEBHOOK = credentials('SLACK_WEBHOOK')
     }
 
     stages {
-        stage('Prepare parameters') {
-            when {
-                anyOf {
-                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
-                    expression {params.FORCE_BUILD}
-                    expression {params.ANALYSIS}
-// Should be enabled when unit-tests will created in repo
-                    // expression {params.UNIT_TESTS}
-                }
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
+        }
+
+        stage('Prepare parameters') {
             steps {
                 script {
-                    def POM = readMavenPom file: INITIAL_POM
-                    APPLICATION_VERSION = POM.version
-                    TAG = env.BRANCH_NAME.replaceAll("[^a-zA-Z0-9.-]+","_")
-                    TAG_UNIQUE = "${TAG}-${CURRENT_DATE}-${env.GIT_COMMIT[0..6]}"
-
+                    OAUTH2_VERSION = sh(script: "git describe --exact-match --tags $(git rev-parse HEAD) || echo ''", returnStdout: true).trim()
+                    
+                    if (OAUTH2_VERSION == '') {
+                        echo 'No tag found. Skipping build.'
+                        return
+                    } else {
+                        // Удаляем префиксы типа 'v.', 'v' и оставляем только номер версии
+                        OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
+                        echo "Processed Tag: ${OAUTH2_VERSION}"
+                    }
+                    
                     COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
                     BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
                     SLACK_MESSAGE =
-                        "//auth// service, ${BUILD_TRIGGERED_BY}\n" +
-                        "branch: //${env.BRANCH_NAME}//, version: //${APPLICATION_VERSION}//, commit: //${env.GIT_COMMIT[0..6]}//, commit author: //${COMMIT_AUTHOR_NAME}//\n" +
-                        "Docker image tag: //${TAG_UNIQUE}//\n" +
+                        "Build triggered by: ${BUILD_TRIGGERED_BY}\n" +
+                        "Branch: ${env.BRANCH_NAME}, Version: ${OAUTH2_VERSION}, Commit: ${env.GIT_COMMIT[0..6]}, Author: ${COMMIT_AUTHOR_NAME}\n" +
+                        "Docker Image: ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION}\n" +
                         "${env.BUILD_URL}"
-
-                    switch (env.BRANCH_NAME) {
-                        case 'master':
-                            MAVEN_PROFILE = "release"
-                            ARTIFACTORY_REPO = 'core-release-local'
-                            TAG_DEPLOY = TAG_UNIQUE
-                            break;
-                        case ~/\d+\.\d+\.\d+/:
-                            MAVEN_PROFILE = "release"
-                            ARTIFACTORY_REPO = 'core-release-local'
-                            TAG_DEPLOY = TAG
-                            break;
-                        default:
-                            MAVEN_PROFILE = "dev"
-                            ARTIFACTORY_REPO = 'core-dev-local'
-                            TAG_DEPLOY = TAG_UNIQUE
-                            break;
-                    }
-
-                    currentBuild.description = TAG_DEPLOY
                 }
             }
         }
 
-        stage('Analysis') {
+        stage('Build Docker Image') {
             when {
-                anyOf {
-                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
-                    expression {params.ANALYSIS}
-                }
+                expression { OAUTH2_VERSION != '' }
             }
             steps {
                 script {
-                    echo "Temporary disabled - https://gmntc.atlassian.net/browse/GC-7006"
-//                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactory-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-//                         IMAGE_ANALYSIS = docker.build(
-//                             "${env.DOCKER_REGISTRY}/${env.DOCKER_IMAGE_NAME}:${TAG}-analysis",
-//                             "--build-arg MAVEN_TAG=${params.MAVEN_TAG} " +
-//                             "--build-arg MAVEN_GOALS='clean checkstyle:checkstyle-aggregate pmd:aggregate-pmd compile' " +
-//                             "--build-arg MAVEN_PROFILE=${MAVEN_PROFILE} " +
-//                             "--build-arg MAVEN_ARTIFACTORY_REPO=${ARTIFACTORY_REPO} " +
-//                             "--build-arg MAVEN_REPO_USERNAME=${USERNAME} " +
-//                             "--build-arg MAVEN_REPO_PASSWORD=${PASSWORD} " +
-//                             "--build-arg OPENJDK_TAG=${params.OPENJDK_TAG} " +
-//                             "--build-arg PROMETHEUS_JAVAAGENT_VERSION=${params.PROMETHEUS_JAVAAGENT_VERSION} " +
-//                             "--build-arg ELASTIC_APM_AGENT_VERSION=${params.ELASTIC_APM_AGENT_VERSION} " +
-//                             "--build-arg PROTOBUF_VERSION=${params.PROTOBUF_VERSION} " +
-//                             "--target build " +
-//                             "--progress plain " +
-//                             "."
-//                         )
-//                     }
+                    sh '''
+                    docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+                                 --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+                                 --build-arg REGION=${REGION} \
+                                 --build-arg REGISTRY_URL=${REGISTRY_URL} \
+                                 --build-arg REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT} \
+                                 --build-arg DOMAIN_OWNER=${DOMAIN_OWNER} \
+                                 --build-arg OAUTH2_VERSION=${OAUTH2_VERSION} \
+                                 --build-arg REPOSITORY_NAME=${REPOSITORY_NAME} \
+                                 -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} .
+                    '''
                 }
             }
-//             post {
-//                 always {
-//                     script {
-//                         IMAGE_ANALYSIS.withRun("--name extract-from-${TAG_UNIQUE}") {c ->
-//                             sh "docker cp extract-from-${TAG_UNIQUE}:/app/target/checkstyle-result.xml ."
-//                             sh "docker cp extract-from-${TAG_UNIQUE}:/app/target/pmd.xml ."
-//                         }
-//
-//                         recordIssues(
-//                             tools: [
-//                                 checkStyle(),
-//                                 pmdParser()
-//                             ],
-// //                            failOnError: true,  // fail build if violations found in analysis
-//                             enabledForFailure: true,
-//                             ignoreFailedBuilds: false
-//                         )
-//
-//                         sh "docker rmi --force ${IMAGE_ANALYSIS.id}"
-//                     }
-//                 }
-//                 unsuccessful {
-//                     script {
-//                         currentBuild.result = 'FAILURE'
-//                         error("Errors found in analysis")
-//                     }
-//                     slackSend(
-//                         color: 'danger',
-//                         message: "BUILD ANALYSIS ${currentBuild.currentResult}: " + SLACK_MESSAGE
-//                     )
-//                 }
-//             }
         }
 
-// Should be enabled when unit-tests will created in repo
-        // stage('Unit tests') {
-        //     when {
-        //         anyOf {
-        //             branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
-        //             expression {params.UNIT_TESTS}
-        //         }
-        //     }
-        //     steps {
-        //         script {
-        //             USER_UID = sh(script: "id -u", returnStdout: true).trim()
-        //             DOCKER_SOCKET_GID = sh(script: "stat -c %g /var/run/docker.sock", returnStdout: true).trim()
-        //             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactory-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-        //                 docker.image("maven:${params.MAVEN_TAG}").inside("-u $USER_UID:$DOCKER_SOCKET_GID -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:$PWD -e MAVEN_USERNAME=${USERNAME} -e MAVEN_PASSWORD=${PASSWORD}") {
-        //                     sh "mvn -f pom.xml --settings settings.xml --activate-profiles ${MAVEN_PROFILE} --quiet clean test"
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     post {
-        //         unsuccessful {
-        //             slackSend(
-        //                 color: 'danger',
-        //                 message: "BUILD UNIT TESTS ${currentBuild.currentResult}: " + SLACK_MESSAGE
-        //             )
-        //         }
-        //     }
-        // }
-
-        stage('Docker build') {
+        stage('Cleanup') {
             when {
-                anyOf {
-                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
-                    expression {
-                        params.FORCE_BUILD
-                    }
-                }
+                expression { OAUTH2_VERSION != '' }
             }
             steps {
                 script {
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'artifactory-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                        IMAGE = docker.build(
-                            "${env.DOCKER_REGISTRY}/${env.DOCKER_IMAGE_NAME}:${TAG}",
-                            "--build-arg MAVEN_TAG=${params.MAVEN_TAG} " +
-                            "--build-arg MAVEN_GOALS='clean install deploy' " +
-                            "--build-arg MAVEN_PROFILE=${MAVEN_PROFILE} " +
-                            "--build-arg MAVEN_ARTIFACTORY_REPO=${ARTIFACTORY_REPO} " +
-                            "--build-arg MAVEN_REPO_USERNAME=${USERNAME} " +
-                            "--build-arg MAVEN_REPO_PASSWORD=${PASSWORD} " +
-                            "--build-arg OPENJDK_TAG=${params.OPENJDK_TAG} " +
-                            "--build-arg PROMETHEUS_JAVAAGENT_VERSION=${params.PROMETHEUS_JAVAAGENT_VERSION} " +
-                            "--build-arg ELASTIC_APM_AGENT_VERSION=${params.ELASTIC_APM_AGENT_VERSION} " +
-                            "--progress plain " +
-                            "."
-                        )
-                    }
-                }
-            }
-            post {
-                unsuccessful {
-                    slackSend(
-                        color: 'danger',
-                        message: "BUILD ${currentBuild.currentResult}: " + SLACK_MESSAGE
-                    )
-                }
-            }
-        }
-
-        stage('Docker push') {
-            when {
-                anyOf {
-                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
-                    expression {
-                        params.FORCE_BUILD
-                    }
-                }
-            }
-            steps {
-                script {
-                    docker.withRegistry('', env.DOCKER_HUB_CREDENTIALS) {
-                        IMAGE.push()
-                        if (!(env.BRANCH_NAME ==~ '\\d+\\.\\d+\\.\\d+')) {
-                            IMAGE.push(TAG_UNIQUE)
-                        }
-                        if (env.BRANCH_NAME == 'master') {
-                            IMAGE.push('latest')
-                        }
-                    }
-
-                    // cleanup
-                    sh "docker rmi ${IMAGE.id}"
-                }
-            }
-            post {
-                unsuccessful {
-                    slackSend(
-                        color: 'danger',
-                        message: "BUILD ${currentBuild.currentResult}: " + SLACK_MESSAGE
-                    )
-                }
-            }
-        }
-
-        stage('Send notifications') {
-            when {
-                anyOf {
-                    branch pattern: 'dev|master|\\d+\\.\\d+\\.\\d+', comparator: 'REGEXP'
-                    expression {
-                        params.FORCE_BUILD
-                    }
-                }
-            }
-            steps {
-                slackSend(
-                    color: 'good',
-                    message: "BUILD SUCCESS: " + SLACK_MESSAGE
-                )
-            }
-        }
-
-        stage('Deploy') {
-            when {
-                anyOf {
-                    // branch pattern: 'dev', comparator: 'REGEXP'
-                    expression {
-                        params.FORCE_BUILD && params.DEPLOY
-                    }
-                }
-            }
-            steps {
-                script {
-                    build(
-                        job: 'deploy_auth',
-                        parameters: [
-                            string(name: 'TAG', value: TAG_DEPLOY),
-                            string(name: 'ENV', value: params.ENV)
-                        ]
-                    )
+                    sh '''
+                    docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
+                    docker rmi ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} || true
+                    '''
                 }
             }
         }
     }
 
     post {
+        success {
+            script {
+                sh '''
+                curl -X POST -H 'Content-type: application/json' \
+                    --data '{"text":"BUILD SUCCESS: ${SLACK_MESSAGE}"}' \
+                    ${SLACK_WEBHOOK}
+                '''
+            }
+        }
+        failure {
+            script {
+                sh '''
+                curl -X POST -H 'Content-type: application/json' \
+                    --data '{"text":"BUILD FAILURE: ${SLACK_MESSAGE}"}' \
+                    ${SLACK_WEBHOOK}
+                '''
+            }
+        }
+        unsuccessful {
+            script {
+                sh '''
+                curl -X POST -H 'Content-type: application/json' \
+                    --data '{"text":"BUILD UNSUCCESSFUL: ${SLACK_MESSAGE}"}' \
+                    ${SLACK_WEBHOOK}
+                '''
+            }
+        }
         cleanup {
             cleanWs()
         }
