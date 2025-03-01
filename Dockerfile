@@ -48,7 +48,7 @@ WORKDIR /app
 # Copy project files
 COPY oauth2-client.tar /app
 RUN tar xfv oauth2-client.tar
-RUN git config --global --add safe.directory /app
+RUN rm -rf /app/.github
 RUN npm install
 RUN npm version ${OAUTH2_VERSION}
 RUN npm run prepublishOnly
