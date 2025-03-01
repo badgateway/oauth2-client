@@ -20,14 +20,12 @@ pipeline {
     }
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        REGION = 'us-east-1'
-        REGISTRY_URL = 'https://your-registry-url'
-        REGISTRY_ENDPOINT = 'your-registry-endpoint'
-        DOMAIN_OWNER = 'your-domain-owner'
-        OAUTH2_VERSION = 'your-oauth2-version'
-        REPOSITORY_NAME = 'your-repository-name'
+        REGION = 'eu-north-1'
+        REGISTRY_URL = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
+        REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
+        DOMAIN_OWNER = '481745976483'
+        OAUTH2_VERSION = ''
+        REPOSITORY_NAME = 'npm-aws'
         SLACK_WEBHOOK = credentials('SLACK_WEBHOOK')
     }
 
@@ -47,7 +45,6 @@ pipeline {
                         echo 'No tag found. Skipping build.'
                         return
                     } else {
-                        // Удаляем префиксы типа 'v.', 'v' и оставляем только номер версии
                         OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
                         echo "Processed Tag: ${OAUTH2_VERSION}"
                     }
@@ -68,18 +65,20 @@ pipeline {
                 expression { OAUTH2_VERSION != '' }
             }
             steps {
-                script {
-                    sh '''
-                    docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-                                 --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-                                 --build-arg REGION=${REGION} \
-                                 --build-arg REGISTRY_URL=${REGISTRY_URL} \
-                                 --build-arg REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT} \
-                                 --build-arg DOMAIN_OWNER=${DOMAIN_OWNER} \
-                                 --build-arg OAUTH2_VERSION=${OAUTH2_VERSION} \
-                                 --build-arg REPOSITORY_NAME=${REPOSITORY_NAME} \
-                                 -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} .
-                    '''
+                withAWS(credentials: 'aws-credentials') {
+                    script {
+                        sh '''
+                        docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+                                     --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+                                     --build-arg REGION=${REGION} \
+                                     --build-arg REGISTRY_URL=${REGISTRY_URL} \
+                                     --build-arg REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT} \
+                                     --build-arg DOMAIN_OWNER=${DOMAIN_OWNER} \
+                                     --build-arg OAUTH2_VERSION=${OAUTH2_VERSION} \
+                                     --build-arg REPOSITORY_NAME=${REPOSITORY_NAME} \
+                                     -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} .
+                        '''
+                    }
                 }
             }
         }
