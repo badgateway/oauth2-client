@@ -30,7 +30,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: scm.branches,
+                        extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, depth: 1, shallow: true]],
+                        userRemoteConfigs: scm.userRemoteConfigs
+                    ])
+                }
             }
         }
 
