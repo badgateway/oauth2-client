@@ -51,9 +51,8 @@ RUN tar xfv oauth2-client.tar
 
 # Install npm dependencies, bump version, and run prepublish script
 RUN npm install && \
-    npm run prepublishOnly &&\
-    npm version ${OAUTH2_VERSION}
+    npm run prepublishOnly &&
 
 # Retrieve CodeArtifact authorization token, log in to CodeArtifact,
 # configure npm authentication, and publish the package.
-RUN CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain gtec --domain-owner ${DOMAIN_OWNER} --region ${REGION} --query authorizationToken --output text) && CODEARTIFACT_ENDPOINT=${REGISTRY_ENDPOINT} && aws codeartifact login --tool npm --repository ${REPOSITORY_NAME} --domain gtec --domain-owner ${DOMAIN_OWNER} --region ${REGION} && HOST=$(echo ${REGISTRY_URL} | sed 's~https://~~') && npm config set //"${HOST}":_authToken=${CODEARTIFACT_AUTH_TOKEN} && npm config set registry ${REGISTRY_URL} && npm publish --registry ${REGISTRY_URL}
+RUN npm version ${OAUTH2_VERSION} && CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain gtec --domain-owner ${DOMAIN_OWNER} --region ${REGION} --query authorizationToken --output text) && CODEARTIFACT_ENDPOINT=${REGISTRY_ENDPOINT} && aws codeartifact login --tool npm --repository ${REPOSITORY_NAME} --domain gtec --domain-owner ${DOMAIN_OWNER} --region ${REGION} && HOST=$(echo ${REGISTRY_URL} | sed 's~https://~~') && npm config set //"${HOST}":_authToken=${CODEARTIFACT_AUTH_TOKEN} && npm config set registry ${REGISTRY_URL} && npm publish --registry ${REGISTRY_URL}
