@@ -65,7 +65,7 @@ pipeline {
                 expression { OAUTH2_VERSION != '' }
             }
             steps {
-                withAWS(credentials: 'aws-credentials') {
+                withAWS(credentials: 'AWSCodeArtifactCredentials') {
                     script {
                         sh '''
                         docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
