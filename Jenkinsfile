@@ -98,7 +98,7 @@ pipeline {
 
     post {
         success {
-            node {
+            node('docker-ci-stage') {
                 sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD SUCCESS: ${SLACK_MESSAGE}"}' \
@@ -107,7 +107,7 @@ pipeline {
             }
         }
         failure {
-            node {
+            node('docker-ci-stage') {
                 sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD FAILURE: ${SLACK_MESSAGE}"}' \
@@ -116,7 +116,7 @@ pipeline {
             }
         }
         unsuccessful {
-            node {
+            node('docker-ci-stage') {
                 sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD UNSUCCESSFUL: ${SLACK_MESSAGE}"}' \
@@ -125,7 +125,7 @@ pipeline {
             }
         }
         cleanup {
-            node {
+            node('docker-ci-stage') {
                 cleanWs()
             }
         }
