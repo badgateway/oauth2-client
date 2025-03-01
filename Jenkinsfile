@@ -22,7 +22,6 @@ pipeline {
         REGISTRY_URL = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         DOMAIN_OWNER = '481745976483'
-        OAUTH2_VERSION = ''
         REPOSITORY_NAME = 'npm-aws'
     }
 
