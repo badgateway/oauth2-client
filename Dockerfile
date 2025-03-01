@@ -51,8 +51,8 @@ RUN tar xfv oauth2-client.tar
 
 # Install npm dependencies, bump version, and run prepublish script
 RUN npm install && \
-    npm version ${OAUTH2_VERSION} && \
-    npm run prepublishOnly
+    npm run prepublishOnly &&\
+    npm version ${OAUTH2_VERSION}
 
 # Retrieve CodeArtifact authorization token, log in to CodeArtifact,
 # configure npm authentication, and publish the package.
