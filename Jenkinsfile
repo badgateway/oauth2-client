@@ -48,10 +48,10 @@ pipeline {
         stage('Prepare parameters') {
             steps {
                 script {
-                    // Отладочная информация: какие теги вообще видит Jenkins?
+                    echo "Отладочная информация: какие теги вообще видит Jenkins?"
                     sh "git fetch --tags"
                     sh "git tag"
-
+                    echo "________________________________________________________________________________"
                     // Получаем тег коммита
                     OAUTH2_VERSION = sh(script: "git describe --tags --abbrev=0 || echo '0.0.0'", returnStdout: true).trim()
 
