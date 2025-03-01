@@ -92,15 +92,14 @@ pipeline {
                     docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
                     docker rmi ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} || true
                     '''
-                }
             }
         }
     }
 
     post {
-    node {
         success {
-            sh '''
+            node {
+                sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD SUCCESS: ${SLACK_MESSAGE}"}' \
                     ${SLACK_WEBHOOK}
@@ -108,7 +107,8 @@ pipeline {
             }
         }
         failure {
-            sh '''
+            node {
+                sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD FAILURE: ${SLACK_MESSAGE}"}' \
                     ${SLACK_WEBHOOK}
@@ -116,7 +116,8 @@ pipeline {
             }
         }
         unsuccessful {
-            sh '''
+            node {
+                sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD UNSUCCESSFUL: ${SLACK_MESSAGE}"}' \
                     ${SLACK_WEBHOOK}
@@ -124,9 +125,9 @@ pipeline {
             }
         }
         cleanup {
-        node {
-            cleanWs()
-        }
+            node {
+                cleanWs()
+            }
         }
     }
 }
