@@ -41,7 +41,6 @@ pipeline {
                 script {
                     OAUTH2_VERSION = sh(script: "git describe --exact-match --tags \$(git rev-parse HEAD) || echo ''", returnStdout: true).trim()
                     
-                    
                     if (OAUTH2_VERSION == '') {
                         echo 'No tag found. Skipping build.'
                         return
@@ -89,8 +88,7 @@ pipeline {
                 expression { OAUTH2_VERSION != '' }
             }
             steps {
-                script {
-                    sh '''
+                sh '''
                     docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
                     docker rmi ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} || true
                     '''
@@ -100,9 +98,9 @@ pipeline {
     }
 
     post {
+    node {
         success {
-            script {
-                sh '''
+            sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD SUCCESS: ${SLACK_MESSAGE}"}' \
                     ${SLACK_WEBHOOK}
@@ -110,8 +108,7 @@ pipeline {
             }
         }
         failure {
-            script {
-                sh '''
+            sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD FAILURE: ${SLACK_MESSAGE}"}' \
                     ${SLACK_WEBHOOK}
@@ -119,8 +116,7 @@ pipeline {
             }
         }
         unsuccessful {
-            script {
-                sh '''
+            sh '''
                 curl -X POST -H 'Content-type: application/json' \
                     --data '{"text":"BUILD UNSUCCESSFUL: ${SLACK_MESSAGE}"}' \
                     ${SLACK_WEBHOOK}
@@ -128,7 +124,9 @@ pipeline {
             }
         }
         cleanup {
+        node {
             cleanWs()
+        }
         }
     }
 }
