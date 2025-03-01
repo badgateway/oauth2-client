@@ -3,9 +3,8 @@ def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
 
 def OAUTH2_VERSION = ''
-def SLACK_MESSAGE = ''
 
-pipeline {
+def pipeline {
     agent {
         label 'docker-ci-stage'
     }
@@ -26,7 +25,6 @@ pipeline {
         DOMAIN_OWNER = '481745976483'
         OAUTH2_VERSION = ''
         REPOSITORY_NAME = 'npm-aws'
-        SLACK_WEBHOOK = credentials('SLACK_WEBHOOK')
     }
 
     stages {
@@ -51,11 +49,6 @@ pipeline {
                     
                     COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
                     BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
-                    SLACK_MESSAGE =
-                        "Build triggered by: ${BUILD_TRIGGERED_BY}\n" +
-                        "Branch: ${env.BRANCH_NAME}, Version: ${OAUTH2_VERSION}, Commit: ${env.GIT_COMMIT[0..6]}, Author: ${COMMIT_AUTHOR_NAME}\n" +
-                        "Docker Image: ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION}\n" +
-                        "${env.BUILD_URL}"
                 }
             }
         }
@@ -97,33 +90,6 @@ pipeline {
     }
 
     post {
-        success {
-            node('docker-ci-stage') {
-                sh '''
-                curl -X POST -H 'Content-type: application/json' \
-                    --data '{"text":"BUILD SUCCESS: ${SLACK_MESSAGE}"}' \
-                    ${SLACK_WEBHOOK}
-                '''
-            }
-        }
-        failure {
-            node('docker-ci-stage') {
-                sh '''
-                curl -X POST -H 'Content-type: application/json' \
-                    --data '{"text":"BUILD FAILURE: ${SLACK_MESSAGE}"}' \
-                    ${SLACK_WEBHOOK}
-                '''
-            }
-        }
-        unsuccessful {
-            node('docker-ci-stage') {
-                sh '''
-                curl -X POST -H 'Content-type: application/json' \
-                    --data '{"text":"BUILD UNSUCCESSFUL: ${SLACK_MESSAGE}"}' \
-                    ${SLACK_WEBHOOK}
-                '''
-            }
-        }
         cleanup {
             node('docker-ci-stage') {
                 cleanWs()
