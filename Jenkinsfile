@@ -71,6 +71,13 @@ stage('Checkout') {
                 }
             }
         }
+        stage('Preparing archive') {
+            steps {
+                script {
+                    sh 'tar -cf oauth2-client.tar --exclude oauth2-client.tar .'
+                }
+            }
+        }
 
         stage('Build Docker Image') {
             when {
