@@ -2,7 +2,7 @@
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
-def OAUTH2_VERSION = ''
+def OAUTH2_VERSION = '0.0.0'
 
 pipeline {
     agent {
@@ -24,6 +24,7 @@ pipeline {
         REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         DOMAIN_OWNER = '481745976483'
         REPOSITORY_NAME = 'npm-aws'
+        OAUTH2_VERSION = '0.0.0'
     }
 
     stages {
