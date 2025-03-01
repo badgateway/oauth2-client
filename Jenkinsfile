@@ -1,3 +1,4 @@
+
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
@@ -23,40 +24,48 @@ pipeline {
         REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         DOMAIN_OWNER = '481745976483'
         REPOSITORY_NAME = 'npm-aws'
-        OAUTH2_VERSION = '0.0.3'
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: scm.branches,
-                        extensions: scm.extensions + [
-                            [$class: 'CloneOption', noTags: false, depth: 1, shallow: true],
-                            [$class: 'PruneStaleBranch'],
-                            [$class: 'CleanBeforeCheckout'],
-                            [$class: 'CloneOption', fetchTags: true]
-                        ],
-                        userRemoteConfigs: scm.userRemoteConfigs
-                    ])
-                }
-            }
+stage('Checkout') {
+    steps {
+        script {
+            checkout([
+                $class: 'GitSCM',
+                branches: scm.branches,
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [
+                    [$class: 'PruneStaleBranch'],
+                    [$class: 'CleanBeforeCheckout'],
+                    [$class: 'CloneOption', depth: 1, noTags: false, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 20]
+                ],
+                submoduleCfg: [],
+                userRemoteConfigs: [
+                    [
+                        url: scm.userRemoteConfigs[0].url,
+                        refspec: "+refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*"
+                    ]
+                ]
+            ])
         }
+    }
+}
+
 
         stage('Prepare parameters') {
             steps {
                 script {
-                    OAUTH2_VERSION = sh(script: "git describe --tags --abbrev=0 || echo '0.0.0'", returnStdout: true).trim()
+                    OAUTH2_VERSION = sh(script: "git describe --exact-match --tags \$(git rev-parse HEAD) || echo ''", returnStdout: true).trim()
+                    
                     if (OAUTH2_VERSION == '') {
                         echo 'No tag found. Skipping build.'
-                        //return
+                        return
                     } else {
                         OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
                         echo "Processed Tag: ${OAUTH2_VERSION}"
                     }
-
+                    
                     COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
                     BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
                 }
@@ -68,7 +77,7 @@ pipeline {
                 expression { OAUTH2_VERSION != '' }
             }
             steps {
-                withAWS(credentials: 'AWSCodeArtifactCredentials') {
+                withAWS(credentials: 'aws-credentials') {
                     script {
                         sh '''
                         docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
@@ -92,15 +101,16 @@ pipeline {
             }
             steps {
                 sh '''
+                    set -e
                     docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
                     docker rmi ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} || true
-                    '''
+                '''
             }
         }
     }
 
     post {
-        cleanup {
+        always {
             node('docker-ci-stage') {
                 cleanWs()
             }
