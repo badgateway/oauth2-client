@@ -1,7 +1,7 @@
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
-def OAUTH2_VERSION = ''
+def OAUTH2_VERSION = '0.0.3'
 
 pipeline {
     agent {
