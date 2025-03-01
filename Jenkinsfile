@@ -88,7 +88,7 @@ stage('Checkout') {
                                      --build-arg DOMAIN_OWNER=${DOMAIN_OWNER} \
                                      --build-arg OAUTH2_VERSION=${OAUTH2_VERSION} \
                                      --build-arg REPOSITORY_NAME=${REPOSITORY_NAME} \
-                                     -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} .
+                                     -t oauth2-client:momentary .
                         '''
                     }
                 }
@@ -103,7 +103,7 @@ stage('Checkout') {
                 sh '''
                     set -e
                     docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
-                    docker rmi ${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} || true
+                    docker rmi oauth2-client:momentary || true
                 '''
             }
         }
