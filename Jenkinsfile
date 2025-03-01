@@ -1,7 +1,6 @@
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
-
 def OAUTH2_VERSION = ''
 
 pipeline {
@@ -34,7 +33,12 @@ pipeline {
                     checkout([
                         $class: 'GitSCM',
                         branches: scm.branches,
-                        extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, depth: 1, shallow: true]],
+                        extensions: scm.extensions + [
+                            [$class: 'CloneOption', noTags: false, depth: 1, shallow: true],
+                            [$class: 'PruneStaleBranch'],
+                            [$class: 'CleanBeforeCheckout'],
+                            [$class: 'CloneOption', fetchTags: true]
+                        ],
                         userRemoteConfigs: scm.userRemoteConfigs
                     ])
                 }
@@ -44,8 +48,13 @@ pipeline {
         stage('Prepare parameters') {
             steps {
                 script {
-                    OAUTH2_VERSION = sh(script: "git describe --exact-match --tags \$(git rev-parse HEAD) || echo ''", returnStdout: true).trim()
-                    
+                    // Отладочная информация: какие теги вообще видит Jenkins?
+                    sh "git fetch --tags"
+                    sh "git tag"
+
+                    // Получаем тег коммита
+                    OAUTH2_VERSION = sh(script: "git tag --points-at HEAD | tail -n 1 || echo ''", returnStdout: true).trim()
+
                     if (OAUTH2_VERSION == '') {
                         echo 'No tag found. Skipping build.'
                         return
@@ -53,7 +62,7 @@ pipeline {
                         OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
                         echo "Processed Tag: ${OAUTH2_VERSION}"
                     }
-                    
+
                     COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
                     BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
                 }
