@@ -2,7 +2,7 @@
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
-def OAUTH2_VERSION = '0.0.0'
+def OAUTH2_VERSION = ''
 
 pipeline {
     agent {
@@ -24,7 +24,7 @@ pipeline {
         REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         DOMAIN_OWNER = '481745976483'
         REPOSITORY_NAME = 'npm-aws'
-        OAUTH2_VERSION = '0.0.0'
+        OAUTH2_VERSION = ''
     }
 
     stages {
@@ -57,14 +57,14 @@ stage('Checkout') {
         stage('Prepare parameters') {
             steps {
                 script {
-                    OAUTH2_VERSION = sh(script: "git describe --exact-match --tags \$(git rev-parse HEAD) || echo '0.0.0'", returnStdout: true).trim()
+                    OAUTH2_VERSION = sh(script: "git describe --tags --always --abbrev=0 || echo ''", returnStdout: true).trim()
                     
                     if (OAUTH2_VERSION == '') {
-                        echo 'No tag found. Skipping build.'
+                        echo 'Pipe message: No tag found. Skipping build.'
                         return
                     } else {
                         OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
-                        echo "Processed Tag: ${OAUTH2_VERSION}"
+                        echo "Pipe message: Processed Tag: ${OAUTH2_VERSION}"
                     }
                     
                     COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
@@ -110,7 +110,7 @@ stage('Checkout') {
             steps {
                 sh '''
                     set -e
-                    docker ps -q --filter ancestor=${REGISTRY_URL}/${REPOSITORY_NAME}:${OAUTH2_VERSION} | xargs -r docker stop
+                    docker ps -q --filter ancestor=oauth2-client:momentary | xargs -r docker stop
                     docker rmi oauth2-client:momentary || true
                 '''
             }
