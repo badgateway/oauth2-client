@@ -1,8 +1,6 @@
-
 def CURRENT_DATE = new Date().format('yyyyMMdd')
 def COMMIT_AUTHOR_NAME = ''
 def BUILD_TRIGGERED_BY = ''
-def OAUTH2_VERSION = ''
 
 pipeline {
     agent {
@@ -24,7 +22,6 @@ pipeline {
         REGISTRY_ENDPOINT = 'https://gtec-481745976483.d.codeartifact.eu-north-1.amazonaws.com/npm/npm-aws/'
         DOMAIN_OWNER = '481745976483'
         REPOSITORY_NAME = 'npm-aws'
-        OAUTH2_VERSION = ''
     }
 
     stages {
@@ -54,40 +51,40 @@ stage('Checkout') {
 }
 
 
-        stage('Prepare parameters') {
+
+
+         stage('Handle OAUTH2 Version') {
             steps {
                 script {
-                    OAUTH2_VERSION = sh(script: "git describe --tags --always --abbrev=0 || echo ''", returnStdout: true).trim()
-                    
-                    if (OAUTH2_VERSION == '') {
+                    env.OAUTH2_VERSION = sh(script: "git tag | tail -n1 | cut -c2- ", returnStdout: true).trim()
+                    if (env.OAUTH2_VERSION == '') {
                         echo 'Pipe message: No tag found. Skipping build.'
                         return
                     } else {
-                        OAUTH2_VERSION = OAUTH2_VERSION.replaceAll(/^v\.?/, '')
+                        //OAUTH2_VERSION_TMP = OAUTH2_VERSION.replace(/^v\.?/, '')
+                        //env.OAUTH2_VERSION = OAUTH2_VERSION_TMP
                         echo "Pipe message: Processed Tag: ${OAUTH2_VERSION}"
-                    }
-                    
-                    COMMIT_AUTHOR_NAME = sh(script: "git log -n 1 ${env.GIT_COMMIT} --format=%aN", returnStdout: true).trim()
-                    BUILD_TRIGGERED_BY = currentBuild.getBuildCauses()[0].shortDescription
+                   }
                 }
             }
-        }
+         }  
         stage('Preparing archive') {
             steps {
                 script {
-                    sh 'tar -cf oauth2-client.tar --exclude oauth2-client.tar .'
+                    sh 'tar -cf oauth2-client.tar --exclude oauth2-client.tar --exclude .git* .'
                 }
             }
         }
 
         stage('Build Docker Image') {
             when {
-                expression { OAUTH2_VERSION != '' }
+                expression { env.OAUTH2_VERSION != '' }
             }
             steps {
                 withAWS(credentials: 'AWSCodeArtifactCredentials') {
                     script {
                         sh '''
+                        echo 'Env var: ${OAUTH2_VERSION}'
                         docker build --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
                                      --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
                                      --build-arg REGION=${REGION} \
