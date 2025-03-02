@@ -72,4 +72,4 @@ RUN aws codeartifact login --tool npm --repository ${repository_name} --domain g
 RUN HOST=$(echo ${registry_url} | sed 's~https://~~') 
 RUN npm config set //"${HOST}":_authToken=${CODEARTIFACT_AUTH_TOKEN} 
 RUN npm config set registry ${registry_url} 
-RUN npm publish --registry ${registry_url}
+RUN npm publish --registry ${registry_url} || true
