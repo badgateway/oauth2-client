@@ -122,7 +122,7 @@ export class OAuth2Fetch {
         const newToken = await this.refreshToken();
 
         authenticatedRequest = request.clone();
-        authenticatedRequest.headers.set('Authorization', 'Bearer '  + newToken.accessToken);
+        authenticatedRequest.headers.set('Authorization', 'Bearer '  + newToken.external.token);
         response = await next(authenticatedRequest);
 
       }
@@ -142,7 +142,7 @@ export class OAuth2Fetch {
    * This function will attempt to automatically refresh if stale.
    */
   async getToken(): Promise<OAuth2Token> {
-    if (this.token && (this.token.expiresAt === null || this.token.expiresAt > Date.now())) {
+    if (this.token && (this.token.external.expiresAt === null || this.token.external.expiresAt > Date.now())) {
       // The current token is still valid
       return this.token;
     }
@@ -162,7 +162,7 @@ export class OAuth2Fetch {
 
     const token = await this.getToken();
 
-    return token.accessToken;
+    return token.external.token;
   }
 
   /**
@@ -189,7 +189,7 @@ export class OAuth2Fetch {
       let newToken: OAuth2Token|null = null;
 
       try {
-        if (oldToken?.refreshToken) {
+        if (oldToken?.internal.token) {
           // We had a refresh token, lets see if we can use it!
           newToken = await this.options.client.refreshToken(oldToken);
         }
@@ -247,12 +247,12 @@ export class OAuth2Fetch {
       this.refreshTimer = null;
     }
 
-    if (!this.token?.expiresAt || !this.token.refreshToken) {
+    if (!this.token?.external.expiresAt || !this.token.external.token) {
       // If we don't know when the token expires, or don't have a refresh_token, don't bother.
       return;
     }
 
-    const expiresIn = this.token.expiresAt - Date.now();
+    const expiresIn = this.token.external.expiresAt - Date.now();
 
     // We only schedule this event if it happens more than 2 minutes in the future.
     if (expiresIn < 120*1000) {

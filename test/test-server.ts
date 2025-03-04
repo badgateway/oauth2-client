@@ -2,6 +2,10 @@ import bodyParser from '@curveball/bodyparser';
 import { Application, Middleware, Request } from '@curveball/core';
 import * as http from 'http';
 
+export enum TOKEN_TYPE {
+  Bearer = 'Bearer',
+}
+
 type TestServer = {
   server: http.Server;
   app: Application;
@@ -108,27 +112,48 @@ const issueToken: Middleware = (ctx, next) => {
   if (ctx.request.body.refresh_token === 'refresh_token_000') {
 
     ctx.response.body = {
-      access_token: 'access_token_001',
-      refresh_token: 'refresh_token_001',
-      expires_in: 3600,
+      external: {
+        access_token: 'access_token_001',
+        expires_in: 300,
+        token_type: TOKEN_TYPE.Bearer,
+      },
+      internal: {
+        access_token: 'refresh_token_001',
+        expires_in: 3600,
+        token_type: TOKEN_TYPE.Bearer,
+      }
     };
 
   } else if (ctx.request.body.refresh_token === 'refresh_token_001') {
 
     ctx.response.body = {
-      access_token: 'access_token_002',
-      expires_in: 3600,
+      external: {
+        access_token: 'access_token_002',
+        expires_in: 300,
+        token_type: TOKEN_TYPE.Bearer,
+      },
+      internal: {
+        access_token: 'refresh_token_002',
+        expires_in: 3600,
+        token_type: TOKEN_TYPE.Bearer,
+      },
     };
 
   } else {
 
     ctx.response.body = {
-      access_token: 'access_token_000',
-      refresh_token: 'refresh_token_000',
-      expires_in: 3600,
+      external: {
+        access_token: 'access_token_000',
+        expires_in: 300,
+        token_type: TOKEN_TYPE.Bearer,
+      },
+      internal: {
+        access_token: 'refresh_token_000',
+        expires_in: 3600,
+        token_type: TOKEN_TYPE.Bearer,
+      }
     };
   }
-
 };
 
 

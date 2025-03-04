@@ -166,13 +166,13 @@ export class OAuth2Client {
    * Refreshes an existing token, and returns a new one.
    */
   async refreshToken(token: OAuth2Token, params?: RefreshParams): Promise<OAuth2Token> {
-    if (!token.refreshToken) {
+    if (!token.internal.token) {
       throw new Error('This token didn\'t have a refreshToken. It\'s not possible to refresh this');
     }
 
     const body: RefreshRequest = {
       grant_type: 'refresh_token',
-      refresh_token: token.refreshToken,
+      refresh_token: token.internal.token,
     };
 
     if (!this.settings.clientSecret) {
@@ -190,9 +190,9 @@ export class OAuth2Client {
 
     const newToken = await this.tokenResponseToOAuth2Token(this.request(OAuth2Endpoint.TokenEndpoint, body));
 
-    if (!newToken.refreshToken && token.refreshToken) {
+    if (!newToken.internal.token && token.internal.token) {
       // Reuse old refresh token if we didn't get a new one.
-      newToken.refreshToken = token.refreshToken;
+      newToken.internal.token = token.internal.token;
     }
 
     return newToken;
@@ -257,8 +257,8 @@ export class OAuth2Client {
    */
   async introspect(token: OAuth2Token): Promise<IntrospectionResponse> {
     const body: IntrospectionRequest = {
-      token: token.accessToken,
-      token_type_hint: 'access_token',
+      token: token.external.token,
+      token_type_hint: OAuth2TokenTypeHint.AccessToken,
     };
 
     return this.request(OAuth2Endpoint.IntrospectionEndpoint, body);
@@ -271,16 +271,24 @@ export class OAuth2Client {
    *
    * @see https://datatracker.ietf.org/doc/html/rfc7009
    */
-  async revoke(token: OAuth2Token, tokenTypeHint: OAuth2TokenTypeHint = 'access_token'): Promise<void> {
-    let tokenValue = token.accessToken;
+  async revoke(
+    token: OAuth2Token,
+    tokenTypeHint: OAuth2TokenTypeHint = OAuth2TokenTypeHint.AccessToken,
+  ): Promise<void> {
+    // Gamingtec implementation does stick to the standard.
+    // Let it stay here for the future.
+    let tokenValue = token.external.token;
 
-    if (tokenTypeHint === 'refresh_token') {
-      tokenValue = token.refreshToken!;
+    if (tokenTypeHint === OAuth2TokenTypeHint.RefreshToken) {
+      tokenValue = token.internal.token;
     }
 
     const body: RevocationRequest = {
       token: tokenValue,
       token_type_hint: tokenTypeHint,
+      headers: {
+        Authorization: `${token.internal.type} ${token.internal.token}`,
+      },
     };
 
     return this.request(OAuth2Endpoint.RevocationEndpoint, body);
@@ -296,7 +304,7 @@ export class OAuth2Client {
       return resolve(this.settings[endpoint] as string, this.settings.server);
     }
 
-    if (endpoint !== 'discoveryEndpoint') {
+    if (endpoint !== OAuth2Endpoint.DiscoveryEndpoint) {
       // This condition prevents infinite loops.
       await this.discover();
 
@@ -389,6 +397,17 @@ export class OAuth2Client {
       'Accept': 'application/json',
     };
 
+    // Gamingtec implementation does stick to the standard.
+    // That's the reason we need to add headers for the Revoke request.
+    if (endpoint === OAuth2Endpoint.RevocationEndpoint) {
+      const additionalHeaders = body.headers || {};
+
+      for (const header in additionalHeaders) {
+        headers[header] = additionalHeaders[header];
+        delete body.headers;
+      }
+    }
+
     let authMethod = this.settings.authenticationMethod;
 
     if (!this.settings.clientSecret) {
@@ -467,15 +486,22 @@ export class OAuth2Client {
   async tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
     const body = await resp;
 
-    if (!body?.access_token) {
+    if (!body?.external || !body?.internal) {
       console.warn('Invalid OAuth2 Token Response: ', body);
       throw new TypeError('We received an invalid token response from an OAuth2 server.');
     }
 
     return {
-      accessToken: body.access_token,
-      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-      refreshToken: body.refresh_token ?? null,
+      external: {
+        token: body?.external.access_token,
+        expiresAt: Date.now() + body?.external.expires_in * 1000,
+        type: body?.external.token_type,
+      },
+      internal: {
+        token: body?.internal.access_token,
+        expiresAt: Date.now() + body?.internal.expires_in * 1000,
+        type: body?.internal.token_type,
+      },
     };
   }
 }

@@ -68,11 +68,16 @@ export interface AuthorizationCodeRequest {
  * Response from the /token endpoint
  */
 export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in?: number;
-  refresh_token?: string;
-  scope?: string;
+  external: {
+    access_token: string;
+    expires_in: number;
+    token_type: string;
+  },
+  internal: {
+    access_token: string;
+    expires_in: number;
+    token_type: string;
+  },
 }
 
 enum OAuth2ResponseType {
@@ -106,7 +111,10 @@ enum OAuth2CodeChallengeMethod {
   Plain = 'plain',
 }
 
-export type OAuth2TokenTypeHint = 'access_token' | 'refresh_token';
+export enum OAuth2TokenTypeHint {
+  AccessToken = 'access_token',
+  RefreshToken = 'refresh_token',
+}
 
 /**
  * Response from /.well-known/oauth-authorization-server
@@ -312,6 +320,7 @@ export interface IntrospectionResponse {
 export interface RevocationRequest {
   token: string;
   token_type_hint?: OAuth2TokenTypeHint;
+  headers?: Record<string, string>;
 }
 
 export type OAuth2ErrorCode =
