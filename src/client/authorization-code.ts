@@ -1,7 +1,7 @@
-import { OAuth2Client } from '../client.js';
-import { OAuth2Token } from '../token.js';
-import { AuthorizationCodeRequest } from '../messages.js';
-import { OAuth2Error } from '../error.js';
+import { OAuth2Client } from '../client.ts';
+import { OAuth2Token } from '../token.ts';
+import { AuthorizationCodeRequest } from '../messages.ts';
+import { OAuth2Error } from '../error.ts';
 
 type GetAuthorizeUrlParams = {
   /**
