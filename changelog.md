@@ -5,9 +5,18 @@ Changelog
 ------------------
 
 * Dropped support for Node 14 and 16.
+* Full conversion to ESM.
+* Support for the OpenID Connect id_token. If a server returns it, we expose it
+  as `idToken`. This is a JWT and would require parsing by a JWT library to get
+  access to its information. (@drev74, @redguardtoo).
+* #171: `client_id` and `client_secret` are now percent-encoded with the most
+  strict rules as specified by RFC 6749. We weren't doing any percent/urlencoding
+  before. This is a a BC break if your secret used special characters, and the
+  server you're talking is not compliant with the OAuth2 spec itself
+  (@p2004a, @panva).
 * Migrated the test suite from Mocha and Chai to node:test and node:assert
   (@Zen-cronic).
-* Full conversion to ESM.
+
 
 
 2.4.2 (2024-09-14)

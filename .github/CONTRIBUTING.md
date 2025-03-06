@@ -29,5 +29,6 @@ bringing in a JWT library, which is in conflict with the design goal of making a
 This may change in the future, but right now OpenID is not a goal.
 
 However, I am open to small additions / new parameters to this library from the OpenID suite of standards.
-For example, this library supports the `response_mode` parameter.
+For example, this library supports the `response_mode` parameter and will return the `id_token` if it's in the
+response.
 
