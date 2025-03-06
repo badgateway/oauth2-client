@@ -1,6 +1,6 @@
 import { OAuth2Client } from '../client.ts';
-import { OAuth2Token } from '../token.ts';
-import { AuthorizationCodeRequest } from '../messages.ts';
+import type { OAuth2Token } from '../token.ts';
+import type { AuthorizationCodeRequest } from '../messages.ts';
 import { OAuth2Error } from '../error.ts';
 
 type GetAuthorizeUrlParams = {

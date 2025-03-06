@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/badgateway/oauth2-client#readme",
   "engines": {
-    "node": ">= 14"
+    "node": ">= 18"
   },
   "devDependencies": {
     "@curveball/bodyparser": "^1.0.0",
@@ -43,7 +43,6 @@
     "@typescript-eslint/parser": "^8.5.0",
     "eslint": "^9.10.0",
     "ts-loader": "^9.2.6",
-    "tsx": "^4.19.0",
     "typescript": "^5.0.4",
     "webpack": "^5.60.0",
     "webpack-cli": "^5.0.1"
