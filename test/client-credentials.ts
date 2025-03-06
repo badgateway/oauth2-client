@@ -131,6 +131,26 @@ describe('client-credentials', () => {
       resource,
     });
   });
+  it('should return an idToken if it was returned from the server', async () => {
+    const client = new OAuth2Client({
+      clientId: 'foo',
+    });
+    const token = await client.tokenResponseToOAuth2Token(
+      Promise.resolve({
+        token_type: 'bearer',
+        access_token: 'foo',
+        id_token: 'bar',
+        refresh_token: 'baz',
+      })
+    );
+
+    assert.deepEqual(token, {
+      accessToken: 'foo',
+      idToken: 'bar',
+      expiresAt: null,
+      refreshToken: 'baz',
+    });
+  });
 
   describe('error handling', async () => {
     it('should create a OAuth2HttpError if an error was thrown', async () => {
@@ -225,5 +245,6 @@ describe('client-credentials', () => {
         assert.equal(err.parsedBody, undefined);
       }
     });
+
   });
 });
