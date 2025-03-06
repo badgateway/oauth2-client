@@ -19,4 +19,9 @@ export type OAuth2Token = {
    * OAuth2 refresh token
    */
   refreshToken: string | null;
+
+  /**
+   * OpenID Connect ID Token
+   */
+  idToken?: string;
 };

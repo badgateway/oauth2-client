@@ -68,11 +68,36 @@ export type AuthorizationCodeRequest = {
  * Response from the /token endpoint
  */
 export type TokenResponse = {
+  /**
+   * The OAuth 2 access token.
+   */
   access_token: string;
+
+  /**
+   * The type of token, which is always "Bearer".
+   */
   token_type: string;
+
+  /**
+   * The lifetime in seconds of the access token.
+   */
   expires_in?: number;
+
+  /**
+   * The refresh token, which can be used to get a new access token after the current one expires.
+   */
   refresh_token?: string;
+
+  /**
+   * List of comma-separated scopes that the access token is valid for.
+   */
   scope?: string;
+
+  /**
+   * The OpenID Connect id_token, which is a JWT encoded value containing
+   * information about the authenticated user.
+   */
+  id_token?: string;
 }
 
 type OAuth2ResponseType = 'code' | 'token';
