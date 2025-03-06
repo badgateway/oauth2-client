@@ -1,5 +1,5 @@
-import { OAuth2Token } from './token.ts';
-import {
+import type { OAuth2Token } from './token.ts';
+import type {
   AuthorizationCodeRequest,
   ClientCredentialsRequest,
   IntrospectionRequest,

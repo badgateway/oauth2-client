@@ -6,7 +6,8 @@ build: dist/build browser/oauth2-client.min.js browser/oauth2-client.min.js.gz
 
 .PHONY:test
 test:
-	npx tsx --test test/*.ts
+	#npx tsx --test test/*.ts
+	node --experimental-strip-types --test test/*.ts
 
 .PHONY:lint
 lint:

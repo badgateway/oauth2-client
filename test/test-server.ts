@@ -1,4 +1,4 @@
-import { Application, Middleware, Request } from '@curveball/core';
+import { Application, type Middleware, Request } from '@curveball/core';
 import bodyParser from '@curveball/bodyparser';
 import * as http from 'http';
 
