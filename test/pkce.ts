@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
-import { generateCodeVerifier } from '../src/index.js';
-import { getCodeChallenge } from '../src/client/authorization-code.js';
+import { generateCodeVerifier } from '../src/index.ts';
+import { getCodeChallenge } from '../src/client/authorization-code.ts';
 import { describe, it } from 'node:test';
 
 describe('generateCodeVerifier', () => {

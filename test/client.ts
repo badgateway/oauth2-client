@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
-import { OAuth2Client } from '../src/index.js';
-import { legacyFormUrlEncode } from '../src/client.js';
+import { OAuth2Client } from '../src/index.ts';
+import { legacyFormUrlEncode } from '../src/client.ts';
 import { describe, it } from 'node:test';
 
 describe('tokenResponseToOAuth2Token', () => {

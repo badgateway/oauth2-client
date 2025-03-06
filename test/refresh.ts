@@ -1,5 +1,5 @@
-import { testServer } from './test-server.js';
-import { OAuth2Client } from '../src/index.js';
+import { testServer } from './test-server.ts';
+import { OAuth2Client } from '../src/index.ts';
 import * as assert from 'node:assert';
 import { after, describe, it } from 'node:test';
 

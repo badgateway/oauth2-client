@@ -1,5 +1,5 @@
 import * as assert from 'node:assert';
-import { OAuth2Fetch, OAuth2Client } from '../src/index.js';
+import { OAuth2Fetch, OAuth2Client } from '../src/index.ts';
 import { afterEach, describe, it } from 'node:test';
 
 describe('FetchWrapper', () => {
