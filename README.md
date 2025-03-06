@@ -5,7 +5,7 @@ utility library, for Node.js, Browsers and written in Typescript.
 
 This OAuth2 client is only **4KB** gzipped, it has **0** dependencies and
 relies on modern APIs like `fetch()` and [Web Crypto][4] which are built-in
-since Node 18 (but it works with Polyfills on Node 14 and 16).
+since Node 18.
 
 
 ## Highlights
@@ -94,6 +94,12 @@ export type OAuth2Token = {
    */
   expiresAt: number | null;
 
+
+  /**
+   * If the server returned an OpenID Connect ID token, it will be stored here.
+   */
+  idToken?: string;
+
 };
 ```
 
@@ -149,7 +155,6 @@ const client = new OAuth2Client({
 **Redirecting the user to the authorization server**
 
 ```typescript
-
 /**
  * This generates a security code that must be passed to the various steps.
  * This is used for 'PKCE' which is an advanced security feature.
@@ -404,37 +409,9 @@ console.log(client.introspect(token));
 
 This package works out of the box with modern browsers and Node 18.
 
-To use this package with Node 16, you need to run:
-
-```sh
-npm i node-fetch@2
-```
-
-Version 2 is required, because version 3 has been rewritten in a non-backwards
-compatible way with ESM.
-
-After installing node-fetch, it must be registered globally:
-
-```javascript
-if (!global.fetch) {
-  const nodeFetch = require('node-fetch');
-  global.fetch = nodeFetch;
-  global.Headers = nodeFetch.Headers;
-  global.Request = nodeFetch.Request;
-  global.Response = nodeFetch.Response;
-}
-```
-
-On Node 14.x you also need the following polyfill:
-
-```javascript
-// For Node 14.x and below
-if (global.btoa === undefined) {
-  global.btoa = input => {
-    return Buffer.from(input).toString('base64');
-  };
-}
-```
+For Node 16 and below, use a 2.x versions of this package and add
+polyfills. The README.md for the 2.x version of this package contains more information
+on the exact steps for older Node versions.
 
 [1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
 [2]: https://datatracker.ietf.org/doc/html/rfc8414 "OAuth 2.0 Authorization Server Metadata"
