@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/badgateway/oauth2-client#readme",
   "engines": {
-    "node": ">= 14"
+    "node": ">= 18"
   },
   "devDependencies": {
     "@curveball/bodyparser": "^1.0.0",
