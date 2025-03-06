@@ -1,5 +1,5 @@
-import { OAuth2Token } from './token.js';
-import { OAuth2Client } from './client.js';
+import { OAuth2Token } from './token.ts';
+import { OAuth2Client } from './client.ts';
 
 type FetchMiddleware = (request: Request, next: (request: Request) => Promise<Response>) => Promise<Response>;
 

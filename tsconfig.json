@@ -9,6 +9,8 @@
         "noUnusedLocals": true,
         "erasableSyntaxOnly": true,
 
+        "rewriteRelativeImportExtensions": true,
+
         "moduleResolution": "node",
         "sourceMap": true,
         "outDir": "dist",
