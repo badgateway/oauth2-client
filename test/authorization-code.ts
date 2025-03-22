@@ -195,8 +195,8 @@ describe('authorization-code', () => {
       const client = new OAuth2Client({
         server: server.url,
         tokenEndpoint: '/token',
-        clientId: 'testClientId',
-        clientSecret: 'testClientSecret',
+        clientId: 'test-Client-Id',
+        clientSecret: 'test-Client-Secret',
       });
 
       const result = await client.authorizationCode.getToken({
@@ -212,7 +212,42 @@ describe('authorization-code', () => {
       const request = server.lastRequest();
       assert.equal(
         request.headers.get('Authorization'),
-        'Basic ' + btoa('testClientId:testClientSecret')
+        'Basic ' + btoa('test%2DClient%2DId:test%2DClient%2DSecret')
+      );
+      assert.equal(request.headers.get('Accept'), 'application/json');
+
+      assert.deepEqual(request.body, {
+        grant_type: 'authorization_code',
+        code: 'code_000',
+        redirect_uri: 'http://example/redirect',
+      });
+    });
+
+    it('should send client_id and client_secret in the Authorization header if secret was specified using custom encoder', async () => {
+      server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'test-Client-Id',
+        clientSecret: 'test-Client-Secret',
+        encodingFunction: v => v // no encoding
+      });
+
+      const result = await client.authorizationCode.getToken({
+        code: 'code_000',
+        redirectUri: 'http://example/redirect',
+      });
+
+      assert.equal(result.accessToken, 'access_token_000');
+      assert.equal(result.refreshToken, 'refresh_token_000');
+      assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+      assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+
+      const request = server.lastRequest();
+      assert.equal(
+        request.headers.get('Authorization'),
+        'Basic ' + btoa('test-Client-Id:test-Client-Secret')
       );
       assert.equal(request.headers.get('Accept'), 'application/json');
 

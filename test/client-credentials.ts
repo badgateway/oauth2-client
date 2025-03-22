@@ -39,6 +39,36 @@ describe('client-credentials', () => {
       grant_type: 'client_credentials',
     });
   });
+
+  it('should work with client_secret_basic with custom encoding functions', async () => {
+    server = testServer();
+
+    const client = new OAuth2Client({
+      server: server.url,
+      tokenEndpoint: '/token',
+      clientId: 'testClientId:10',
+      clientSecret: 'test=client=secret',
+      encodingFunction: String
+    });
+
+    const result = await client.clientCredentials();
+
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+
+    const request = server.lastRequest();
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('testClientId:10:test=client=secret')
+    );
+
+    assert.deepEqual(request.body, {
+      grant_type: 'client_credentials',
+    });
+  });
+
   it('should support extra parameters', async () => {
     server = testServer();
 

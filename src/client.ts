@@ -142,6 +142,13 @@ export interface ClientSettings {
    * The default value is 'client_secret_basic' if not provided.
    */
   authenticationMethod?: string;
+
+  /**
+  * A function that encodes the username and password for client_id and client_secret on basic authentication
+  * @param data
+  * @returns string
+  */
+  encodingFunction?: (data: string) => string;
 }
 
 
@@ -400,13 +407,18 @@ export class OAuth2Client {
       authMethod = 'client_secret_basic';
     }
 
+    let encodingFunction = legacyFormUrlEncode;
+    if (this.settings.encodingFunction) {
+      encodingFunction = this.settings.encodingFunction;
+    }
+
     switch(authMethod) {
       case 'client_secret_basic' :
         // Per RFC 6749 section 2.3.1, the client_id and client_secret need
         // to be encoded using application/x-www-form-urlencoded for the
         // basic auth.
         headers.Authorization = 'Basic ' +
-          btoa(legacyFormUrlEncode(this.settings.clientId) + ':' + legacyFormUrlEncode(this.settings.clientSecret!));
+          btoa(encodingFunction(this.settings.clientId) + ':' + encodingFunction(this.settings.clientSecret!));
         break;
       case 'client_secret_post' :
         body.client_id = this.settings.clientId;
