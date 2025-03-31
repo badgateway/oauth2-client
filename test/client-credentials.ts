@@ -20,6 +20,7 @@ describe('client-credentials', () => {
       tokenEndpoint: '/token',
       clientId: 'testClientId:10',
       clientSecret: 'test=client=secret',
+      authenticationMethod: 'client_secret_basic',
     });
 
     const result = await client.clientCredentials();
@@ -33,6 +34,61 @@ describe('client-credentials', () => {
     assert.equal(
       request.headers.get('Authorization'),
       'Basic ' + btoa('testClientId%3A10:test%3Dclient%3Dsecret')
+    );
+
+    assert.deepEqual(request.body, {
+      grant_type: 'client_credentials',
+    });
+  });
+  it('should apply "interop" encoding when using client_secret_basic_interop', async () => {
+    server = testServer();
+
+    const client = new OAuth2Client({
+      server: server.url,
+      tokenEndpoint: '/token',
+      clientId: 'testClientId:10',
+      clientSecret: 'test=client=secret',
+      authenticationMethod: 'client_secret_basic_interop',
+    });
+
+    const result = await client.clientCredentials();
+
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+
+    const request = server.lastRequest();
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('testClientId%3A10:test=client=secret')
+    );
+
+    assert.deepEqual(request.body, {
+      grant_type: 'client_credentials',
+    });
+  });
+  it('should apply "interop" encoding by default when no authenticationMethod is provided', async () => {
+    server = testServer();
+
+    const client = new OAuth2Client({
+      server: server.url,
+      tokenEndpoint: '/token',
+      clientId: 'testClientId:10',
+      clientSecret: 'test=client=secret',
+    });
+
+    const result = await client.clientCredentials();
+
+    assert.equal(result.accessToken, 'access_token_000');
+    assert.equal(result.refreshToken, 'refresh_token_000');
+    assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
+    assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
+
+    const request = server.lastRequest();
+    assert.equal(
+      request.headers.get('Authorization'),
+      'Basic ' + btoa('testClientId%3A10:test=client=secret')
     );
 
     assert.deepEqual(request.body, {

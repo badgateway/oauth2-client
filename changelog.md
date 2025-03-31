@@ -1,6 +1,18 @@
 Changelog
 =========
 
+3.1.0 (????-??-??)
+------------------
+
+* #181: Revert back to percent-encoding of the `Authorization: Basic header`.
+  Even though this was more correct from a standards perspective, this is
+  causing interopability problems with popular real-world OAuth2 servers. If
+  you need strict encoding, you can opt-in using the `authorizationMethod`
+  option. We recommend using `client_secret_post` if it's possible with your
+  server. See README.md for more information on this behaviour and what the
+  possible options are.
+
+
 3.0.0 (2025-03-06)
 ------------------
 
