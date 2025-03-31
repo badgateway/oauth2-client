@@ -137,11 +137,23 @@ export interface ClientSettings {
    * Client authentication method that is used to authenticate
    * when using the token endpoint.
    *
-   * Can be one of 'client_secret_basic' | 'client_secret_post'.
+   * When 'client_secret_basic' is used, the client_id and client_secret are
+   * encoded in the Authorization header, as per RFC 6749 section 2.3.1. This
+   * uses the official encoding, which also percent-encodes special characters.
+   *
+   * Many popular servers don't expect this, despite being the standard. So we
+   * also support 'client_secret_basic_interop', which does not percent-encode
+   * special characters except ":". This is 'interop' encoding is the default
+   * for this library to maximize compatibility.
+   *
+   * In the future, we will switch this to 'client_secret_post', which has fewer
+   * interopability issues. This setting causes the client to provide the
+   * client_id and secret in the POST body.
    *
    * The default value is 'client_secret_basic' if not provided.
    */
-  authenticationMethod?: string;
+  authenticationMethod?: 'client_secret_basic' | 'client_secret_post' | 'client_secret_basic_interop';
+
 }
 
 
@@ -397,7 +409,7 @@ export class OAuth2Client {
       // If we got here, it means no preference was provided by anything,
       // and we have a secret. In this case its preferred to embed
       // authentication in the Authorization header.
-      authMethod = 'client_secret_basic';
+      authMethod = 'client_secret_basic_interop';
     }
 
     switch(authMethod) {
@@ -407,6 +419,11 @@ export class OAuth2Client {
         // basic auth.
         headers.Authorization = 'Basic ' +
           btoa(legacyFormUrlEncode(this.settings.clientId) + ':' + legacyFormUrlEncode(this.settings.clientSecret!));
+        break;
+      case 'client_secret_basic_interop' :
+        // A more relaxed encoding that's more compatible with popular servers.
+        headers.Authorization = 'Basic ' +
+          btoa(this.settings.clientId.replace(/:/g, '%3A') + ':' + this.settings.clientSecret!.replace(/:/g, '%3A'));
         break;
       case 'client_secret_post' :
         body.client_id = this.settings.clientId;

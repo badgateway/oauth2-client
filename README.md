@@ -372,7 +372,6 @@ ketting.use(oauth2Fetch.mw());
 ```
 
 ### Introspection
-
 Introspection ([RFC7662][3]) lets you find more information about a token,
 such as whether it's valid, which user it belongs to, which oauth2 client
 was used to generate it, etc.
@@ -403,6 +402,52 @@ const token = client.clientCredentials();
 // Introspect!
 console.log(client.introspect(token));
 ```
+
+## OAuth2 `client_id` and `client_secret` encoding
+
+OAuth2 allows users to encode the `client_id` and `client_secret` either in a
+`Authorization: Basic` header or in the `POST` request body.
+
+Real-world OAuth2 servers may support one or the other, or both. The OAuth2
+spec _requires_ that servers support the Authorization header, and don't
+recommend using the body.
+
+By default, this library will use the `Authorization` header. OAuth2 also
+requires that clients percent-encode the `client_id` and `client_secret`, but
+in practice many popular servers break if you do this. By default this library
+will *not* percent encode any characters except the `:` character.
+
+You can change this behavior using the `authenticatioMethod` flag:
+
+```typescript
+const client = new OAuth2Client({
+  server: 'https://auth-server.example/',
+  clientId: '...',
+  clientSecret: '...',
+  authenticationMethod: 'client_secret_post', // encode in POST body 
+});
+```
+
+The following 3 values are currently supported:
+
+* `client_secret_post` - Encode in POST body
+* `client_secret_basic` - Encode in Authorization header using the strict
+  standard rules.
+* `client_secret_basic_interop` - Encode in Authorization header using less
+  strict rules. This is the default and more likely to work with popular
+  servers (at least some Google and Ebay APIs want this).
+
+The current OAuth 2.1 draft switches the recommendation to use
+`client_secret_post` by default instead. When that document stabilizes and gets
+released, this library will also switch to use `client_secret_post` by default
+in a major release.
+
+If your OAuth2 server supports POST, we recommend you use `client_secret_post`
+as this is more likely to work without a hitch.
+
+If you configured the client using the OAuth2 discovery document, and the
+server indicates it prefers `client_secret_basic` we will also default to the
+strict form.
 
 
 ## Support for older Node versions
