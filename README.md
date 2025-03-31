@@ -408,7 +408,7 @@ console.log(client.introspect(token));
 OAuth2 allows users to encode the `client_id` and `client_secret` either in a
 `Authorization: Basic` header or in the `POST` request body.
 
-Real-world OAuth2 servers may require one or the other, or both. The OAuth2
+Real-world OAuth2 servers may support one or the other, or both. The OAuth2
 spec _requires_ that servers support the Authorization header, and don't
 recommend using the body.
 
