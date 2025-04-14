@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.1.0 (????-??-??)
+3.1.0 (2025-04-14)
 ------------------
 
 * #181: Revert back to percent-encoding of the `Authorization: Basic header`.
