@@ -374,8 +374,16 @@ export class OAuth2Client {
       this.settings[setting] = resolve(this.serverMetadata[property]!, discoverUrl);
     }
 
-    if (this.serverMetadata.token_endpoint_auth_methods_supported && !this.settings.authenticationMethod) {
-      this.settings.authenticationMethod = this.serverMetadata.token_endpoint_auth_methods_supported[0];
+    if (
+      this.serverMetadata.token_endpoint_auth_methods_supported
+      && !this.settings.authenticationMethod
+    ) {
+      for(const method of this.serverMetadata.token_endpoint_auth_methods_supported) {
+        if (method === 'client_secret_basic' || method === 'client_secret_post') {
+          this.settings.authenticationMethod = method;
+          break;
+        }
+      }
     }
 
   }

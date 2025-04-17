@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.1.1 (????-??-??)
+------------------
+
+* Ignore auhtentication methods from Discovery document we don't support.
+
+
 3.1.0 (2025-04-14)
 ------------------
 
