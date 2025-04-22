@@ -44,8 +44,7 @@
     "eslint": "^9.10.0",
     "ts-loader": "^9.2.6",
     "typescript": "^5.0.4",
-    "webpack": "^5.60.0",
-    "webpack-cli": "^5.0.1"
+    "vite": "^6.3.2"
   },
   "browser": "browser/oauth2-client.min.js",
   "files": [
