@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.2.0 (????-??-??)
+3.2.0 (2025-04-23)
 ------------------
 
 * #180: The browser build was failing to work for vite and next.js users since
