@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.2.0 (????-??-??)
+------------------
+
+* #180: The browser build was failing to work for vite and next.js users since
+  v3. This was probably due to the switch to ESM. Instead of trying to fix this
+  problem in Webpack, this library has switched to vite for the minified
+  browser build instead.
+
+
 3.1.1 (2025-04-17)
 ------------------
 

@@ -30,9 +30,9 @@ dist/build: ${SOURCE_FILES}
 	./node_modules/.bin/tsc
 	touch dist/build
 
-browser/oauth2-client.min.js: ${SOURCE_FILES} webpack.config.js
+browser/oauth2-client.min.js: ${SOURCE_FILES} vite.config.js
 	mkdir -p browser
-	./node_modules/.bin/webpack
+	npx vite build
 
 browser/oauth2-client.min.js.gz: browser/oauth2-client.min.js
 	gzip --keep -f browser/oauth2-client.min.js

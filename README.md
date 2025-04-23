@@ -10,7 +10,7 @@ since Node 18.
 
 ## Highlights
 
-* 12KB minified (4KB gzipped).
+* 16KB minified (5KB gzipped).
 * No dependencies.
 * `authorization_code` grant with optional [PKCE][1] support.
 * `password` and `client_credentials` grant.
