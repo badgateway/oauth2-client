@@ -30,7 +30,7 @@ dist/build: ${SOURCE_FILES}
 	./node_modules/.bin/tsc
 	touch dist/build
 
-browser/oauth2-client.min.js: ${SOURCE_FILES} webpack.config.js
+browser/oauth2-client.min.js: ${SOURCE_FILES} vite.config.js
 	mkdir -p browser
 	npx vite build
 
