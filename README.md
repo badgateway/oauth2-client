@@ -454,8 +454,8 @@ strict form.
 
 This package works out of the box with modern browsers and Node 18.
 
-For Node 16 and below, use a 2.x versions of this package and add
-polyfills. The README.md for the 2.x version of this package contains more information
+For Node 16 and below, use a 2.x version of this package and add
+polyfills. The README.md for the 2.x branch of this package contains more information
 on the exact steps for older Node versions.
 
 [1]: https://datatracker.ietf.org/doc/html/rfc7636 "Proof Key for Code Exchange by OAuth Public Clients"
