@@ -50,6 +50,15 @@ export type PasswordRequest = {
   resource?: string | string[];
 }
 
+/**
+ * JWT Bearer Grant Type request body
+ */
+export type JwtBearerRequest = {
+  grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer';
+  assertion: string;
+  scope?: string;
+}
+
 export type AuthorizationCodeRequest = {
   grant_type: 'authorization_code';
   code: string;
