@@ -155,10 +155,10 @@ export interface ClientSettings {
   authenticationMethod?: 'client_secret_basic' | 'client_secret_post' | 'client_secret_basic_interop';
 
   /**
-    * Some providers return additional parameters during the token call.
-    * This flag allows to include all these properties in the `OAuth2Token`
-    * object, under the `additionalTokenProperties` property.
-    */
+   * Some OAuth2 servers return additional properties during the token call.
+   * This flag allows to include all these properties in the `OAuth2Token`
+   * object, under the `additionalProperties` property.
+   */
   tokenAdditionalProperties?: boolean;
 }
 
