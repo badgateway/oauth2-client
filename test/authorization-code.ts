@@ -320,7 +320,7 @@ describe('authorization-code', () => {
         resource,
       });
     });
-    
+
     it('should return additional token properties', async () => {
       server = testServer();
 
