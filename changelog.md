@@ -1,6 +1,17 @@
 Changelog
 =========
 
+3.3.0 (????-??-??)
+------------------
+
+* OAuth2 token operations may now return an `extraParams` property, which is an
+  object with all unrecognized properties. Some servers return custom
+  properties from OAuth2 responses, and this lets users get access to them.
+  (@ericleib, @blarralde)
+* The OAuth2Token object now has a `scope` property, containing a list of
+  scopes the server returned *if* the server returned this. (@ericleib)
+
+
 3.2.0 (2025-04-23)
 ------------------
 
