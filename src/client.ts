@@ -495,6 +495,8 @@ export class OAuth2Client {
       refresh_token,
       expires_in,
       id_token,
+      scope,
+      token_type,
       ...extraParams
     } = body;
 
@@ -506,7 +508,10 @@ export class OAuth2Client {
     if (id_token) {
       result.idToken = id_token;
     }
-    if(Object.keys(extraParams).length > 0) {
+    if (scope) {
+      result.scopes = scope.split(' ');
+    }
+    if (Object.keys(extraParams).length > 0) {
       result.extraParams = extraParams;
     }
     return result;

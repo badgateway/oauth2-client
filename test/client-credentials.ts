@@ -205,9 +205,6 @@ describe('client-credentials', () => {
       idToken: 'bar',
       expiresAt: null,
       refreshToken: 'baz',
-      extraParams: {
-        token_type: 'bearer'
-      }
     });
   });
 

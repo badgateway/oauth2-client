@@ -174,6 +174,7 @@ describe('authorization-code', () => {
 
       assert.equal(result.accessToken, 'access_token_000');
       assert.equal(result.refreshToken, 'refresh_token_000');
+      assert.deepEqual(result.scopes, ['foo', 'bar']);
       assert.deepEqual(result.extraParams, {
         foo: 'bar',
       });
