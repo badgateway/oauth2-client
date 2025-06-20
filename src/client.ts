@@ -509,7 +509,7 @@ export class OAuth2Client {
       result.idToken = id_token;
     }
     if (scope) {
-      result.scopes = scope.split(' ');
+      result.scope = scope.split(' ');
     }
     if (Object.keys(extraParams).length > 0) {
       result.extraParams = extraParams;
