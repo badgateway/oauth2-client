@@ -24,4 +24,12 @@ export type OAuth2Token = {
    * OpenID Connect ID Token
    */
   idToken?: string;
+
+  /**
+   * Additional tokens properties included by the OAuth2 server.
+   * 
+   * To include these properties, set `returnAdditionalTokenProperties`
+   * to true in the `ClientSettings` object.
+   */
+  additionalProperties?: Record<string, any>;
 };

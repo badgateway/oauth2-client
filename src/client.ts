@@ -154,6 +154,12 @@ export interface ClientSettings {
    */
   authenticationMethod?: 'client_secret_basic' | 'client_secret_post' | 'client_secret_basic_interop';
 
+  /**
+    * Some providers return additional parameters during the token call.
+    * This flag allows to include all these properties in the `OAuth2Token`
+    * object, under the `additionalTokenProperties` property.
+    */
+  tokenAdditionalProperties?: boolean;
 }
 
 
@@ -490,13 +496,24 @@ export class OAuth2Client {
       throw new TypeError('We received an invalid token response from an OAuth2 server.');
     }
 
+    const {
+      access_token,
+      refresh_token,
+      expires_in,
+      id_token,
+      ...additionalProperties
+    } = body;
+
     const result: OAuth2Token = {
-      accessToken: body.access_token,
-      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-      refreshToken: body.refresh_token ?? null,
+      accessToken: access_token,
+      expiresAt: expires_in ? Date.now() + (expires_in * 1000) : null,
+      refreshToken: refresh_token ?? null,
     };
-    if (body.id_token) {
-      result.idToken = body.id_token;
+    if (id_token) {
+      result.idToken = id_token;
+    }
+    if(this.settings.tokenAdditionalProperties) {
+      result.additionalProperties = additionalProperties;
     }
     return result;
 

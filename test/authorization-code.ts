@@ -320,6 +320,26 @@ describe('authorization-code', () => {
         resource,
       });
     });
+    
+    it('should return additional token properties', async () => {
+      server = testServer();
+
+      const client = new OAuth2Client({
+        server: server.url,
+        tokenEndpoint: '/token',
+        clientId: 'test-client-id',
+        tokenAdditionalProperties: true
+      });
+
+      const result = await client.authorizationCode.getToken({
+        code: 'code_000',
+        redirectUri: 'http://example/redirect',
+      });
+
+      assert.deepEqual(result.additionalProperties, {
+        foo: 'bar',
+      });
+    });
   });
 
   describe('validateResponse', () => {
