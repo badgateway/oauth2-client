@@ -174,6 +174,10 @@ describe('authorization-code', () => {
 
       assert.equal(result.accessToken, 'access_token_000');
       assert.equal(result.refreshToken, 'refresh_token_000');
+      assert.deepEqual(result.scope, ['foo', 'bar']);
+      assert.deepEqual(result.extraParams, {
+        foo: 'bar',
+      });
       assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
       assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 

@@ -24,4 +24,15 @@ export type OAuth2Token = {
    * OpenID Connect ID Token
    */
   idToken?: string;
+
+  /**
+   * List of scopes that the access token is valid for.
+   * (May be omitted if identical to the requested scope)
+   */
+  scope?: string[];
+
+  /**
+   * Additional tokens properties returned by the OAuth2 server.
+   */
+  extraParams?: Record<string, any>;
 };

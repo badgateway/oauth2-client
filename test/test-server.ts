@@ -108,6 +108,7 @@ const issueToken: Middleware = (ctx, next) => {
   if (ctx.request.body.refresh_token === 'refresh_token_000') {
 
     ctx.response.body = {
+      token_type: 'Bearer',
       access_token: 'access_token_001',
       refresh_token: 'refresh_token_001',
       expires_in: 3600,
@@ -116,6 +117,7 @@ const issueToken: Middleware = (ctx, next) => {
   } else if (ctx.request.body.refresh_token === 'refresh_token_001') {
 
     ctx.response.body = {
+      token_type: 'Bearer',
       access_token: 'access_token_002',
       expires_in: 3600,
     };
@@ -123,9 +125,12 @@ const issueToken: Middleware = (ctx, next) => {
   } else {
 
     ctx.response.body = {
+      token_type: 'Bearer',
       access_token: 'access_token_000',
       refresh_token: 'refresh_token_000',
       expires_in: 3600,
+      scope: 'foo bar',
+      foo: 'bar'  // Additional property returned by the server
     };
   }
 

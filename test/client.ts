@@ -12,6 +12,8 @@ describe('tokenResponseToOAuth2Token', () => {
       Promise.resolve({
         token_type: 'bearer',
         access_token: 'foo-bar',
+        scope: 'foo bar',
+        foo: 'bar'
       })
     );
 
@@ -19,6 +21,10 @@ describe('tokenResponseToOAuth2Token', () => {
       accessToken: 'foo-bar',
       expiresAt: null,
       refreshToken: null,
+      scope: ['foo', 'bar'],
+      extraParams: {
+        foo: 'bar'
+      }
     });
   });
 

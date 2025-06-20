@@ -490,13 +490,29 @@ export class OAuth2Client {
       throw new TypeError('We received an invalid token response from an OAuth2 server.');
     }
 
+    const {
+      access_token,
+      refresh_token,
+      expires_in,
+      id_token,
+      scope,
+      token_type,
+      ...extraParams
+    } = body;
+
     const result: OAuth2Token = {
-      accessToken: body.access_token,
-      expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
-      refreshToken: body.refresh_token ?? null,
+      accessToken: access_token,
+      expiresAt: expires_in ? Date.now() + (expires_in * 1000) : null,
+      refreshToken: refresh_token ?? null,
     };
-    if (body.id_token) {
-      result.idToken = body.id_token;
+    if (id_token) {
+      result.idToken = id_token;
+    }
+    if (scope) {
+      result.scope = scope.split(' ');
+    }
+    if (Object.keys(extraParams).length > 0) {
+      result.extraParams = extraParams;
     }
     return result;
 
