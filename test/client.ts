@@ -12,8 +12,8 @@ describe('tokenResponseToOAuth2Token', () => {
       Promise.resolve({
         token_type: 'bearer',
         access_token: 'foo-bar',
-        scope: "foo bar",
-        foo: "bar"
+        scope: 'foo bar',
+        foo: 'bar'
       })
     );
 
