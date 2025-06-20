@@ -27,9 +27,6 @@ export type OAuth2Token = {
 
   /**
    * Additional tokens properties returned by the OAuth2 server.
-   *
-   * To include these properties, set `tokenAdditionalProperties`
-   * to true in the `ClientSettings` object.
    */
-  additionalProperties?: Record<string, any>;
+  extraParams?: Record<string, any>;
 };

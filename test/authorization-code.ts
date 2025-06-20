@@ -174,6 +174,9 @@ describe('authorization-code', () => {
 
       assert.equal(result.accessToken, 'access_token_000');
       assert.equal(result.refreshToken, 'refresh_token_000');
+      assert.deepEqual(result.extraParams, {
+        foo: 'bar',
+      });
       assert.ok((result.expiresAt as number) <= Date.now() + 3600_000);
       assert.ok((result.expiresAt as number) >= Date.now() + 3500_000);
 
@@ -318,26 +321,6 @@ describe('authorization-code', () => {
         code: 'code_000',
         redirect_uri: 'http://example/redirect',
         resource,
-      });
-    });
-
-    it('should return additional token properties', async () => {
-      server = testServer();
-
-      const client = new OAuth2Client({
-        server: server.url,
-        tokenEndpoint: '/token',
-        clientId: 'test-client-id',
-        tokenAdditionalProperties: true
-      });
-
-      const result = await client.authorizationCode.getToken({
-        code: 'code_000',
-        redirectUri: 'http://example/redirect',
-      });
-
-      assert.deepEqual(result.additionalProperties, {
-        foo: 'bar',
       });
     });
   });

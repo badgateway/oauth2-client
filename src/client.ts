@@ -154,12 +154,6 @@ export interface ClientSettings {
    */
   authenticationMethod?: 'client_secret_basic' | 'client_secret_post' | 'client_secret_basic_interop';
 
-  /**
-   * Some OAuth2 servers return additional properties during the token call.
-   * This flag allows to include all these properties in the `OAuth2Token`
-   * object, under the `additionalProperties` property.
-   */
-  tokenAdditionalProperties?: boolean;
 }
 
 
@@ -501,7 +495,7 @@ export class OAuth2Client {
       refresh_token,
       expires_in,
       id_token,
-      ...additionalProperties
+      ...extraParams
     } = body;
 
     const result: OAuth2Token = {
@@ -512,8 +506,8 @@ export class OAuth2Client {
     if (id_token) {
       result.idToken = id_token;
     }
-    if(this.settings.tokenAdditionalProperties) {
-      result.additionalProperties = additionalProperties;
+    if(Object.keys(extraParams).length > 0) {
+      result.extraParams = extraParams;
     }
     return result;
 
