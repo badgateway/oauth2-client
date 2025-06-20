@@ -21,7 +21,7 @@ describe('tokenResponseToOAuth2Token', () => {
       accessToken: 'foo-bar',
       expiresAt: null,
       refreshToken: null,
-      scopes: ['foo', 'bar'],
+      scope: ['foo', 'bar'],
       extraParams: {
         foo: 'bar'
       }
