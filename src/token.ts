@@ -29,7 +29,7 @@ export type OAuth2Token = {
    * List of scopes that the access token is valid for.
    * (May be omitted if identical to the requested scope)
    */
-  scopes?: string[];
+  scope?: string[];
 
   /**
    * Additional tokens properties returned by the OAuth2 server.
