@@ -379,7 +379,9 @@ export class OAuth2Client {
       && !this.settings.authenticationMethod
     ) {
       for(const method of this.serverMetadata.token_endpoint_auth_methods_supported) {
-        if (method === 'client_secret_basic' || method === 'client_secret_post') {
+        if (method === 'client_secret_basic') {
+          this.settings.authenticationMethod = method;
+        } else if (method === 'client_secret_post') {
           this.settings.authenticationMethod = method;
           break;
         }
