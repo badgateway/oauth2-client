@@ -155,6 +155,72 @@ describe('authorization-code', () => {
         server.url + '/authorize?' + params.toString()
       );
     });
+    it('should preserve query parameters baked into the authorization endpoint', async () => {
+      // Real-world case: Salesforce's OAuth2 discovery document returns
+      // `authorization_endpoint` as `.../oauth2/authorize?prompt=select_account`.
+      // The library used to naively append `?` + query, producing a malformed
+      // URL with two `?` separators.
+      server = testServer();
+      const client = new OAuth2Client({
+        server: server.url,
+        authorizationEndpoint: '/authorize?prompt=select_account',
+        clientId: 'test-client-id',
+      });
+
+      const redirectUri = 'http://my-app.example/redirect';
+
+      const result = await client.authorizationCode.getAuthorizeUri({
+        redirectUri,
+      });
+
+      const resultUrl = new URL(result);
+      assert.equal(resultUrl.pathname, '/authorize');
+      assert.equal(resultUrl.searchParams.get('prompt'), 'select_account');
+      assert.equal(resultUrl.searchParams.get('client_id'), 'test-client-id');
+      assert.equal(resultUrl.searchParams.get('response_type'), 'code');
+      assert.equal(resultUrl.searchParams.get('redirect_uri'), redirectUri);
+      // Only one `?` in the final URL.
+      assert.equal((result.match(/\?/g) ?? []).length, 1);
+    });
+    it('should let runtime params override baked-in params on collision', async () => {
+      // Defensive: if a provider's discovery document bakes in a standard
+      // OAuth param the library also sets (e.g. `response_type=token`),
+      // the library's value must win — the authorization_code flow
+      // depends on `response_type=code`. Non-colliding baked params are
+      // preserved alongside.
+      server = testServer();
+      const client = new OAuth2Client({
+        server: server.url,
+        authorizationEndpoint: '/authorize?response_type=token&prompt=login',
+        clientId: 'test-client-id',
+      });
+
+      const result = await client.authorizationCode.getAuthorizeUri({
+        redirectUri: 'http://my-app.example/redirect',
+      });
+
+      const resultUrl = new URL(result);
+      assert.deepEqual(resultUrl.searchParams.getAll('response_type'), ['code']);
+      assert.equal(resultUrl.searchParams.get('prompt'), 'login');
+    });
+    it('should preserve multi-valued resource params alongside baked-in params', async () => {
+      server = testServer();
+      const client = new OAuth2Client({
+        server: server.url,
+        authorizationEndpoint: '/authorize?prompt=select_account',
+        clientId: 'test-client-id',
+      });
+
+      const resource = ['https://example/foo1', 'https://example/foo2'];
+      const result = await client.authorizationCode.getAuthorizeUri({
+        redirectUri: 'http://my-app.example/redirect',
+        resource,
+      });
+
+      const resultUrl = new URL(result);
+      assert.deepEqual(resultUrl.searchParams.getAll('resource'), resource);
+      assert.equal(resultUrl.searchParams.get('prompt'), 'select_account');
+    });
   });
 
   describe('Token endpoint calls', () => {

@@ -137,7 +137,34 @@ export class OAuth2AuthorizationCodeClient {
       query.set(k, v);
     }
 
-    return authorizationEndpoint + '?' + query.toString();
+    // Fast path: endpoint has no baked query — plain concat, no URL
+    // allocation. This is the common case.
+    if (!authorizationEndpoint.includes('?')) {
+      return authorizationEndpoint + '?' + query.toString();
+    }
+
+    // Slow path: the endpoint already carries query parameters baked in
+    // via the provider's discovery document. Salesforce is the canonical
+    // example — its published `authorization_endpoint` is
+    // `.../oauth2/authorize?prompt=select_account`. A plain concat would
+    // produce a URL with two '?' separators; servers parse only the first
+    // as the query delimiter, so `client_id` ends up buried inside the
+    // `prompt` value and the request is rejected as `invalid_client_id`.
+    //
+    // Merge via URL so baked params survive and the library's runtime
+    // params win on collision — the authorization_code flow depends on
+    // canonical values like `response_type=code`. Two passes are
+    // intentional: folding into one would require an allocated Set to
+    // avoid re-deleting the value a previous iteration just appended for
+    // multi-valued keys like `resource`.
+    const url = new URL(authorizationEndpoint);
+    for (const key of query.keys()) {
+      url.searchParams.delete(key);
+    }
+    for (const [key, value] of query) {
+      url.searchParams.append(key, value);
+    }
+    return url.toString();
 
   }
 
