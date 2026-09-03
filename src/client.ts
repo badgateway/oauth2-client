@@ -385,8 +385,10 @@ export class OAuth2Client {
     ) {
       for(const method of this.serverMetadata.token_endpoint_auth_methods_supported) {
         if (method === 'client_secret_basic') {
+          // Accept client_secret_basic but keep iterating
           this.settings.authenticationMethod = method;
         } else if (method === 'client_secret_post') {
+          // break on client_secret_post. Preffered method, it has fewer interop issues
           this.settings.authenticationMethod = method;
           break;
         }
