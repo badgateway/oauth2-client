@@ -1,7 +1,14 @@
 Changelog
 =========
 
-3.3.0 (????-??-??)
+3.3.1 (2025-09-09)
+------------------
+
+* #193: Fix race condition when multiple function calls are trying to do
+  endpoint discovery. (@lukybrody)
+
+
+3.3.0 (2025-07-30)
 ------------------
 
 * OAuth2 token operations may now return an `extraParams` property, which is an

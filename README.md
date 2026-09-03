@@ -140,7 +140,7 @@ This library provides support for these steps, but there's no requirement
 to use its functionality as the system is mostly stateless.
 
 ```typescript
-import { OAuth2Client, generateCodeVerifier } from 'client';
+import { OAuth2Client, generateCodeVerifier } from '@badgateway/oauth2-client';
 
 const client = new OAuth2Client({
   server: 'https://authserver.example/',

@@ -331,18 +331,23 @@ export class OAuth2Client {
 
   }
 
-  private discoveryDone = false;
+  private discoveryPromise: Promise<void> | undefined;
   private serverMetadata: ServerMetadataResponse | null = null;
 
+  private discover(): Promise<void> {
+    // Never discover twice
+    if (this.discoveryPromise === undefined) {
+      this.discoveryPromise = this.doDiscover();
+    }
+    return this.discoveryPromise;
+  }
 
   /**
    * Fetches the OAuth2 discovery document
+   *
+   * Should not call this directly, call `discover()` instead
    */
-  private async discover(): Promise<void> {
-
-    // Never discover twice
-    if (this.discoveryDone) return;
-    this.discoveryDone = true;
+  private async doDiscover(): Promise<void> {
 
     let discoverUrl;
     try {

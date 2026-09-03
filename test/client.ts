@@ -74,3 +74,31 @@ describe('legacyFormUrlEncode', () => {
       '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ%21%22%23%24%25%26%27%28%29%2A%2B%2C%2D%2E%2F%3A%3B%3C%3D%3E%3F%40%5B%5C%5D%5E%5F%60%7B%7C%7D%7E+%C3%B3');
   });
 });
+
+describe('getEndpoint', () => {
+  it('should not have a race condition when getting endpoints multiple times before the discovery request comes back', async () => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const response = {
+      ok: true,
+      headers: new Headers([['Content-Type', 'application/json']]),
+      json() {
+        return Promise.resolve({
+          'authorization_endpoint': 'custom'
+        });
+      },
+    } as Response;
+
+    const client = new OAuth2Client({
+      server: 'http://server',
+      discoveryEndpoint: '/discovery',
+      clientId: 'clientId',
+      fetch: () => Promise.resolve(response)
+    });
+
+    const endpoint1 = client.getEndpoint('authorizationEndpoint');
+    const endpoint2 = client.getEndpoint('authorizationEndpoint');
+
+    assert.equal(await endpoint1, 'http://server/custom');
+    assert.equal(await endpoint2, 'http://server/custom');
+  });
+});
