@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.4.0 (????-??-??)
+3.4.0 (2026-11-20)
 ------------------
 
 * Token exchange ([RFC8693](https://datatracker.ietf.org/doc/html/rfc8693))
