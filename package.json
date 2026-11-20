@@ -43,7 +43,7 @@
     "@typescript-eslint/parser": "^8.5.0",
     "eslint": "^9.10.0",
     "ts-loader": "^9.2.6",
-    "typescript": "^5.0.4",
+    "typescript": "^6.0.3",
     "vite": "^6.3.2"
   },
   "browser": "browser/oauth2-client.min.js",
@@ -53,5 +53,8 @@
     "browser/",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
 }
