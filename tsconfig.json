@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "esnext",
+        "module": "nodenext",
         "target": "es2019",
 
         "strict": true,
@@ -11,18 +11,15 @@
 
         "rewriteRelativeImportExtensions": true,
 
-        "moduleResolution": "node",
         "sourceMap": true,
+        "rootDir": "src",
         "outDir": "dist",
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "src/types/*"
-            ]
-        },
         "lib": [
           "DOM",
           "ES2019"
+        ],
+        "types": [
+          "node"
         ],
         "declaration": true
     },
