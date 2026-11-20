@@ -19,6 +19,7 @@ since Node 18.
 * OAuth2 Token Introspection ([RFC7662][3]).
 * Resource Indicators for OAuth 2.0 ([RFC8707][5]).
 * OAuth2 Token Revocation ([RFC7009][6]).
+* OAuth 2.0 Token Exchange ([RFC8693][7]).
 * [OAuth 2.0 Multiple Response Type Encoding Practices](https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html)
 
 ## Installation
@@ -115,6 +116,29 @@ const token = await client.clientCredentials();
 ```typescript
 const newToken = await client.refreshToken(oldToken);
 ```
+
+### Token exchange
+
+Exchanges a token for another one, as [RFC8693][7] describes. For example, a
+service that received an access token can exchange it for a token to call
+another API on the same user's behalf:
+
+```typescript
+const token = await client.tokenExchange({
+  subjectToken: receivedAccessToken,
+  subjectTokenType: 'urn:ietf:params:oauth:token-type:access_token',
+
+  // All optional:
+  resource: 'https://api.example/',
+  audience: 'api',
+  scope: ['read'],
+  requestedTokenType: 'urn:ietf:params:oauth:token-type:access_token',
+  actorToken: '...',
+  actorTokenType: 'urn:ietf:params:oauth:token-type:access_token',
+});
+```
+
+The server's `issued_token_type` is in `token.extraParams`.
 
 
 ### password grant:
@@ -464,3 +488,4 @@ on the exact steps for older Node versions.
 [4]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API "Web Crypto API"
 [5]: https://datatracker.ietf.org/doc/html/rfc8707 "https://datatracker.ietf.org/doc/html/rfc8707"
 [6]: https://datatracker.ietf.org/doc/html/rfc7009 "OAuth 2.0 Token Revocation"
+[7]: https://datatracker.ietf.org/doc/html/rfc8693 "OAuth 2.0 Token Exchange"

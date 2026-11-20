@@ -3,5 +3,5 @@ export { OAuth2AuthorizationCodeClient, generateCodeVerifier } from './client/au
 export { OAuth2Fetch } from './fetch-wrapper.ts';
 export { OAuth2Error, OAuth2HttpError } from './error.ts';
 
-export type { IntrospectionResponse } from './messages.ts';
+export type { IntrospectionResponse, OAuth2TokenTypeIdentifier } from './messages.ts';
 export type { OAuth2Token } from './token.ts';
