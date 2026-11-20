@@ -248,7 +248,7 @@ async function getWebCrypto(): Promise<typeof window.crypto> {
 
 }
 
-function stringToBuffer(input: string): ArrayBuffer {
+function stringToBuffer(input: string): Uint8Array<ArrayBuffer> {
 
   const buf = new Uint8Array(input.length);
   for(let i=0; i<input.length;i++) {
@@ -258,7 +258,7 @@ function stringToBuffer(input: string): ArrayBuffer {
 
 }
 
-function base64Url(buf: ArrayBuffer) {
+function base64Url(buf: ArrayBuffer | Uint8Array) {
   return (
     btoa(String.fromCharCode(...new Uint8Array(buf)))
       .replace(/\+/g, '-')
