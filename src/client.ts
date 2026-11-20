@@ -4,11 +4,13 @@ import type {
   ClientCredentialsRequest,
   IntrospectionRequest,
   IntrospectionResponse,
+  OAuth2TokenTypeIdentifier,
   PasswordRequest,
   OAuth2TokenTypeHint,
   RefreshRequest,
   RevocationRequest,
   ServerMetadataResponse,
+  TokenExchangeRequest,
   TokenResponse,
 } from './messages.ts';
 import { OAuth2HttpError } from './error.ts';
@@ -40,6 +42,47 @@ type PasswordParams = {
    */
   resource?: string | string[];
 
+}
+
+type TokenExchangeParams = {
+  /**
+   * The token that represents the party on whose behalf the request is made.
+   */
+  subjectToken: string;
+
+  /**
+   * The type of subjectToken.
+   */
+  subjectTokenType: OAuth2TokenTypeIdentifier;
+
+  /**
+   * The token that represents the party acting on behalf of the subject.
+   */
+  actorToken?: string;
+
+  /**
+   * The type of actorToken. Required when actorToken is given.
+   */
+  actorTokenType?: OAuth2TokenTypeIdentifier;
+
+  /**
+   * The type of token the client wants back.
+   */
+  requestedTokenType?: OAuth2TokenTypeIdentifier;
+
+  scope?: string[];
+
+  /**
+   * The resource the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+  /**
+   * The logical name of the service the client intends to access.
+   */
+  audience?: string | string[];
 }
 
 /**
@@ -243,6 +286,33 @@ export class OAuth2Client {
   }
 
   /**
+   * Exchanges a token for another one, using the token exchange grant.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8693
+   */
+  async tokenExchange(params: TokenExchangeParams): Promise<OAuth2Token> {
+
+    if (params.actorToken && !params.actorTokenType) {
+      throw new Error('actorTokenType must be provided with actorToken');
+    }
+
+    const body: TokenExchangeRequest = {
+      grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+      subject_token: params.subjectToken,
+      subject_token_type: params.subjectTokenType,
+    };
+    if (params.actorToken) body.actor_token = params.actorToken;
+    if (params.actorTokenType) body.actor_token_type = params.actorTokenType;
+    if (params.requestedTokenType) body.requested_token_type = params.requestedTokenType;
+    if (params.scope) body.scope = params.scope.join(' ');
+    if (params.resource) body.resource = params.resource;
+    if (params.audience) body.audience = params.audience;
+
+    return this.tokenResponseToOAuth2Token(this.request('tokenEndpoint', body));
+
+  }
+
+  /**
    * Returns the helper object for the `authorization_code` grant.
    */
   get authorizationCode(): OAuth2AuthorizationCodeClient {
@@ -396,7 +466,7 @@ export class OAuth2Client {
   /**
    * Does a HTTP request on the 'token' endpoint.
    */
-  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest): Promise<TokenResponse>;
+  async request(endpoint: 'tokenEndpoint', body: RefreshRequest | ClientCredentialsRequest | PasswordRequest | AuthorizationCodeRequest | TokenExchangeRequest): Promise<TokenResponse>;
   async request(endpoint: 'introspectionEndpoint', body: IntrospectionRequest): Promise<IntrospectionResponse>;
   async request(endpoint: 'revocationEndpoint', body: RevocationRequest): Promise<void>;
   async request(endpoint: OAuth2Endpoint, body: Record<string, any>): Promise<unknown> {

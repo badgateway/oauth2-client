@@ -65,6 +65,45 @@ export type AuthorizationCodeRequest = {
 }
 
 /**
+ * A token type identifier, as RFC 8693 section 3 defines them.
+ */
+export type OAuth2TokenTypeIdentifier =
+  | 'urn:ietf:params:oauth:token-type:access_token'
+  | 'urn:ietf:params:oauth:token-type:refresh_token'
+  | 'urn:ietf:params:oauth:token-type:id_token'
+  | 'urn:ietf:params:oauth:token-type:saml1'
+  | 'urn:ietf:params:oauth:token-type:saml2'
+  | 'urn:ietf:params:oauth:token-type:jwt'
+  | (string & {});
+
+/**
+ * Token exchange request body
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc8693#section-2.1
+ */
+export type TokenExchangeRequest = {
+  grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange';
+  subject_token: string;
+  subject_token_type: OAuth2TokenTypeIdentifier;
+  actor_token?: string;
+  actor_token_type?: OAuth2TokenTypeIdentifier;
+  requested_token_type?: OAuth2TokenTypeIdentifier;
+  scope?: string;
+
+  /**
+   * The resource the client intends to access.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8707
+   */
+  resource?: string | string[];
+
+  /**
+   * The logical name of the service the client intends to access.
+   */
+  audience?: string | string[];
+}
+
+/**
  * Response from the /token endpoint
  */
 export type TokenResponse = {
@@ -98,11 +137,18 @@ export type TokenResponse = {
    * information about the authenticated user.
    */
   id_token?: string;
+
+  /**
+   * The type of the issued token, in a token exchange response.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc8693#section-2.2.1
+   */
+  issued_token_type?: OAuth2TokenTypeIdentifier;
 }
 
 type OAuth2ResponseType = 'code' | 'token';
 type OAuth2ResponseMode = 'query' | 'fragment';
-type OAuth2GrantType = 'authorization_code' | 'implicit' | 'password' | 'client_credentials' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:jwt-bearer' | 'urn:ietf:params:oauth:grant-type:saml2-bearer';
+type OAuth2GrantType = 'authorization_code' | 'implicit' | 'password' | 'client_credentials' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:jwt-bearer' | 'urn:ietf:params:oauth:grant-type:saml2-bearer' | 'urn:ietf:params:oauth:grant-type:token-exchange';
 type OAuth2AuthMethod = 'none' | 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'tls_client_auth' | 'self_signed_tls_client_auth';
 type OAuth2CodeChallengeMethod = 'S256' | 'plain';
 

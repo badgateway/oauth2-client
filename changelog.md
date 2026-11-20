@@ -1,6 +1,13 @@
 Changelog
 =========
 
+3.4.0 (????-??-??)
+------------------
+
+* Token exchange ([RFC8693](https://datatracker.ietf.org/doc/html/rfc8693))
+  with `client.tokenExchange()`.
+
+
 3.3.1 (2025-09-09)
 ------------------
 

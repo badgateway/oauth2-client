@@ -122,6 +122,15 @@ const issueToken: Middleware = (ctx, next) => {
       expires_in: 3600,
     };
 
+  } else if (ctx.request.body.grant_type === 'urn:ietf:params:oauth:grant-type:token-exchange') {
+
+    ctx.response.body = {
+      token_type: 'Bearer',
+      access_token: 'exchanged_access_token',
+      issued_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+      expires_in: 300,
+    };
+
   } else {
 
     ctx.response.body = {
